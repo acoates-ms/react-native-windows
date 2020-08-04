@@ -97,11 +97,12 @@ export default class MSBuildTools {
       });
     }
 
-    try {
-      checkRequirements.isWinSdkPresent('10.0');
-    } catch (e) {
-      newError(e.message);
-      throw e;
+    if (!checkRequirements.isWinSdkInstalled()) {
+      const errorMessage = `${
+        checkRequirements.WINDOWS_SDK_MISSING_ERROR
+      } from ${checkRequirements.WINDOWS_SDK_DOWNLOAD_URL}`;
+      newError(errorMessage);
+      throw new Error(errorMessage);
     }
 
     if (verbose) {

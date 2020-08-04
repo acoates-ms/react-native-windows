@@ -57,6 +57,13 @@ class DevServerHelper {
         PackagerOpenStackFrameUrlFormat, GetDeviceLocalHost(sourceBundleHost, sourceBundlePort).c_str());
   }
 
+  static std::string get_PackagerOpenUrl(
+      const std::string &sourceBundleHost,
+      const uint16_t sourceBundlePort) {
+    return string_format(
+        PackagerOpenUrlFormat, GetDeviceLocalHost(sourceBundleHost, sourceBundlePort).c_str());
+  }
+
   static constexpr const char DefaultPackagerHost[] = "localhost";
   static const uint16_t DefaultPackagerPort = 8081;
 
@@ -77,6 +84,7 @@ class DevServerHelper {
   static constexpr const char PackagerConnectionUrlFormat[] = "ws://%s/message";
   static constexpr const char PackagerStatusUrlFormat[] = "http://%s/status";
   static constexpr const char PackagerOpenStackFrameUrlFormat[] = "https://%s/open-stack-frame";
+  static constexpr const char PackagerOpenUrlFormat[] = "https://%s/open-url";
 
   static constexpr const char PackagerOkStatus[] = "packager-status:running";
   const int LongPollFailureDelayMs = 5000;

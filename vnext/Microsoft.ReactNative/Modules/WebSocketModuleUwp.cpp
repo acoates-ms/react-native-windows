@@ -85,6 +85,8 @@ void WebSocketModule::WebSocket::connect(
     folly::dynamic /* @Nullable final ReadableArray */ protocols,
     folly::dynamic /* @Nullable final ReadableArray */ options,
     int64_t id) {
+
+  assert(m_parent);
   m_ws_clients.emplace(id, winrt::MessageWebSocket());
   auto socket = m_ws_clients[id];
   m_dataWriters.emplace(id, winrt::Windows::Storage::Streams::DataWriter(socket.OutputStream()));

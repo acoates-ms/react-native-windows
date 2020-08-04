@@ -15,6 +15,7 @@ import {autoLinkCommand} from './runWindows/utils/autolink';
 import {runWindowsCommand} from './runWindows/runWindows';
 import {dependencyConfigWindows} from './config/dependencyConfig';
 import {projectConfigWindows} from './config/projectConfig';
+import {healthChecksWindows} from './healthChecks';
 
 /**
  * Project generation options
@@ -86,3 +87,4 @@ assertStableInterface;
 export const commands = [autoLinkCommand, runWindowsCommand];
 export const dependencyConfig = dependencyConfigWindows;
 export const projectConfig = projectConfigWindows;
+export const healthChecks = healthChecksWindows;

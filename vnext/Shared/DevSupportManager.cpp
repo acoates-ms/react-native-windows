@@ -63,6 +63,8 @@ std::future<std::pair<std::string, bool>> GetJavaScriptFromServerAsync(const std
   HRESULT hr = asyncRequest.ErrorCode();
   if (FAILED(hr)) {
     std::ostringstream sstream;
+    winrt::hresult_error her{hr};
+    sstream << Microsoft::Common::Unicode::Utf16ToUtf8(her.message());
     if (hr == WININET_E_CANNOT_CONNECT) {
       sstream << "A connection with the server " << url << " could not be established\n\nIs the packager running?";
     } else {

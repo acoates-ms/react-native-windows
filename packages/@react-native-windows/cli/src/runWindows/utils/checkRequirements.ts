@@ -9,32 +9,10 @@ import * as path from 'path';
 import * as shell from 'shelljs';
 import Version from './version';
 
-type Requirement =
-  | 'os'
-  | 'msbuild'
-  | 'visualstudio'
-  | 'windowssdk'
-  | 'phonesdk';
-
-const REQUIRED_VERSIONS: Record<string, Record<Requirement, Version>> = {
-  '10.0': {
-    os: new Version(6, 3),
-    msbuild: new Version(14, 0),
-    visualstudio: new Version(14, 0),
-    windowssdk: new Version(10, 0),
-    phonesdk: new Version(10, 0),
-  },
-};
+const REQUIRED_WINDOWS_SDK_VERSION = new Version(10, 0);
 
 function shortenVersion(version: Version): string {
   return /^(\d+(?:\.\d+)?)/.exec(version.toString())![1];
-}
-
-function getMinimalRequiredVersionFor(
-  requirement: Requirement,
-  windowsTargetVersion: keyof (typeof REQUIRED_VERSIONS),
-): Version {
-  return REQUIRED_VERSIONS[windowsTargetVersion][requirement];
 }
 
 function getInstalledWindowsSdks(): Version[] {
@@ -65,26 +43,28 @@ function getInstalledWindowsSdks(): Version[] {
   return installedSdks;
 }
 
-function checkWinSdk(windowsTargetVersion: string): string {
+export function isWinSdkInstalled(): boolean {
   const installedSdks = getInstalledWindowsSdks();
-  const requiredVersion = getMinimalRequiredVersionFor(
-    'windowssdk',
-    windowsTargetVersion,
-  );
-  const hasSdkInstalled = installedSdks.some(installedSdk =>
-    installedSdk.eq(requiredVersion),
-  );
-
-  if (hasSdkInstalled) {
-    return shortenVersion(requiredVersion);
-  }
-
-  const shortenedVersion = shortenVersion(requiredVersion);
-  throw new Error(
-    `Windows SDK not found. Ensure that you have installed Windows ${shortenedVersion} SDK along with Visual Studio or install Windows ${shortenedVersion} SDK separately from https://dev.windows.com/en-us/downloads`,
+  return installedSdks.some(installedSdk =>
+    installedSdk.eq(REQUIRED_WINDOWS_SDK_VERSION),
   );
 }
 
-export function isWinSdkPresent(target: string): string {
-  return checkWinSdk(target);
+export const WINDOWS_SDK_MISSING_ERROR = `Windows SDK not found. Ensure that you have installed Windows ${shortenVersion(
+  REQUIRED_WINDOWS_SDK_VERSION,
+)} SDK along with Visual Studio or install Windows ${shortenVersion(
+  REQUIRED_WINDOWS_SDK_VERSION,
+)} SDK separately`;
+
+export const WINDOWS_SDK_DOWNLOAD_URL =
+  'https://dev.windows.com/en-us/downloads';
+
+export function verifyWinSdkPresent() {
+  if (isWinSdkInstalled()) {
+    return;
+  }
+
+  throw new Error(
+    `${WINDOWS_SDK_MISSING_ERROR} from ${WINDOWS_SDK_DOWNLOAD_URL}`,
+  );
 }

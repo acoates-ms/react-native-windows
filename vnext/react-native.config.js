@@ -12,4 +12,5 @@ module.exports = {
         npmPackageName: 'react-native-windows',
       },
     },
+    healthChecks: cli.healthChecks
   };
