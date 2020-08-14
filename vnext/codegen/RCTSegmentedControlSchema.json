@@ -1,0 +1,94 @@
+{
+  "extendsProps": [
+    {
+      "type": "ReactNativeBuiltInType",
+      "knownTypeName": "ReactNativeCoreViewProps"
+    }
+  ],
+  "events": [
+    {
+      "name": "onChange",
+      "optional": true,
+      "bubblingType": "bubble",
+      "typeAnnotation": {
+        "type": "EventTypeAnnotation",
+        "argument": {
+          "type": "ObjectTypeAnnotation",
+          "properties": [
+            {
+              "type": "Int32TypeAnnotation",
+              "name": "value",
+              "optional": false
+            },
+            {
+              "type": "Int32TypeAnnotation",
+              "name": "selectedSegmentIndex",
+              "optional": false
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "props": [
+    {
+      "name": "values",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ArrayTypeAnnotation",
+        "elementType": {
+          "type": "StringTypeAnnotation"
+        }
+      }
+    },
+    {
+      "name": "selectedIndex",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "Int32TypeAnnotation",
+        "default": 0
+      }
+    },
+    {
+      "name": "enabled",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": true
+      }
+    },
+    {
+      "name": "tintColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "textColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "backgroundColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "momentary",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": false
+      }
+    }
+  ],
+  "commands": []
+}

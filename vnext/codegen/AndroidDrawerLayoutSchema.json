@@ -1,0 +1,167 @@
+{
+  "extendsProps": [
+    {
+      "type": "ReactNativeBuiltInType",
+      "knownTypeName": "ReactNativeCoreViewProps"
+    }
+  ],
+  "events": [
+    {
+      "name": "onDrawerSlide",
+      "optional": true,
+      "bubblingType": "direct",
+      "typeAnnotation": {
+        "type": "EventTypeAnnotation",
+        "argument": {
+          "type": "ObjectTypeAnnotation",
+          "properties": [
+            {
+              "type": "FloatTypeAnnotation",
+              "name": "offset",
+              "optional": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "onDrawerStateChanged",
+      "optional": true,
+      "bubblingType": "direct",
+      "typeAnnotation": {
+        "type": "EventTypeAnnotation",
+        "argument": {
+          "type": "ObjectTypeAnnotation",
+          "properties": [
+            {
+              "type": "Int32TypeAnnotation",
+              "name": "drawerState",
+              "optional": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "onDrawerOpen",
+      "optional": true,
+      "bubblingType": "direct",
+      "paperTopLevelNameDeprecated": "topDrawerOpened",
+      "typeAnnotation": {
+        "type": "EventTypeAnnotation",
+        "argument": {
+          "type": "ObjectTypeAnnotation",
+          "properties": []
+        }
+      }
+    },
+    {
+      "name": "onDrawerClose",
+      "optional": true,
+      "bubblingType": "direct",
+      "paperTopLevelNameDeprecated": "topDrawerClosed",
+      "typeAnnotation": {
+        "type": "EventTypeAnnotation",
+        "argument": {
+          "type": "ObjectTypeAnnotation",
+          "properties": []
+        }
+      }
+    }
+  ],
+  "props": [
+    {
+      "name": "keyboardDismissMode",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringEnumTypeAnnotation",
+        "default": "none",
+        "options": [
+          {
+            "name": "none"
+          },
+          {
+            "name": "on-drag"
+          }
+        ]
+      }
+    },
+    {
+      "name": "drawerBackgroundColor",
+      "optional": false,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "drawerPosition",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringEnumTypeAnnotation",
+        "default": "left",
+        "options": [
+          {
+            "name": "left"
+          },
+          {
+            "name": "right"
+          }
+        ]
+      }
+    },
+    {
+      "name": "drawerWidth",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "FloatTypeAnnotation",
+        "default": null
+      }
+    },
+    {
+      "name": "drawerLockMode",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringEnumTypeAnnotation",
+        "default": "unlocked",
+        "options": [
+          {
+            "name": "unlocked"
+          },
+          {
+            "name": "locked-closed"
+          },
+          {
+            "name": "locked-open"
+          }
+        ]
+      }
+    },
+    {
+      "name": "statusBarBackgroundColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    }
+  ],
+  "commands": [
+    {
+      "name": "openDrawer",
+      "optional": false,
+      "typeAnnotation": {
+        "type": "FunctionTypeAnnotation",
+        "params": []
+      }
+    },
+    {
+      "name": "closeDrawer",
+      "optional": false,
+      "typeAnnotation": {
+        "type": "FunctionTypeAnnotation",
+        "params": []
+      }
+    }
+  ]
+}

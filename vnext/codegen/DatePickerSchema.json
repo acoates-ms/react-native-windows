@@ -1,0 +1,159 @@
+{
+  "paperComponentName": "RCTDatePicker",
+  "excludedPlatform": "android",
+  "extendsProps": [
+    {
+      "type": "ReactNativeBuiltInType",
+      "knownTypeName": "ReactNativeCoreViewProps"
+    }
+  ],
+  "events": [
+    {
+      "name": "onChange",
+      "optional": true,
+      "bubblingType": "bubble",
+      "typeAnnotation": {
+        "type": "EventTypeAnnotation",
+        "argument": {
+          "type": "ObjectTypeAnnotation",
+          "properties": [
+            {
+              "type": "FloatTypeAnnotation",
+              "name": "timestamp",
+              "optional": false
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "props": [
+    {
+      "name": "date",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "FloatTypeAnnotation",
+        "default": 0
+      }
+    },
+    {
+      "name": "initialDate",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "FloatTypeAnnotation",
+        "default": 0
+      }
+    },
+    {
+      "name": "locale",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringTypeAnnotation",
+        "default": null
+      }
+    },
+    {
+      "name": "maximumDate",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "FloatTypeAnnotation",
+        "default": 0
+      }
+    },
+    {
+      "name": "minimumDate",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "FloatTypeAnnotation",
+        "default": 0
+      }
+    },
+    {
+      "name": "minuteInterval",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "Int32EnumTypeAnnotation",
+        "default": 1,
+        "options": [
+          {
+            "value": 1
+          },
+          {
+            "value": 2
+          },
+          {
+            "value": 3
+          },
+          {
+            "value": 4
+          },
+          {
+            "value": 5
+          },
+          {
+            "value": 6
+          },
+          {
+            "value": 10
+          },
+          {
+            "value": 12
+          },
+          {
+            "value": 15
+          },
+          {
+            "value": 20
+          },
+          {
+            "value": 30
+          }
+        ]
+      }
+    },
+    {
+      "name": "mode",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringEnumTypeAnnotation",
+        "default": "date",
+        "options": [
+          {
+            "name": "date"
+          },
+          {
+            "name": "time"
+          },
+          {
+            "name": "datetime"
+          }
+        ]
+      }
+    },
+    {
+      "name": "timeZoneOffsetInMinutes",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "FloatTypeAnnotation",
+        "default": 0
+      }
+    }
+  ],
+  "commands": [
+    {
+      "name": "setNativeDate",
+      "optional": false,
+      "typeAnnotation": {
+        "type": "FunctionTypeAnnotation",
+        "params": [
+          {
+            "name": "date",
+            "typeAnnotation": {
+              "type": "FloatTypeAnnotation"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

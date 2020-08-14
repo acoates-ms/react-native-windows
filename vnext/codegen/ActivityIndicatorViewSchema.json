@@ -1,0 +1,53 @@
+{
+  "paperComponentName": "RCTActivityIndicatorView",
+  "extendsProps": [
+    {
+      "type": "ReactNativeBuiltInType",
+      "knownTypeName": "ReactNativeCoreViewProps"
+    }
+  ],
+  "events": [],
+  "props": [
+    {
+      "name": "hidesWhenStopped",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": false
+      }
+    },
+    {
+      "name": "animating",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": false
+      }
+    },
+    {
+      "name": "color",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "size",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringEnumTypeAnnotation",
+        "default": "small",
+        "options": [
+          {
+            "name": "small"
+          },
+          {
+            "name": "large"
+          }
+        ]
+      }
+    }
+  ],
+  "commands": []
+}

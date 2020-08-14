@@ -22,7 +22,6 @@ const {
 } = require('just-scripts');
 const {execSync} = require('child_process');
 const fs = require('fs');
-const srcPath = path.resolve(process.cwd(), 'src');
 const copyRNLibaries = require('./Scripts/copyRNLibraries');
 
 option('production');
@@ -39,11 +38,19 @@ task('apiDocumenter', () => {
   );
 });
 
-task('codegen', () => {
+task('codegen:schema', () => {
+  execSync(
+    'npx react-native-windows-codegen --files Libraries/**/*NativeComponent.js --namespace Microsoft::ReactNativeSpecs --viewComponentSchemas',
+  );
+});
+
+task('codegen:modules', () => {
   execSync(
     'npx react-native-windows-codegen --files Libraries/**/Native*.js --namespace Microsoft::ReactNativeSpecs',
   );
 });
+
+task('codegen', parallel('codegen:modules', 'codegen:schema'));
 
 task('flow-check', () => {
   require('child_process').execSync('npx flow check', {stdio: 'inherit'});

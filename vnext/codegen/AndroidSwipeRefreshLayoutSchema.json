@@ -1,0 +1,92 @@
+{
+  "extendsProps": [
+    {
+      "type": "ReactNativeBuiltInType",
+      "knownTypeName": "ReactNativeCoreViewProps"
+    }
+  ],
+  "events": [
+    {
+      "name": "onRefresh",
+      "optional": true,
+      "bubblingType": "direct",
+      "typeAnnotation": {
+        "type": "EventTypeAnnotation",
+        "argument": {
+          "type": "ObjectTypeAnnotation",
+          "properties": []
+        }
+      }
+    }
+  ],
+  "props": [
+    {
+      "name": "enabled",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": true
+      }
+    },
+    {
+      "name": "colors",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ArrayTypeAnnotation",
+        "elementType": {
+          "type": "ReservedPropTypeAnnotation",
+          "name": "ColorPrimitive"
+        }
+      }
+    },
+    {
+      "name": "progressBackgroundColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "size",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "Int32TypeAnnotation",
+        "default": 1
+      }
+    },
+    {
+      "name": "progressViewOffset",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "FloatTypeAnnotation",
+        "default": 0
+      }
+    },
+    {
+      "name": "refreshing",
+      "optional": false,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": false
+      }
+    }
+  ],
+  "commands": [
+    {
+      "name": "setNativeRefreshing",
+      "optional": false,
+      "typeAnnotation": {
+        "type": "FunctionTypeAnnotation",
+        "params": [
+          {
+            "name": "value",
+            "typeAnnotation": {
+              "type": "BooleanTypeAnnotation"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

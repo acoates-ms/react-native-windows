@@ -1,0 +1,198 @@
+{
+  "interfaceOnly": true,
+  "paperComponentName": "RCTSlider",
+  "extendsProps": [
+    {
+      "type": "ReactNativeBuiltInType",
+      "knownTypeName": "ReactNativeCoreViewProps"
+    }
+  ],
+  "events": [
+    {
+      "name": "onChange",
+      "optional": true,
+      "bubblingType": "bubble",
+      "typeAnnotation": {
+        "type": "EventTypeAnnotation",
+        "argument": {
+          "type": "ObjectTypeAnnotation",
+          "properties": [
+            {
+              "type": "DoubleTypeAnnotation",
+              "name": "value",
+              "optional": false
+            },
+            {
+              "type": "BooleanTypeAnnotation",
+              "name": "fromUser",
+              "optional": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "onValueChange",
+      "optional": true,
+      "bubblingType": "bubble",
+      "paperTopLevelNameDeprecated": "paperValueChange",
+      "typeAnnotation": {
+        "type": "EventTypeAnnotation",
+        "argument": {
+          "type": "ObjectTypeAnnotation",
+          "properties": [
+            {
+              "type": "DoubleTypeAnnotation",
+              "name": "value",
+              "optional": false
+            },
+            {
+              "type": "BooleanTypeAnnotation",
+              "name": "fromUser",
+              "optional": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "onSlidingComplete",
+      "optional": true,
+      "bubblingType": "direct",
+      "paperTopLevelNameDeprecated": "paperSlidingComplete",
+      "typeAnnotation": {
+        "type": "EventTypeAnnotation",
+        "argument": {
+          "type": "ObjectTypeAnnotation",
+          "properties": [
+            {
+              "type": "DoubleTypeAnnotation",
+              "name": "value",
+              "optional": false
+            },
+            {
+              "type": "BooleanTypeAnnotation",
+              "name": "fromUser",
+              "optional": true
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "props": [
+    {
+      "name": "disabled",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": false
+      }
+    },
+    {
+      "name": "enabled",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": true
+      }
+    },
+    {
+      "name": "maximumTrackImage",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ImageSourcePrimitive"
+      }
+    },
+    {
+      "name": "maximumTrackTintColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "maximumValue",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "DoubleTypeAnnotation",
+        "default": 1
+      }
+    },
+    {
+      "name": "minimumTrackImage",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ImageSourcePrimitive"
+      }
+    },
+    {
+      "name": "minimumTrackTintColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "minimumValue",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "DoubleTypeAnnotation",
+        "default": 0
+      }
+    },
+    {
+      "name": "step",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "DoubleTypeAnnotation",
+        "default": 0
+      }
+    },
+    {
+      "name": "testID",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringTypeAnnotation",
+        "default": ""
+      }
+    },
+    {
+      "name": "thumbImage",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ImageSourcePrimitive"
+      }
+    },
+    {
+      "name": "thumbTintColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "trackImage",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ImageSourcePrimitive"
+      }
+    },
+    {
+      "name": "value",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "DoubleTypeAnnotation",
+        "default": 0
+      }
+    }
+  ],
+  "commands": []
+}

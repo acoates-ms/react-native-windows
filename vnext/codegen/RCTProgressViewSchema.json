@@ -1,0 +1,68 @@
+{
+  "extendsProps": [
+    {
+      "type": "ReactNativeBuiltInType",
+      "knownTypeName": "ReactNativeCoreViewProps"
+    }
+  ],
+  "events": [],
+  "props": [
+    {
+      "name": "progressViewStyle",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringEnumTypeAnnotation",
+        "default": "default",
+        "options": [
+          {
+            "name": "default"
+          },
+          {
+            "name": "bar"
+          }
+        ]
+      }
+    },
+    {
+      "name": "progress",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "FloatTypeAnnotation",
+        "default": 0
+      }
+    },
+    {
+      "name": "progressTintColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "trackTintColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "progressImage",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ImageSourcePrimitive"
+      }
+    },
+    {
+      "name": "trackImage",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ImageSourcePrimitive"
+      }
+    }
+  ],
+  "commands": []
+}

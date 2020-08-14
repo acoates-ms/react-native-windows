@@ -1,0 +1,68 @@
+{
+  "extendsProps": [
+    {
+      "type": "ReactNativeBuiltInType",
+      "knownTypeName": "ReactNativeCoreViewProps"
+    }
+  ],
+  "events": [],
+  "props": [
+    {
+      "name": "styleAttr",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringTypeAnnotation",
+        "default": null
+      }
+    },
+    {
+      "name": "typeAttr",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringTypeAnnotation",
+        "default": null
+      }
+    },
+    {
+      "name": "indeterminate",
+      "optional": false,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": false
+      }
+    },
+    {
+      "name": "progress",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "DoubleTypeAnnotation",
+        "default": 0
+      }
+    },
+    {
+      "name": "animating",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": true
+      }
+    },
+    {
+      "name": "color",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "testID",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringTypeAnnotation",
+        "default": ""
+      }
+    }
+  ],
+  "commands": []
+}

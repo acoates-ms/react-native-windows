@@ -1,0 +1,20 @@
+{
+  "extendsProps": [
+    {
+      "type": "ReactNativeBuiltInType",
+      "knownTypeName": "ReactNativeCoreViewProps"
+    }
+  ],
+  "events": [],
+  "props": [
+    {
+      "name": "name",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringTypeAnnotation",
+        "default": ""
+      }
+    }
+  ],
+  "commands": []
+}

@@ -10,6 +10,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as globby from 'globby';
 import {createNM2Generator} from './generators/GenerateNM2';
+import {createComponentSchemaGenerator} from './generators/GenerateSchemas';
 // @ts-ignore
 import {parseFile} from 'react-native-tscodegen/lib/rncodegen/src/parsers/flow';
 // @ts-ignore
@@ -33,6 +34,10 @@ const argv = yargs.options({
     describe: 'C++/C# Namespace to put generated native modules in',
     default: 'MyNamespace',
   },
+  viewComponentSchemas: {
+    type: 'boolean',
+    describe: 'Generate the schema files for view components',
+  },
 }).argv;
 
 import {SchemaType} from 'react-native-tscodegen';
@@ -47,6 +52,7 @@ interface Options {
 interface Config {
   generators: any[] /*Generators[]*/;
   test?: boolean;
+  viewComponentSchemas?: boolean;
 }
 
 /*
@@ -136,7 +142,7 @@ function combineSchemas(files: string[]): SchemaType {
 
 function generate(
   {libraryName, schema, outputDirectory, moduleSpecName}: Options,
-  {/*generators,*/ test}: Config,
+  {/*generators,*/ test, viewComponentSchemas}: Config,
 ): boolean {
   schemaValidator.validate(schema);
 
@@ -150,8 +156,13 @@ function generate(
 */
 
   const generateNM2 = createNM2Generator({namespace: argv.namespace});
+  const generateSchema = createComponentSchemaGenerator();
 
-  generatedFiles.push(...generateNM2(libraryName, schema, moduleSpecName));
+  if (viewComponentSchemas) {
+    generatedFiles.push(...generateSchema(libraryName, schema, moduleSpecName));
+  } else {
+    generatedFiles.push(...generateNM2(libraryName, schema, moduleSpecName));
+  }
 
   const filesToUpdate = new Map<string, string>([...generatedFiles]);
 
@@ -179,5 +190,9 @@ const moduleSpecName = 'moduleSpecName';
 const outputDirectory = 'codegen';
 generate(
   {libraryName, schema, outputDirectory, moduleSpecName},
-  {generators: [], test: false},
+  {
+    generators: [],
+    test: false,
+    viewComponentSchemas: argv.viewComponentSchemas,
+  },
 );

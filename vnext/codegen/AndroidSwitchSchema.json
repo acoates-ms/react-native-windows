@@ -1,0 +1,120 @@
+{
+  "interfaceOnly": true,
+  "extendsProps": [
+    {
+      "type": "ReactNativeBuiltInType",
+      "knownTypeName": "ReactNativeCoreViewProps"
+    }
+  ],
+  "events": [
+    {
+      "name": "onChange",
+      "optional": true,
+      "bubblingType": "bubble",
+      "typeAnnotation": {
+        "type": "EventTypeAnnotation",
+        "argument": {
+          "type": "ObjectTypeAnnotation",
+          "properties": [
+            {
+              "type": "BooleanTypeAnnotation",
+              "name": "value",
+              "optional": false
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "props": [
+    {
+      "name": "disabled",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": false
+      }
+    },
+    {
+      "name": "enabled",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": true
+      }
+    },
+    {
+      "name": "thumbColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "trackColorForFalse",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "trackColorForTrue",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "value",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": false
+      }
+    },
+    {
+      "name": "on",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": false
+      }
+    },
+    {
+      "name": "thumbTintColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "trackTintColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    }
+  ],
+  "commands": [
+    {
+      "name": "setNativeValue",
+      "optional": false,
+      "typeAnnotation": {
+        "type": "FunctionTypeAnnotation",
+        "params": [
+          {
+            "name": "value",
+            "typeAnnotation": {
+              "type": "BooleanTypeAnnotation"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

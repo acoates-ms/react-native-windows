@@ -1,0 +1,75 @@
+{
+  "paperComponentName": "RCTRefreshControl",
+  "excludedPlatform": "android",
+  "extendsProps": [
+    {
+      "type": "ReactNativeBuiltInType",
+      "knownTypeName": "ReactNativeCoreViewProps"
+    }
+  ],
+  "events": [
+    {
+      "name": "onRefresh",
+      "optional": true,
+      "bubblingType": "direct",
+      "typeAnnotation": {
+        "type": "EventTypeAnnotation",
+        "argument": {
+          "type": "ObjectTypeAnnotation",
+          "properties": []
+        }
+      }
+    }
+  ],
+  "props": [
+    {
+      "name": "tintColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "titleColor",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "ReservedPropTypeAnnotation",
+        "name": "ColorPrimitive"
+      }
+    },
+    {
+      "name": "title",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "StringTypeAnnotation",
+        "default": null
+      }
+    },
+    {
+      "name": "refreshing",
+      "optional": false,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": false
+      }
+    }
+  ],
+  "commands": [
+    {
+      "name": "setNativeRefreshing",
+      "optional": false,
+      "typeAnnotation": {
+        "type": "FunctionTypeAnnotation",
+        "params": [
+          {
+            "name": "refreshing",
+            "typeAnnotation": {
+              "type": "BooleanTypeAnnotation"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

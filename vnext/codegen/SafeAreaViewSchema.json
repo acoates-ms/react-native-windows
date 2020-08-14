@@ -1,0 +1,22 @@
+{
+  "paperComponentName": "RCTSafeAreaView",
+  "interfaceOnly": true,
+  "extendsProps": [
+    {
+      "type": "ReactNativeBuiltInType",
+      "knownTypeName": "ReactNativeCoreViewProps"
+    }
+  ],
+  "events": [],
+  "props": [
+    {
+      "name": "emulateUnlessSupported",
+      "optional": true,
+      "typeAnnotation": {
+        "type": "BooleanTypeAnnotation",
+        "default": false
+      }
+    }
+  ],
+  "commands": []
+}
