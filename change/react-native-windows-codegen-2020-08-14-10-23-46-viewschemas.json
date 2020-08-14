@@ -1,0 +1,8 @@
+{
+  "type": "patch",
+  "comment": "Generate schema files for the viewcomponents to help with detecting needed changes",
+  "packageName": "react-native-windows-codegen",
+  "email": "acoates-ms@noreply.github.com",
+  "dependentChangeType": "patch",
+  "date": "2020-08-14T17:23:35.073Z"
+}

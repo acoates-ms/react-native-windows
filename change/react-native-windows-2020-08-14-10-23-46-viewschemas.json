@@ -1,0 +1,8 @@
+{
+  "type": "none",
+  "comment": "Generate schema files for the viewcomponents to help with detecting needed changes",
+  "packageName": "react-native-windows",
+  "email": "acoates-ms@noreply.github.com",
+  "dependentChangeType": "none",
+  "date": "2020-08-14T17:23:46.540Z"
+}
