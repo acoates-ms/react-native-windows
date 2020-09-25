@@ -1,0 +1,14 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+import "IReactContext.idl";
+
+namespace Microsoft.ReactNative {
+
+  [webhosthidden]
+  [default_interface]
+  static runtimeclass LocalBundle {
+    static void Load(IReactContext context, String urlSource);
+  }
+
+} // namespace Microsoft.ReactNative

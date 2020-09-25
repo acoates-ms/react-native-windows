@@ -101,6 +101,20 @@ struct WindowData {
           winrt::Microsoft::ReactNative::XamlUIService::SetXamlRoot(
               host.InstanceSettings().Properties(), rootElement.XamlRoot());
 
+          host.InstanceSettings().InstanceCreated /*.InstanceCreated*/ (
+              [](auto sender, winrt::Microsoft::ReactNative::InstanceCreatedEventArgs const &args) {
+                winrt::Microsoft::ReactNative::LocalBundle::Load(
+                    args.Context(), L"file://E:\\Repos\\react-native-windows\\packages\\playground\\pre.js");
+              });
+
+          host.InstanceSettings().InstanceLoaded /*.InstanceCreated*/ (
+              [](auto sender, winrt::Microsoft::ReactNative::InstanceLoadedEventArgs const &args) {
+                if (!args.Failed()) {
+                  winrt::Microsoft::ReactNative::LocalBundle::Load(
+                      args.Context(), L"file://E:\\Repos\\react-native-windows\\packages\\playground\\foo.js");
+                }
+              });
+
           // Nudge the ReactNativeHost to create the instance and wrapping context
           host.ReloadInstance();
 

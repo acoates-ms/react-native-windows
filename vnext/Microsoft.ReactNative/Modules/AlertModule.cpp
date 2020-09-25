@@ -56,20 +56,23 @@ void Alert::showAlert(ShowAlertArgs const &args, std::function<void(std::string)
 
       auto asyncOp = dialog.ShowAsync();
       asyncOp.Completed(
-          [jsDispatcher, result](
+          [jsDispatcher, result, innerWeakThis = weakThis](
               const winrt::IAsyncOperation<xaml::Controls::ContentDialogResult> &asyncOp, winrt::AsyncStatus status) {
-            switch (asyncOp.GetResults()) {
-              case xaml::Controls::ContentDialogResult::Primary:
-                jsDispatcher.Post([result] { result("positive"); });
-                break;
-              case xaml::Controls::ContentDialogResult::Secondary:
-                jsDispatcher.Post([result] { result("negative"); });
-                break;
-              case xaml::Controls::ContentDialogResult::None:
-                jsDispatcher.Post([result] { result("neutral"); });
-                break;
-              default:
-                break;
+
+        if (auto strongThis = innerWeakThis.lock()) {
+              switch (asyncOp.GetResults()) {
+                case xaml::Controls::ContentDialogResult::Primary:
+                  jsDispatcher.Post([result] { result("positive"); });
+                  break;
+                case xaml::Controls::ContentDialogResult::Secondary:
+                  jsDispatcher.Post([result] { result("negative"); });
+                  break;
+                case xaml::Controls::ContentDialogResult::None:
+                  jsDispatcher.Post([result] { result("neutral"); });
+                  break;
+                default:
+                  break;
+              }
             }
           });
     }

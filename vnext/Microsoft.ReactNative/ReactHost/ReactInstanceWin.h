@@ -70,6 +70,7 @@ class ReactInstanceWin final : public Mso::ActiveObject<IReactInstanceInternal, 
       folly::dynamic &&initialProps) noexcept override;
   void DetachRootView(facebook::react::IReactRootView *rootView) noexcept override;
 #endif
+  void LoadBundle(std::string &&path) noexcept;
 
  private:
   friend MakePolicy;

@@ -78,6 +78,7 @@ struct IReactContext : IUnknown {
   virtual winrt::Microsoft::ReactNative::IReactPropertyBag Properties() noexcept = 0;
   virtual void CallJSFunction(std::string &&module, std::string &&method, folly::dynamic &&params) noexcept = 0;
   virtual void DispatchEvent(int64_t viewTag, std::string &&eventName, folly::dynamic &&eventData) noexcept = 0;
+  virtual void LoadBundle(std::string &&path) noexcept = 0;
 };
 
 //! Settings per each IReactViewHost associated with an IReactHost instance.

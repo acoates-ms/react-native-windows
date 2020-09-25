@@ -4,6 +4,7 @@
 #include "ReactContext.h"
 #include <winrt/Microsoft.ReactNative.h>
 #include "Microsoft.ReactNative/IReactNotificationService.h"
+#include "ReactErrorProvider.h"
 #include "ReactInstanceWin.h"
 
 namespace Mso::React {
@@ -45,6 +46,14 @@ void ReactContext::DispatchEvent(int64_t viewTag, std::string &&eventName, folly
 #ifndef CORE_ABI // requires instance
   if (auto instance = m_reactInstance.GetStrongPtr()) {
     instance->DispatchEvent(viewTag, std::move(eventName), std::move(eventData));
+  }
+#endif
+}
+
+void ReactContext::LoadBundle(std::string &&path) noexcept {
+#ifndef CORE_ABI // requires instance
+  if (auto instance = m_reactInstance.GetStrongPtr()) {
+    instance->LoadBundle(std::move(path));
   }
 #endif
 }

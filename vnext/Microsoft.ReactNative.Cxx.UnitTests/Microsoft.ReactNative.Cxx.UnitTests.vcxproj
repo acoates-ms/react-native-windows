@@ -147,6 +147,7 @@
     <Midl Include="$(ReactNativeWindowsDir)Microsoft.ReactNative\IReactPropertyBag.idl" />
     <Midl Include="$(ReactNativeWindowsDir)Microsoft.ReactNative\IViewManager.idl" />
     <Midl Include="$(ReactNativeWindowsDir)Microsoft.ReactNative\IViewManagerCore.idl" />
+    <Midl Include="$(ReactNativeWindowsDir)Microsoft.ReactNative\LocalBundle.idl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

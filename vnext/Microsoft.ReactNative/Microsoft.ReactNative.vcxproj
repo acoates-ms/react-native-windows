@@ -263,6 +263,10 @@
       <DependentUpon>IReactContext.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="LocalBundle.h">
+      <DependentUpon>LocalBundle.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="ReactHost\AsyncActionQueue.h" />
     <ClInclude Include="ReactHost\InstanceFactory.h" />
     <ClInclude Include="ReactHost\IReactInstanceInternal.h" />
@@ -463,6 +467,10 @@
       <DependentUpon>IReactContext.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="LocalBundle.cpp">
+      <DependentUpon>LocalBundle.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="ReactHost\AsyncActionQueue.cpp" />
     <ClCompile Include="ReactHost\JSBundle.cpp" />
     <ClCompile Include="ReactHost\JSBundle_Win32.cpp" />
@@ -582,6 +590,7 @@
     <Midl Include="IReactContext.idl">
       <SubType>Designer</SubType>
     </Midl>
+    <Midl Include="LocalBundle.idl" />
     <Midl Include="ReactInstanceSettings.idl">
       <SubType>Designer</SubType>
     </Midl>

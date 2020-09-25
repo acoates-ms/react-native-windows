@@ -1,0 +1,1 @@
+var ggggfoobar = {foobar: 'Hello from global world'};

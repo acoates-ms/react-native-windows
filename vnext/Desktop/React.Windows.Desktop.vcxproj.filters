@@ -57,6 +57,9 @@
     <Midl Include="..\Microsoft.ReactNative\IReactPropertyBag.idl">
       <Filter>ABI</Filter>
     </Midl>
+    <Midl Include="..\Microsoft.ReactNative\LocalBundle.idl">
+      <Filter>ABI</Filter>
+    </Midl>
     <Midl Include="..\Microsoft.ReactNative\ReactInstanceSettings.idl">
       <Filter>ABI</Filter>
     </Midl>

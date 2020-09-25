@@ -26,6 +26,7 @@ class ReactContext final : public Mso::UnknownObject<IReactContext> {
   winrt::Microsoft::ReactNative::IReactNotificationService Notifications() noexcept override;
   void CallJSFunction(std::string &&module, std::string &&method, folly::dynamic &&params) noexcept override;
   void DispatchEvent(int64_t viewTag, std::string &&eventName, folly::dynamic &&eventData) noexcept override;
+  void LoadBundle(std::string &&path) noexcept override;
 
  private:
   Mso::WeakPtr<ReactInstanceWin> m_reactInstance;

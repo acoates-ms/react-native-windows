@@ -73,6 +73,14 @@ void MainPage::OnLoadClick(
     host.InstanceSettings().DebugHost(m_bundlerHostname);
   }
 
+  host.InstanceSettings().InstanceLoaded /*.InstanceCreated*/ (
+      [](auto sender, winrt::Microsoft::ReactNative::InstanceLoadedEventArgs const &args) {
+        if (!args.Failed()) {
+          winrt::Microsoft::ReactNative::LocalBundle::Load(
+              args.Context(), L"file://E:\\Repos\\react-native-windows\\packages\\playground\\foo.js");
+        }
+      });
+
   // Nudge the ReactNativeHost to create the instance and wrapping context
   host.ReloadInstance();
 }

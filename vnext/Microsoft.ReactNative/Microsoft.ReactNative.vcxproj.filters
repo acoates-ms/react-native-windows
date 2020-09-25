@@ -721,6 +721,7 @@
     <Midl Include="IReactPackageProvider.idl" />
     <Midl Include="IReactPropertyBag.idl" />
     <Midl Include="IViewManager.idl" />
+    <Midl Include="LocalBundle.idl" />
     <Midl Include="ReactApplication.idl" />
     <Midl Include="ReactInstanceSettings.idl" />
     <Midl Include="ReactNativeHost.idl" />
