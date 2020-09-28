@@ -1,0 +1,8 @@
+{
+  "type": "prerelease",
+  "comment": "Quick pass at making button match system button a bit better",
+  "packageName": "react-native-windows",
+  "email": "30809111+acoates-ms@users.noreply.github.com",
+  "dependentChangeType": "patch",
+  "date": "2020-09-28T19:08:38.871Z"
+}
