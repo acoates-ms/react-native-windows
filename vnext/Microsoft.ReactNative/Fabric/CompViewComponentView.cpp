@@ -194,6 +194,8 @@ void CompViewComponentView::ensureVisual() noexcept {
 void CompViewComponentView::updateProps(
     facebook::react::Props::Shared const &props,
     facebook::react::Props::Shared const &oldProps) noexcept {
+  using namespace winrt::Windows::UI::Composition;
+
   const auto &oldViewProps = *std::static_pointer_cast<const facebook::react::ViewProps>(m_props);
   const auto &newViewProps = *std::static_pointer_cast<const facebook::react::ViewProps>(props);
 
@@ -212,7 +214,31 @@ void CompViewComponentView::updateProps(
     m_visual.Opacity(newViewProps.opacity);
   }
 
-  updateBorderProps(oldViewProps, newViewProps);
+   updateBorderProps(oldViewProps, newViewProps);
+
+  // Shadow
+   if (oldViewProps.shadowOffset != newViewProps.shadowOffset ||
+        oldViewProps.shadowColor != newViewProps.shadowColor ||
+        oldViewProps.shadowOpacity != newViewProps.shadowOpacity ||
+        oldViewProps.shadowRadius != newViewProps.shadowRadius) {
+     DropShadow shadow = Compositor().CreateDropShadow();
+     shadow.Offset({newViewProps.shadowOffset.width, newViewProps.shadowOffset.height, 0});
+     shadow.Opacity(newViewProps.shadowOpacity);
+     shadow.BlurRadius(newViewProps.shadowRadius);
+     if (newViewProps.shadowColor)
+       shadow.Color(newViewProps.shadowColor.AsWindowsColor());
+     m_visual.as<winrt::Windows::UI::Composition::SpriteVisual>().Shadow(shadow);
+   }
+
+   // Transform
+   if (oldViewProps.transform != newViewProps.transform) {
+    for (const auto &operation : newViewProps.transform.operations) {
+      if (operation.type == facebook::react::TransformOperationType::Scale)
+        m_visual.Scale({operation.x, operation.y, operation.z});
+      else if (operation.type == facebook::react::TransformOperationType::Rotate)
+        m_visual.RotationAngle(operation.z);
+    }
+  }
 
   m_props = std::static_pointer_cast<facebook::react::ViewProps const>(props);
 }
