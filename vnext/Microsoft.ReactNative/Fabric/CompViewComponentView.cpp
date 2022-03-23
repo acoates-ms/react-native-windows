@@ -46,6 +46,11 @@ void CompBaseComponentView::updateEventEmitter(facebook::react::EventEmitter::Sh
 }
 
 void CompBaseComponentView::handleCommand(std::string const &commandName, folly::dynamic const &arg) noexcept {
+  if (commandName == "setValue") {
+    // TODO Implement this on the actual view, stub out for now
+    return;
+  }
+
   assert(false); // Unhandled command
 }
 
