@@ -69,7 +69,8 @@ struct CompScrollViewComponentView : CompBaseComponentView {
   const winrt::Windows::UI::Composition::Visual Visual() const noexcept override;
 
   const winrt::Windows::UI::Composition::ContainerVisual ContentVisual() const noexcept;
-  // void OnPointerDown(const winrt::Windows::UI::Input::PointerPoint &pp) noexcept override;
+  int64_t SendMessage(uint32_t msg, uint64_t wParam, int64_t lParam) noexcept override;
+  void OnPointerDown(const POINTER_INFO &pi) noexcept;
   bool ScrollWheel(facebook::react::Point pt, int32_t delta) noexcept override;
 
  private:

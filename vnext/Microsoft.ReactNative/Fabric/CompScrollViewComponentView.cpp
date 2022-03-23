@@ -294,11 +294,24 @@ void CompScrollViewComponentView::ScrollInteractionTrackerOwner::ValuesChanged(
   }
 }
 
-/*
-void CompScrollViewComponentView::OnPointerDown(const winrt::Windows::UI::Input::PointerPoint &pp) noexcept {
-  m_visualInteractionSource.TryRedirectForManipulation(pp);
+int64_t CompScrollViewComponentView::SendMessage(uint32_t msg, uint64_t wParam, int64_t lParam) noexcept {
+  switch (msg) {
+    case WM_POINTERDOWN: {
+      POINTER_INFO pi;
+      GetPointerInfo(GET_POINTERID_WPARAM(wParam), &pi);
+      OnPointerDown(pi);
+      return 0;
+    }
+  }
+
+  return 0;
 }
-*/
+
+void CompScrollViewComponentView::OnPointerDown(const POINTER_INFO &pi) noexcept {
+  winrt::com_ptr < ABI::Windows::UI::Composition::Interactions::IVisualInteractionSourceInterop> spInteractionSource;
+  m_visualInteractionSource.as(spInteractionSource);
+  spInteractionSource->TryRedirectForManipulation(pi);
+}
 
 bool CompScrollViewComponentView::ScrollWheel(facebook::react::Point pt, int32_t delta) noexcept {
   facebook::react::Point ptViewport{pt.x - m_layoutMetrics.frame.origin.x, pt.y - m_layoutMetrics.frame.origin.y};
