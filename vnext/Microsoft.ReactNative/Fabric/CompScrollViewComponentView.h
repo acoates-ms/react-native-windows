@@ -45,6 +45,8 @@ struct CompScrollViewComponentView : CompBaseComponentView {
 
    private:
     CompScrollViewComponentView *m_outer;
+    bool m_isScrollingFromInertia = false;
+    bool m_isScrolling = false;
   };
 
   CompScrollViewComponentView();
@@ -70,7 +72,7 @@ struct CompScrollViewComponentView : CompBaseComponentView {
 
   const winrt::Windows::UI::Composition::ContainerVisual ContentVisual() const noexcept;
   int64_t SendMessage(uint32_t msg, uint64_t wParam, int64_t lParam) noexcept override;
-  void OnPointerDown(const POINTER_INFO &pi) noexcept;
+  int64_t OnPointerDown(const POINTER_INFO &pi) noexcept;
   bool ScrollWheel(facebook::react::Point pt, int32_t delta) noexcept override;
 
  private:
@@ -84,8 +86,6 @@ struct CompScrollViewComponentView : CompBaseComponentView {
   winrt::Windows::UI::Composition::Interactions::VisualInteractionSource m_visualInteractionSource{nullptr};
 
   float m_zoomFactor{1.0f};
-  bool m_isScrollingFromInertia = false;
-  bool m_isScrolling = false;
   bool m_isHorizontal = false;
   bool m_isScrollingEnabled = true;
   bool m_changeViewAfterLoaded = false;

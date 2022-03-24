@@ -251,33 +251,30 @@ void CompScrollViewComponentView::ScrollInteractionTrackerOwner::CustomAnimation
     winrt::Windows::UI::Composition::Interactions::InteractionTrackerCustomAnimationStateEnteredArgs args) noexcept {}
 void CompScrollViewComponentView::ScrollInteractionTrackerOwner::IdleStateEntered(
     winrt::Windows::UI::Composition::Interactions::InteractionTracker sender,
-    winrt::Windows::UI::Composition::Interactions::InteractionTrackerIdleStateEnteredArgs args) noexcept {}
+    winrt::Windows::UI::Composition::Interactions::InteractionTrackerIdleStateEnteredArgs args) noexcept {
+  m_isScrolling = false;
+  m_isScrollingFromInertia = false;
+}
 void CompScrollViewComponentView::ScrollInteractionTrackerOwner::InertiaStateEntered(
     winrt::Windows::UI::Composition::Interactions::InteractionTracker sender,
-    winrt::Windows::UI::Composition::Interactions::InteractionTrackerInertiaStateEnteredArgs args) noexcept {}
+    winrt::Windows::UI::Composition::Interactions::InteractionTrackerInertiaStateEnteredArgs args) noexcept {
+  m_isScrollingFromInertia = true;
+}
 void CompScrollViewComponentView::ScrollInteractionTrackerOwner::InteractingStateEntered(
     winrt::Windows::UI::Composition::Interactions::InteractionTracker sender,
-    winrt::Windows::UI::Composition::Interactions::InteractionTrackerInteractingStateEnteredArgs args) noexcept {}
+    winrt::Windows::UI::Composition::Interactions::InteractionTrackerInteractingStateEnteredArgs args) noexcept {
+  m_isScrolling = true;
+}
 void CompScrollViewComponentView::ScrollInteractionTrackerOwner::RequestIgnored(
     winrt::Windows::UI::Composition::Interactions::InteractionTracker sender,
-    winrt::Windows::UI::Composition::Interactions::InteractionTrackerRequestIgnoredArgs args) noexcept {}
+    winrt::Windows::UI::Composition::Interactions::InteractionTrackerRequestIgnoredArgs args) noexcept {
+  m_isScrolling = false;
+  m_isScrollingFromInertia = false;
+}
 
 void CompScrollViewComponentView::ScrollInteractionTrackerOwner::ValuesChanged(
     winrt::Windows::UI::Composition::Interactions::InteractionTracker sender,
     winrt::Windows::UI::Composition::Interactions::InteractionTrackerValuesChangedArgs args) noexcept {
-  /*
-  // If we are transitioning to inertial scrolling.
-  if (m_isScrolling && !m_isScrollingFromInertia && args.IsInertial()) {
-    m_isScrollingFromInertia = true;
-
-    if (m_eventEmitter) {
-      std::static_pointer_cast<facebook::react::ScrollViewEventEmitter const>(m_eventEmitter)
-          ->onScrollEndDrag(scrollMetrics);
-      std::static_pointer_cast<facebook::react::ScrollViewEventEmitter const>(m_eventEmitter)
-          ->onMomentumScrollBegin(scrollMetrics);
-    }
-  }
-  */
 
   auto eventEmitter = m_outer->GetEventEmitter();
   if (eventEmitter) {
@@ -298,18 +295,19 @@ int64_t CompScrollViewComponentView::SendMessage(uint32_t msg, uint64_t wParam, 
     case WM_POINTERDOWN: {
       POINTER_INFO pi;
       GetPointerInfo(GET_POINTERID_WPARAM(wParam), &pi);
-      OnPointerDown(pi);
-      return S_OK;
+      return OnPointerDown(pi);
     }
   }
 
   return S_FALSE;
 }
 
-void CompScrollViewComponentView::OnPointerDown(const POINTER_INFO &pi) noexcept {
+int64_t CompScrollViewComponentView::OnPointerDown(const POINTER_INFO &pi) noexcept {
   winrt::com_ptr < ABI::Windows::UI::Composition::Interactions::IVisualInteractionSourceInterop> spInteractionSource;
   m_visualInteractionSource.as(spInteractionSource);
-  winrt::check_hresult(spInteractionSource->TryRedirectForManipulation(pi));
+  LRESULT hr = spInteractionSource->TryRedirectForManipulation(pi);
+
+  return hr;
 }
 
 bool CompScrollViewComponentView::ScrollWheel(facebook::react::Point pt, int32_t delta) noexcept {
