@@ -299,17 +299,17 @@ int64_t CompScrollViewComponentView::SendMessage(uint32_t msg, uint64_t wParam, 
       POINTER_INFO pi;
       GetPointerInfo(GET_POINTERID_WPARAM(wParam), &pi);
       OnPointerDown(pi);
-      return 0;
+      return S_OK;
     }
   }
 
-  return 0;
+  return S_FALSE;
 }
 
 void CompScrollViewComponentView::OnPointerDown(const POINTER_INFO &pi) noexcept {
   winrt::com_ptr < ABI::Windows::UI::Composition::Interactions::IVisualInteractionSourceInterop> spInteractionSource;
   m_visualInteractionSource.as(spInteractionSource);
-  spInteractionSource->TryRedirectForManipulation(pi);
+  winrt::check_hresult(spInteractionSource->TryRedirectForManipulation(pi));
 }
 
 bool CompScrollViewComponentView::ScrollWheel(facebook::react::Point pt, int32_t delta) noexcept {

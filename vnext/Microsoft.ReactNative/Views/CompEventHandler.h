@@ -37,6 +37,7 @@ class CompEventHandler {
   winrt::Microsoft::ReactNative::BatchingEventEmitter &BatchingEmitter() noexcept;
 
  private:
+  void ButtonDown(facebook::react::SurfaceId surfaceId, uint32_t msg, uint64_t wParam, int64_t lParam);
   void PointerPressed(facebook::react::SurfaceId surfaceId, uint32_t msg, uint64_t wParam, int64_t lParam);
   void PointerUp(facebook::react::SurfaceId surfaceId, uint32_t msg, uint64_t wParam, int64_t lParam);
 

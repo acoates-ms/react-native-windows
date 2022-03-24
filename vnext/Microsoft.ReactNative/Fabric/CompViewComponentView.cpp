@@ -55,7 +55,7 @@ void CompBaseComponentView::handleCommand(std::string const &commandName, folly:
 }
 
 int64_t CompBaseComponentView::SendMessage(uint32_t msg, uint64_t wParam, int64_t lParam) noexcept {
-  return 0;
+  return S_FALSE;
 }
 
 RECT CompBaseComponentView::getClientRect() const noexcept {

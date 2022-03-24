@@ -105,10 +105,9 @@ int64_t CompEventHandler::SendMessage(
   switch (msg) {
     case WM_LBUTTONDOWN: {
       // TODO why are we not getting WM_POINTERDOWN instead?
-      PointerPressed(surfaceId, msg, wParam, lParam);
+      ButtonDown(surfaceId, msg, wParam, lParam);
       return 0;
     }
-
     case WM_POINTERDOWN: {
       PointerPressed(surfaceId, msg, wParam, lParam);
       return 0;
@@ -119,7 +118,7 @@ int64_t CompEventHandler::SendMessage(
       return 0;
     }
     case WM_POINTERUP: {
-      PointerUp(surfaceId, msg, wParam, lParam);
+     // PointerUp(surfaceId, msg, wParam, lParam);
       return 0;
     }
     case WM_KEYDOWN:
@@ -135,12 +134,91 @@ int64_t CompEventHandler::SendMessage(
       }
       return 0;
     }
+    case WM_POINTERROUTEDAWAY:
+    case WM_POINTERCAPTURECHANGED: {
+      return 0;
+    }
   }
 
   return 0;
 }
 
 void CompEventHandler::PointerPressed(
+    facebook::react::SurfaceId surfaceId,
+    uint32_t msg,
+    uint64_t wParam,
+    int64_t lParam) {
+  //int pointerId = 1; // TODO pointerId
+
+  //auto touch = std::find_if(
+  //    m_touches.begin(), m_touches.end(), [pointerId](facebook::react::Touch &t) { return t.identifier == pointerId; });
+
+  //if (touch != m_touches.end()) {
+  //  // A pointer with this ID already exists
+  //  assert(false);
+  //  return;
+  //}
+
+  auto x = GET_X_LPARAM(lParam);
+  auto y = GET_Y_LPARAM(lParam);
+
+  const auto eventType = TouchEventType::Start;
+
+  if (std::shared_ptr<FabricUIManager> fabricuiManager = ::Microsoft::ReactNative::FabricUIManager::FromProperties(
+          winrt::Microsoft::ReactNative::ReactPropertyBag(m_context->Properties()))) {
+    facebook::react::Point ptLocal;
+
+    auto rootComponentViewDescriptor = fabricuiManager->GetViewRegistry().componentViewDescriptorWithTag(surfaceId);
+    facebook::react::Point ptScaled = {
+        static_cast<float>(x / m_compRootView.ScaleFactor()), static_cast<float>(y / m_compRootView.ScaleFactor())};
+    auto tag = static_cast<CompBaseComponentView &>(*rootComponentViewDescriptor.view).hitTest(ptScaled, ptLocal);
+
+    if (tag == -1)
+      return;
+
+    auto &targetComponentView = static_cast<CompBaseComponentView &>(
+        *fabricuiManager->GetViewRegistry().componentViewDescriptorWithTag(tag).view);
+
+    LRESULT hr = S_FALSE;
+    while (hr != S_OK) {
+      hr = targetComponentView.SendMessage(msg, wParam, lParam);
+      if (!targetComponentView.parent())
+        return;
+
+      targetComponentView = static_cast<CompBaseComponentView &>(*(targetComponentView.parent()));
+    }
+
+    //facebook::react::Touch pointer;
+
+    //pointer.target = tag;
+    //pointer.identifier = pointerId;
+    //// pointer.deviceType = winrt::Windows::Devices::Input::PointerDeviceType::Mouse;
+    //// pointer.isLeftButton = true;
+    //// pointer.isRightButton = false;
+    //// pointer.isMiddleButton = false;
+    //// pointer.isHorizontalScrollWheel = false;
+    //// pointer.isEraser = false;
+
+    //pointer.pagePoint.x = ptScaled.x;
+    //pointer.pagePoint.y = ptScaled.y;
+    //pointer.screenPoint.x = ptLocal.x;
+    //pointer.screenPoint.y = ptLocal.y;
+    //pointer.offsetPoint.x = ptLocal.x;
+    //pointer.offsetPoint.y = ptLocal.y;
+    //pointer.timestamp = static_cast<facebook::react::Float>(
+    //    std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch())
+    //        .count());
+    //pointer.force = 0;
+    //// pointer.isBarrelButton = false;
+    //// pointer.shiftKey = false;
+    //// pointer.ctrlKey = false;
+    //// pointer.altKey = false;
+
+    //m_touches.emplace_back(std::move(pointer));
+  }
+}
+
+void CompEventHandler::ButtonDown(
     facebook::react::SurfaceId surfaceId,
     uint32_t msg,
     uint64_t wParam,
