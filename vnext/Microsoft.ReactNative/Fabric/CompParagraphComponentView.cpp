@@ -192,7 +192,8 @@ void CompParagraphComponentView::updateVisualBrush() noexcept {
         return;
       }
 
-      winrt::Windows::Foundation::Size surfaceSize = {metrics.width, metrics.height};
+      winrt::Windows::Foundation::Size surfaceSize = {
+          metrics.width * m_layoutMetrics.pointScaleFactor, metrics.height * m_layoutMetrics.pointScaleFactor};
       winrt::Windows::UI::Composition::ICompositionDrawingSurface drawingSurface;
       drawingSurface = CompositionGraphicsDevice().CreateDrawingSurface(
           surfaceSize,
@@ -283,21 +284,43 @@ void CompParagraphComponentView::DrawText() noexcept {
     // it in the event of device removed.
     winrt::com_ptr<ID2D1SolidColorBrush> brush;
     if (paragraphProps.textAttributes.foregroundColor) {
-      auto winColor = paragraphProps.textAttributes.foregroundColor.AsWindowsColor();
-      D2D1::ColorF color{winColor.R / 255.0f, winColor.G / 255.0f, winColor.B / 255.0f, winColor.A / 255.0f};
+      auto color = paragraphProps.textAttributes.foregroundColor.AsD2DColor();
       winrt::check_hresult(d2dDeviceContext->CreateSolidColorBrush(color, brush.put()));
     } else {
       winrt::check_hresult(
           d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black, 1.0f), brush.put()));
     }
 
+    // Create color effects for individual text fragments.
+    unsigned int position = 0;
+    unsigned int length = 0;
+    for (auto fragment : m_attributedStringBox.getValue().getFragments()) {
+      length = static_cast<UINT32>(fragment.string.length());
+      DWRITE_TEXT_RANGE range = {position, length};
+      if (fragment.textAttributes.foregroundColor) {
+        winrt::com_ptr<ID2D1SolidColorBrush> brush;
+        auto color = fragment.textAttributes.foregroundColor.AsD2DColor();
+        winrt::check_hresult(d2dDeviceContext->CreateSolidColorBrush(color, brush.put()));
+        m_textLayout->SetDrawingEffect(brush.get(), range);
+      }
+
+      position += length;
+    }
+
     d2dDeviceContext->Clear(D2D1::ColorF(D2D1::ColorF::Black, 0.0f));
+    assert(d2dDeviceContext->GetUnitMode() == D2D1_UNIT_MODE_DIPS);
+    const auto dpi = m_layoutMetrics.pointScaleFactor * 96.0f;
+    d2dDeviceContext->SetDpi(dpi, dpi);
 
     // Draw the line of text at the specified offset, which corresponds to the top-left
     // corner of our drawing surface. Notice we don't call BeginDraw on the D2D device
     // context; this has already been done for us by the composition API.
     d2dDeviceContext->DrawTextLayout(
-        D2D1::Point2F(static_cast<FLOAT>(offset.x), static_cast<FLOAT>(offset.y)), m_textLayout.get(), brush.get());
+        D2D1::Point2F(
+            static_cast<FLOAT>(offset.x / m_layoutMetrics.pointScaleFactor),
+            static_cast<FLOAT>(offset.y / m_layoutMetrics.pointScaleFactor)),
+        m_textLayout.get(),
+        brush.get());
 
     // Our update is done. EndDraw never indicates rendering device removed, so any
     // failure here is unexpected and, therefore, fatal.
