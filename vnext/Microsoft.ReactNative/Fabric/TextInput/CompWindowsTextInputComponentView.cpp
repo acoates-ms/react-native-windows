@@ -153,7 +153,7 @@ struct CompTextHost : public winrt::implements<CompTextHost, ITextHost> {
 
   //@cmember Show the caret
   BOOL TxShowCaret(BOOL fShow) override {
-    // TODO
+    m_outer->DrawCaret(fShow);
     return true;
   }
 
@@ -956,6 +956,33 @@ void CompWindowsTextInputComponentView::ensureDrawingSurface() noexcept {
   }
 }
 
+void CompWindowsTextInputComponentView::DrawCaret(bool show) noexcept {
+  ensureVisual();
+  using namespace winrt::Windows::UI::Composition;
+  if (show) {
+    // Get X position
+    long xPos;
+    winrt::check_hresult(m_textServices->TxGetCurTargetX(&xPos));
+    m_caretVisual.Brush(Compositor().CreateColorBrush(winrt::Windows::UI::Colors::Black()));
+    m_caretVisual.Opacity(1.0f);
+    m_caretVisual.Size({2.0f, 0.0f});
+    m_caretVisual.RelativeSizeAdjustment({0.0f, 1.0f});
+    // TODO: offset by char width 
+    m_caretVisual.Offset({static_cast<float>(xPos), 0.0f, 0.0f});
+
+    // Blinking animation
+    auto animation = Compositor().CreateScalarKeyFrameAnimation();
+    animation.InsertKeyFrame(0.0f, 0.0f);
+    animation.InsertKeyFrame(1.0f, 1.0f, Compositor().CreateLinearEasingFunction());
+    animation.Duration(std::chrono::milliseconds{1000});
+    animation.IterationBehavior(AnimationIterationBehavior::Forever);
+    m_caretVisual.StartAnimation(L"opacity", animation);
+  } else {
+    m_caretVisual.Opacity(0.0f);
+  }
+ }
+
+
 void CompWindowsTextInputComponentView::DrawImage() noexcept {
   m_needsRedraw = true;
   if (m_cDrawBlock) {
@@ -1027,6 +1054,11 @@ void CompWindowsTextInputComponentView::ensureVisual() noexcept {
     winrt::com_ptr<IUnknown> spUnk;
     winrt::check_hresult(g_pfnCreateTextServices(nullptr, m_textHost.get(), spUnk.put()));
     spUnk.as(m_textServices);
+  }
+
+  if (!m_caretVisual) {
+    m_caretVisual = Compositor().CreateSpriteVisual();
+    m_visual.Children().InsertAtTop(m_caretVisual);
   }
 }
 
