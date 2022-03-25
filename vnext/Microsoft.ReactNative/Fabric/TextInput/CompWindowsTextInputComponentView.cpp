@@ -48,6 +48,7 @@ MSO_CLASS_GUID(ITextServices2, "8D33F741-CF58-11CE-A89D-00AA006CADC5") // IID_IT
 
 namespace Microsoft::ReactNative {
 
+// RichEdit doesn't handle us calling Draw during the middle of a TxTranslateMessage call.
 CompWindowsTextInputComponentView::DrawBlock::DrawBlock(CompWindowsTextInputComponentView &view) : m_view(view) {
   m_view.m_cDrawBlock++;
 }
@@ -240,6 +241,10 @@ struct CompTextHost : public winrt::implements<CompTextHost, ITextHost> {
   //@cmember Retrieves the coordinates of a window's client area
   HRESULT TxGetClientRect(LPRECT prc) override {
     *prc = m_outer->getClientRect();
+    prc->right -= prc->left;
+    prc->left -= prc->left;
+    prc->bottom -= prc->top;
+    prc->top -= prc->top;
     return S_OK;
   }
 
@@ -803,9 +808,15 @@ void CompWindowsTextInputComponentView::OnSelectionChanged(LONG start, LONG end)
     onSelectionChangeArgs.selection.end = end;
     emitter->onSelectionChange(onSelectionChangeArgs);
   }
+
+  // If selection changes, we should update the caret position
+  DrawCaret(m_caretShown);
 }
 
 std::string CompWindowsTextInputComponentView::GetTextFromRichEdit() const noexcept {
+  if (!m_textServices)
+    return {};
+
   BSTR bstr;
   winrt::check_hresult(m_textServices->TxGetText(&bstr));
   auto str = BstrToStdString(bstr);
@@ -958,30 +969,26 @@ void CompWindowsTextInputComponentView::ensureDrawingSurface() noexcept {
 
 void CompWindowsTextInputComponentView::DrawCaret(bool show) noexcept {
   ensureVisual();
-  using namespace winrt::Windows::UI::Composition;
-  if (show) {
-    // Get X position
-    long xPos;
-    winrt::check_hresult(m_textServices->TxGetCurTargetX(&xPos));
-    m_caretVisual.Brush(Compositor().CreateColorBrush(winrt::Windows::UI::Colors::Black()));
-    m_caretVisual.Opacity(1.0f);
-    m_caretVisual.Size({2.0f, 0.0f});
-    m_caretVisual.RelativeSizeAdjustment({0.0f, 1.0f});
-    // TODO: offset by char width 
-    m_caretVisual.Offset({static_cast<float>(xPos), 0.0f, 0.0f});
 
-    // Blinking animation
-    auto animation = Compositor().CreateScalarKeyFrameAnimation();
-    animation.InsertKeyFrame(0.0f, 0.0f);
-    animation.InsertKeyFrame(1.0f, 1.0f, Compositor().CreateLinearEasingFunction());
-    animation.Duration(std::chrono::milliseconds{1000});
-    animation.IterationBehavior(AnimationIterationBehavior::Forever);
-    m_caretVisual.StartAnimation(L"opacity", animation);
-  } else {
+  if (show && !m_caretShown) {
+    m_caretVisual.StartAnimation(L"opacity", m_caretOpacityAnimation);
+  } else if (!show && m_caretShown) {
     m_caretVisual.Opacity(0.0f);
   }
- }
 
+  m_caretShown = show;
+
+  ensureVisual();
+  if (show) {
+    long xPos;
+    winrt::check_hresult(m_textServices->TxGetCurTargetX(&xPos));
+    m_caretVisual.Size(
+        {2.0f * m_layoutMetrics.pointScaleFactor,
+         (0.0f - m_layoutMetrics.borderWidth.top - m_layoutMetrics.borderWidth.bottom) *
+             m_layoutMetrics.pointScaleFactor});
+    m_caretVisual.Offset({static_cast<float>(xPos / m_layoutMetrics.pointScaleFactor), 0.0f, 0.0f});
+  }
+}
 
 void CompWindowsTextInputComponentView::DrawImage() noexcept {
   m_needsRedraw = true;
@@ -1002,6 +1009,7 @@ void CompWindowsTextInputComponentView::DrawImage() noexcept {
 
   if (CheckForDeviceRemoved(m_drawingSurfaceInterop->BeginDraw(
           nullptr, __uuidof(ID2D1DeviceContext), d2dDeviceContext.put_void(), &offset))) {
+
     d2dDeviceContext->Clear(D2D1::ColorF(D2D1::ColorF::Black, 0.0f));
 
     RECTL rc{
@@ -1058,7 +1066,26 @@ void CompWindowsTextInputComponentView::ensureVisual() noexcept {
 
   if (!m_caretVisual) {
     m_caretVisual = Compositor().CreateSpriteVisual();
-    m_visual.Children().InsertAtTop(m_caretVisual);
+    m_caretVisual.Brush(Compositor().CreateColorBrush(winrt::Windows::UI::Colors::Black()));
+    m_caretVisual.Opacity(1.0f);
+    m_caretVisual.RelativeSizeAdjustment({0.0f, 1.0f});
+
+    // Blinking animation
+    constexpr float ftCaretFadePct = 0.2385714285714f;
+    constexpr float stayVisFrame = (1.0f - ftCaretFadePct) / 2.0f;
+    constexpr float fadeVisFrame = ftCaretFadePct / 2.0f;
+
+    m_caretOpacityAnimation = Compositor().CreateScalarKeyFrameAnimation();
+    m_caretOpacityAnimation.InsertKeyFrame(0.0f, 1.0f);
+    m_caretOpacityAnimation.InsertKeyFrame(stayVisFrame, 1.0f);
+    m_caretOpacityAnimation.InsertKeyFrame(
+        stayVisFrame + fadeVisFrame, 0.0f, Compositor().CreateLinearEasingFunction());
+    m_caretOpacityAnimation.InsertKeyFrame(stayVisFrame + fadeVisFrame + stayVisFrame, 0.0f);
+    m_caretOpacityAnimation.InsertKeyFrame(1.0f, 1.0f, Compositor().CreateLinearEasingFunction());
+    m_caretOpacityAnimation.Duration(std::chrono::milliseconds{1000});
+    m_caretOpacityAnimation.IterationBehavior(winrt::Windows::UI::Composition::AnimationIterationBehavior::Forever);
+
+    m_visual.Children().InsertAtBottom(m_caretVisual);
   }
 }
 

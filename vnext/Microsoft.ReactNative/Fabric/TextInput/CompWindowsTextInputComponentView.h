@@ -68,6 +68,7 @@ struct CompWindowsTextInputComponentView : CompBaseComponentView {
   winrt::Windows::UI::Composition::CompositionSurfaceBrush m_brush{nullptr};
   winrt::Windows::UI::Composition::SpriteVisual m_visual{nullptr};
   winrt::Windows::UI::Composition::SpriteVisual m_caretVisual{nullptr};
+  winrt::Windows::UI::Composition::ScalarKeyFrameAnimation m_caretOpacityAnimation{nullptr};
   winrt::Microsoft::ReactNative::ReactContext m_context;
   winrt::com_ptr<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop> m_drawingSurfaceInterop{nullptr};
 
@@ -87,6 +88,7 @@ struct CompWindowsTextInputComponentView : CompBaseComponentView {
   bool m_comingFromState{false};
   int m_cDrawBlock{0};
   bool m_needsRedraw{false};
+  bool m_caretShown{false};
 };
 
 } // namespace Microsoft::ReactNative
