@@ -98,6 +98,18 @@ void CompBaseComponentView::ensureBorderVisual() noexcept {
 
     auto containerChildren = Visual().as<winrt::Windows::UI::Composition::ContainerVisual>().Children();
     containerChildren.InsertAtTop(m_borderVisual);
+
+    // Create 4 Borders for Left, Top, Right, Bottom
+    m_borderLeftVisual = Compositor().CreateSpriteVisual();
+    m_borderTopVisual = Compositor().CreateSpriteVisual();
+    m_borderRightVisual = Compositor().CreateSpriteVisual();
+    m_borderBottomVisual = Compositor().CreateSpriteVisual();
+	
+	// Add Children to Border
+    m_borderVisual.Children().InsertAtTop(m_borderLeftVisual);
+    m_borderVisual.Children().InsertAtTop(m_borderTopVisual);
+    m_borderVisual.Children().InsertAtTop(m_borderRightVisual);
+    m_borderVisual.Children().InsertAtTop(m_borderBottomVisual);
   }
 }
 
@@ -117,6 +129,26 @@ void CompBaseComponentView::updateBorderProps(
     if (newViewProps.borderRadii.all) {
       ensureBorderVisual();
     }
+  }
+
+  if (oldViewProps.borderColors.left != newViewProps.borderColors.left) {
+    ensureBorderVisual();
+    m_borderLeftVisual.Brush(Compositor().CreateColorBrush((*newViewProps.borderColors.left).AsWindowsColor()));
+  }
+
+  if (oldViewProps.borderColors.top != newViewProps.borderColors.top) {
+    ensureBorderVisual();
+    m_borderTopVisual.Brush(Compositor().CreateColorBrush((*newViewProps.borderColors.top).AsWindowsColor()));
+  }
+
+  if (oldViewProps.borderColors.right != newViewProps.borderColors.right) {
+    ensureBorderVisual();
+    m_borderRightVisual.Brush(Compositor().CreateColorBrush((*newViewProps.borderColors.right).AsWindowsColor()));
+  }
+
+  if (oldViewProps.borderColors.bottom != newViewProps.borderColors.bottom) {
+    ensureBorderVisual();
+    m_borderBottomVisual.Brush(Compositor().CreateColorBrush((*newViewProps.borderColors.bottom).AsWindowsColor()));
   }
 }
 
@@ -144,6 +176,32 @@ void CompBaseComponentView::updateBorderLayoutMetrics(const facebook::react::Vie
       m_borderGeometry.CornerRadius(
           {radiusX * m_layoutMetrics.pointScaleFactor, radiusY * m_layoutMetrics.pointScaleFactor});
     }
+  }
+
+  // TODO RelativeSizeAdjustment can prop be done on intialization
+
+  if (m_borderLeftVisual) {
+    m_borderLeftVisual.RelativeSizeAdjustment({0.0f, 1.0f});
+    m_borderLeftVisual.Size({m_layoutMetrics.borderWidth.left * m_layoutMetrics.pointScaleFactor, 0.0f});
+  }
+
+  if (m_borderTopVisual) {
+    m_borderTopVisual.RelativeSizeAdjustment({1.0f, 0.0f});
+    m_borderTopVisual.Size({0.0f, m_layoutMetrics.borderWidth.top * m_layoutMetrics.pointScaleFactor});
+  }
+
+  if (m_borderRightVisual) {
+    m_borderRightVisual.RelativeSizeAdjustment({0.0f, 1.0f});
+    m_borderRightVisual.RelativeOffsetAdjustment({1.0f, 0.0f , 0.0f});
+    m_borderRightVisual.Size({m_layoutMetrics.borderWidth.right * m_layoutMetrics.pointScaleFactor, 0.0f});
+    m_borderRightVisual.Offset({-(m_layoutMetrics.borderWidth.right * m_layoutMetrics.pointScaleFactor), 0.0f , 0.0f});
+  }
+
+  if (m_borderBottomVisual) {
+    m_borderBottomVisual.RelativeSizeAdjustment({1.0f, 0.0f});
+    m_borderBottomVisual.RelativeOffsetAdjustment({0.0f, 1.0f, 0.0f});
+    m_borderBottomVisual.Size({0.0f, m_layoutMetrics.borderWidth.bottom * m_layoutMetrics.pointScaleFactor});
+    m_borderBottomVisual.Offset({0.0f, -(m_layoutMetrics.borderWidth.bottom * m_layoutMetrics.pointScaleFactor), 0.0f});
   }
 }
 

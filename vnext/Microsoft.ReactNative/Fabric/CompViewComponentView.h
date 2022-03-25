@@ -54,6 +54,11 @@ struct CompBaseComponentView : public IComponentView {
   winrt::Windows::UI::Composition::ShapeVisual m_borderVisual{nullptr};
   winrt::Windows::UI::Composition::CompositionSpriteShape m_borderShape{nullptr};
   winrt::Windows::UI::Composition::CompositionRoundedRectangleGeometry m_borderGeometry{nullptr};
+  // borders
+  winrt::Windows::UI::Composition::SpriteVisual m_borderLeftVisual{nullptr};
+  winrt::Windows::UI::Composition::SpriteVisual m_borderTopVisual{nullptr};
+  winrt::Windows::UI::Composition::SpriteVisual m_borderRightVisual{nullptr};
+  winrt::Windows::UI::Composition::SpriteVisual m_borderBottomVisual{nullptr};
 };
 
 struct CompViewComponentView : public CompBaseComponentView {
