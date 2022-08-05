@@ -134,7 +134,41 @@ TEST_CLASS (ExecuteJsiTests) {
       winrt::event_token onDestroyed{};
       auto reactNativeHost =
           TestReactNativeHostHolder(L"ExecuteJsiTests", [&onDestroyed](ReactNativeHost const &host) noexcept {
+            host.InstanceSettings().UseDeveloperSupport(true);
+            host.InstanceSettings().JSIEngineOverride(winrt::Microsoft::ReactNative::JSIEngine::V8);
             host.PackageProviders().Append(winrt::make<TestPackageProvider>());
+            host.InstanceSettings().InstanceCreated(
+                [](auto sender, winrt::Microsoft::ReactNative::InstanceCreatedEventArgs args) {
+              winrt::Microsoft::ReactNative::ExecuteJsi(args.Context(), [](facebook::jsi::Runtime &rt) {
+                    auto foundation = std::make_shared<StringBuffer>(R"(
+let globalSharedPlatformObject = {
+}
+
+let globalSharedPlatformObject2 = {
+    get foundation2() {
+      return "foundation string here";
+    }
+};
+
+// Uncommenting this line fixes the issue?!?!
+//let b = globalSharedPlatformObject2.foundation2;
+
+const sourceDesc = Object.getOwnPropertyDescriptor(globalSharedPlatformObject2, 'foundation2');
+Object.defineProperty(globalSharedPlatformObject, 'foundation2', sourceDesc);
+
+)");
+                    rt.evaluateJavaScript(foundation, "foundation.bundle");
+                });
+
+                            winrt::Microsoft::ReactNative::ExecuteJsi(args.Context(), [](facebook::jsi::Runtime &rt) {
+                auto ui = std::make_shared<StringBuffer>(R"(
+
+let a = globalSharedPlatformObject2.foundation2;
+
+)");
+                rt.evaluateJavaScript(ui, "ui.bundle");
+              });
+              });
             onDestroyed = host.InstanceSettings().InstanceDestroyed(
                 [](winrt::Windows::Foundation::IInspectable const &, InstanceDestroyedEventArgs const &args) {
                   OnInstanceDestroyed(args.Context());
@@ -143,6 +177,8 @@ TEST_CLASS (ExecuteJsiTests) {
 
       TestEventService::ObserveEvents({
           TestEvent{"initialize", nullptr},
+          TestEvent{"testMultipleExecuteJsi started", nullptr},
+          TestEvent{"testMultipleExecuteJsi completed", nullptr},
           TestEvent{"testSimpleExecuteJsi started", nullptr},
           TestEvent{"testSimpleExecuteJsi completed", nullptr},
           TestEvent{"testHostFunction started", nullptr},

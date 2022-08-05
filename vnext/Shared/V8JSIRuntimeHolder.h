@@ -9,6 +9,7 @@
 #include <JSI/ScriptStore.h>
 
 #include <Logging.h>
+#include <cxxreact/MessageQueueThread.h>
 
 namespace facebook {
 namespace react {

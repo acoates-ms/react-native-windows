@@ -7,6 +7,7 @@
 #include <JSI/NodeApiJsiRuntime.h>
 #include "RuntimeHolder.h"
 #include "ScriptStore.h"
+#include <cxxreact/MessageQueueThread.h>
 
 namespace Microsoft::JSI {
 

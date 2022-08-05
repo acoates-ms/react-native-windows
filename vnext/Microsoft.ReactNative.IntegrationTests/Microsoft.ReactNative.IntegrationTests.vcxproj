@@ -6,6 +6,7 @@
     <ProjectGuid>{14FA0516-E6D7-4E4D-B097-1470198C5072}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Microsoft.ReactNative.IntegrationTests</RootNamespace>
+    <UseV8>false</UseV8>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(ReactNativeWindowsDir)PropertySheets\React.Cpp.props" />
@@ -62,7 +63,7 @@
       <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
       <PreprocessorDefinitions>_CONSOLE;MSO_MOTIFCPP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory);$(ReactNativeWindowsDir);$(ReactNativeWindowsDir)\Mso;$(ReactNativeWindowsDir)Common;$(ReactNativeWindowsDir)stubs;$(MSBuildProjectDirectory);$(ReactNativeWindowsDir)Shared;$(ReactNativeWindowsDir)\Shared\tracing;$(ReactNativeWindowsDir)include\Shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/await %(AdditionalOptions) /bigobj</AdditionalOptions>
       <ConformanceMode>true</ConformanceMode>
       <CallingConvention>Cdecl</CallingConvention>
@@ -163,7 +164,11 @@
     <PackageReference Include="Microsoft.googletest.v140.windesktop.msvcstl.static.rt-dyn" Version="1.8.1" />
     <PackageReference Include="Microsoft.VCRTForwarders.140" Version="1.0.6" />
     <PackageReference Include="Microsoft.Windows.CppWinRT" Version="$(CppWinRTVersion)" />
+    <PackageReference Include="ReactNative.Hermes.Windows" Version="$(HermesVersion)" />
   </ItemGroup>
+  <PropertyGroup>
+    <V8JSI_NODLLCOPY />
+  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="TestBundle.targets" />
 </Project>

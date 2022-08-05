@@ -10,6 +10,22 @@ using namespace winrt;
 using namespace Microsoft::ReactNative;
 using namespace Windows::System;
 
+struct TestRedBoxHandler : winrt::implements<TestRedBoxHandler, IRedBoxHandler> {
+  void ShowNewError(IRedBoxErrorInfo info, RedBoxErrorType /*type*/)
+  {
+    auto msg = info.Message();
+    OutputDebugStringW(msg.c_str());
+    TestCheck(false);
+  }
+
+  bool IsDevSupportEnabled() {
+    return true;
+  }
+
+  void UpdateError(IRedBoxErrorInfo info) {}
+  void DismissRedBox() {}
+};
+
 TestReactNativeHostHolder::TestReactNativeHostHolder(
     std::wstring_view jsBundle,
     Mso::Functor<void(ReactNativeHost const &)> &&hostInitializer,
@@ -32,6 +48,7 @@ TestReactNativeHostHolder::TestReactNativeHostHolder(
     m_host.InstanceSettings().UseFastRefresh(false);
     m_host.InstanceSettings().UseLiveReload(false);
     m_host.InstanceSettings().EnableDeveloperMenu(false);
+    m_host.InstanceSettings().RedBoxHandler(winrt::make<TestRedBoxHandler>());
 
     hostInitializer(m_host);
 

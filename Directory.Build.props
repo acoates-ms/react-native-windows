@@ -16,6 +16,8 @@
 
     <RootIntDir>$(ReactNativeWindowsDir)build</RootIntDir>
     <RootOutDir>$(ReactNativeWindowsDir)target</RootOutDir>
+    <UseV8 Condition="'$(UseV8)' == ''">true</UseV8>
+    <UseHermes>true</UseHermes>
     <!-- Visual Studio forces using 'Win32' for the 'x86' platform. -->
     <BaseIntDir Condition="'$(Platform)' == 'Win32'">$(RootIntDir)\x86\$(Configuration)</BaseIntDir>
     <BaseIntDir Condition="'$(Platform)' != 'Win32'">$(RootIntDir)\$(Platform)\$(Configuration)</BaseIntDir>
