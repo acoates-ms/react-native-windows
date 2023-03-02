@@ -296,6 +296,15 @@ export function generate(
       generatorShadowNodeH,
       generatorStateCPP,
       generatorStateH,
+
+      require(path.resolve(
+        rncodegenPath,
+        'lib/generators/components/GeneratePropsJavaDelegate',
+      )).generate,
+      require(path.resolve(
+        rncodegenPath,
+        'lib/generators/components/GeneratePropsJavaInterface',
+      )).generate,
     ];
 
     componentGenerators.forEach(generator => {

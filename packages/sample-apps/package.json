@@ -36,7 +36,7 @@
   },
   "codegenConfig": {
     "name": "SampleApp",
-    "type": "modules",
+    "type": "all",
     "jsSrcsDir": "src",
     "windows": {
       "namespace": "SampleLibraryCodegen"

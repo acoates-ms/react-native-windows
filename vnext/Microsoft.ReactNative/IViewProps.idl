@@ -1,0 +1,29 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+#include "DocString.h"
+
+namespace Microsoft.ReactNative
+{
+  [webhosthidden]
+  [experimental]
+  DOC_STRING("TODO write docs")
+  interface IRawValue
+  {
+    DOC_STRING("TODO write docs")
+    String CastString();
+
+    DOC_STRING("TODO write docs")
+    String CastBoolean();
+  }
+
+  [webhosthidden]
+  [experimental]
+  DOC_STRING("TODO write docs")
+  interface IViewProps
+  {
+    DOC_STRING("TODO write docs")
+    void SetProp(UInt32 hash, String propName, IRawValue value);
+  }
+
+} // namespace Microsoft.ReactNative
