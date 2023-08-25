@@ -5,7 +5,6 @@
 #include <windowsx.h>
 
 #include <memory>
-#include <cstdlib>
 
 // Disabled until we have a 3rd party story for custom components
 // #include "AutolinkedNativeModules.g.h"
@@ -24,6 +23,10 @@
 
 #include "NativeModules.h"
 #include "ReactPropertyBag.h"
+#include "d2d1helper.h"
+#include <d2d1_1.h>
+#include <d3d11.h>
+#include <d3d11_4.h>
 
 struct CustomProps : winrt::implements<CustomProps, winrt::Microsoft::ReactNative::IComponentProps> {
   CustomProps(winrt::Microsoft::ReactNative::ViewProps props) : m_props(props) {}
@@ -203,6 +206,9 @@ struct WindowData {
   winrt::Windows::System::DispatcherQueueController m_compositorDispatcherQueueController{nullptr};
   winrt::Windows::System::DispatcherQueueController m_uiDispatcherQueueController{nullptr};
 
+  winrt::com_ptr<ID2D1Factory1> m_d2dFactory;
+  winrt::com_ptr<ID3D11Device> m_d3dDevice;
+  winrt::com_ptr<ID2D1Device> m_d2dDevice;
   bool m_backgroundCompositor{false};
   bool m_useWebDebugger{false};
   bool m_fastRefreshEnabled{true};
@@ -377,18 +383,83 @@ struct WindowData {
     if (m_CompositionHwndHost.CompositionRootView()) {
       auto rootVisual = m_CompositionHwndHost.CompositionRootView().RootVisual();
 
-      m_compositorDispatcherQueueController.DispatcherQueue().TryEnqueue([compContext = m_compContext, rootVisual]() {
+      m_compositorDispatcherQueueController.DispatcherQueue().TryEnqueue([&, compContext = m_compContext, rootVisual]() {
 
         auto compositor =
             winrt::Microsoft::ReactNative::Composition::CompositionContextHelper::InnerCompositor(compContext);
 
         auto visual = compositor.CreateSpriteVisual();
-        auto spotlight = AttachSpotlightToVisual(visual);
+
+        winrt::Windows::UI::Composition::CompositionGraphicsDevice cgd{nullptr};
+
+        winrt::com_ptr<ABI::Windows::UI::Composition::ICompositorInterop> compositorInterop{compositor.as<ABI::Windows::UI::Composition::ICompositorInterop>()};
+
+        winrt::Windows::Foundation::Size size{
+            static_cast<float>(std::rand() % 100 + 10), static_cast<float>(std::rand() % 100 + 10)};
+
+        // Create a graphics device backed by our D3D device
+        winrt::com_ptr<ABI::Windows::UI::Composition::ICompositionGraphicsDevice> compositionGraphicsDeviceIface;
+        winrt::check_hresult(
+            compositorInterop->CreateGraphicsDevice(D2DDevice().get(), compositionGraphicsDeviceIface.put()));
+
+        compositionGraphicsDeviceIface.as(cgd);
+
+       auto drawingSurface = cgd.CreateDrawingSurface(size, winrt::Windows::Graphics::DirectX::DirectXPixelFormat::B8G8R8A8UIntNormalized,
+        winrt::Windows::Graphics::DirectX::DirectXAlphaMode::Premultiplied);
+
+       // auto spotlight = AttachSpotlightToVisual(visual);
         // Leak!
-        reinterpret_cast<ABI::Windows::UI::Composition::ISpotLight*>(winrt::get_abi(spotlight))->AddRef();
+        //reinterpret_cast<ABI::Windows::UI::Composition::ISpotLight*>(winrt::get_abi(spotlight))->AddRef();
+
+
+        winrt::com_ptr<ID2D1DeviceContext> d2dDeviceContext;
+       POINT offset;
+
+       winrt::com_ptr<ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop> drawingSurfaceInterop;
+       drawingSurface.as(drawingSurfaceInterop);
+
+       winrt::check_hresult(drawingSurfaceInterop->BeginDraw(
+           nullptr, __uuidof(ID2D1DeviceContext), (void **)d2dDeviceContext.put(), &offset));
+         d2dDeviceContext->Clear(D2D1::ColorF(D2D1::ColorF::Black, 1.0f));
+         assert(d2dDeviceContext->GetUnitMode() == D2D1_UNIT_MODE_DIPS);
+         d2dDeviceContext->SetUnitMode(D2D1_UNIT_MODE_PIXELS);
+         // TODO get real DPI
+         //const auto dpi = 1.5f * 96.0f;
+         //float oldDpiX, oldDpiY;
+         //d2dDeviceContext->GetDpi(&oldDpiX, &oldDpiY);
+         //d2dDeviceContext->SetDpi(dpi, dpi);
+
+         D2D1_RECT_F rc{
+             static_cast<float>(offset.x),
+             static_cast<float>(offset.y),
+             static_cast<float>(offset.x) + static_cast<float>(size.Width),
+             static_cast<float>(offset.y) + static_cast<float>(size.Height)};
+
+
+           winrt::com_ptr<ID2D1SolidColorBrush> spBrush;
+         d2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red, 1.0f), spBrush.put());
+
+           d2dDeviceContext->DrawRectangle(&rc, spBrush.get(), 13.0f); //, strokeStyle);
+
+         //winrt::check_hresult(hrDraw);
+
+         // restore dpi state
+         //d2dDeviceContext->SetDpi(oldDpiX, oldDpiY);
+         d2dDeviceContext->SetUnitMode(D2D1_UNIT_MODE_DIPS);
+
+         // Our update is done. EndDraw never indicates rendering device removed, so any
+         // failure here is unexpected and, therefore, fatal.
+         auto hrEndDraw = drawingSurfaceInterop->EndDraw();
+         winrt::check_hresult(hrEndDraw);
+
+      auto surfaceBrush = compositor.CreateSurfaceBrush(drawingSurface);
+       surfaceBrush.HorizontalAlignmentRatio(0.f);
+       surfaceBrush.VerticalAlignmentRatio(0.f);
+       surfaceBrush.Stretch(winrt::Windows::UI::Composition::CompositionStretch::Fill);
+       visual.Brush(surfaceBrush);
         
         //visual.Brush(compositor.CreateColorBrush(winrt::Windows::UI::Colors::Red()));
-        visual.Size({static_cast<float>(std::rand() % 100 + 10),static_cast<float>(std::rand() % 100 + 10)});
+        visual.Size(size);
         visual.Offset({static_cast<float>(std::rand() % 300 + 10),static_cast<float>(std::rand() % 300 + 10), 0.0f});
         winrt::Microsoft::ReactNative::Composition::CompositionContextHelper::InnerVisual(rootVisual)
             .as<winrt::Windows::UI::Composition::ContainerVisual>()
@@ -396,6 +467,73 @@ struct WindowData {
             .InsertAtBottom(visual);
       });
     }
+  }
+
+  
+  winrt::com_ptr<ID3D11Device> D3DDevice() noexcept {
+    // This flag adds support for surfaces with a different color channel ordering than the API default.
+    // You need it for compatibility with Direct2D.
+    UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+
+    // #if defined(_DEBUG)
+    //   creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
+    // #endif
+
+    // This array defines the set of DirectX hardware feature levels this app  supports.
+    // The ordering is important and you should  preserve it.
+    // Don't forget to declare your app's minimum required feature level in its
+    // description.  All apps are assumed to support 9.1 unless otherwise stated.
+    D3D_FEATURE_LEVEL featureLevels[] = {
+        D3D_FEATURE_LEVEL_11_1,
+        D3D_FEATURE_LEVEL_11_0,
+        D3D_FEATURE_LEVEL_10_1,
+        D3D_FEATURE_LEVEL_10_0,
+        D3D_FEATURE_LEVEL_9_3,
+        D3D_FEATURE_LEVEL_9_2,
+        D3D_FEATURE_LEVEL_9_1};
+    if (!m_d3dDevice) {
+      D3D11CreateDevice(
+          nullptr, // specify null to use the default adapter
+          D3D_DRIVER_TYPE_HARDWARE,
+          0,
+          creationFlags, // optionally set debug and Direct2D compatibility flags
+          featureLevels, // list of feature levels this app can support
+          ARRAYSIZE(featureLevels), // number of possible feature levels
+          D3D11_SDK_VERSION,
+          m_d3dDevice.put(), // returns the Direct3D device created
+          nullptr /*&m_featureLevel*/, // returns feature level of device created
+          nullptr /*&context*/ // returns the device immediate context
+      );
+    }
+    return m_d3dDevice;
+  }
+
+
+  winrt::com_ptr<ID2D1Device> D2DDevice() noexcept {
+    if (!m_d2dDevice) {
+      winrt::com_ptr<IDXGIDevice> dxgiDevice;
+      // Obtain the underlying DXGI device of the Direct3D11 device.
+      D3DDevice().as(dxgiDevice);
+
+      // Obtain the Direct2D device for 2-D rendering.
+      winrt::check_hresult(D2DFactory()->CreateDevice(dxgiDevice.get(), m_d2dDevice.put()));
+    }
+    return m_d2dDevice;
+  }
+
+  winrt::com_ptr<ID2D1Factory1> D2DFactory() noexcept {
+    if (!m_d2dFactory) {
+      // Initialize Direct2D resources.
+      // #if defined(_DEBUG)
+      //     D2D1_FACTORY_OPTIONS d2d1FactoryOptions{D2D1_DEBUG_LEVEL_INFORMATION};
+      // #else
+      D2D1_FACTORY_OPTIONS d2d1FactoryOptions{D2D1_DEBUG_LEVEL_NONE};
+      // #endif
+
+      D2D1CreateFactory(
+          D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory1), &d2d1FactoryOptions, m_d2dFactory.put_void());
+    }
+    return m_d2dFactory;
   }
 
 
