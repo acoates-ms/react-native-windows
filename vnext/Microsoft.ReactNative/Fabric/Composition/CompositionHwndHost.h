@@ -21,7 +21,9 @@ struct CompositionHwndHost : CompositionHwndHostT<CompositionHwndHost> {
   void ReactViewHost(winrt::Microsoft::ReactNative::IReactViewHost const &value) noexcept;
 
   // property UiaProvider
-  IInspectable UiaProvider() noexcept;
+  IInspectable UiaProvider() const noexcept;
+
+  winrt::Microsoft::ReactNative::CompositionRootView CompositionRootView() const noexcept;
 
   winrt::Windows::UI::Composition::Visual RootVisual() const noexcept;
 

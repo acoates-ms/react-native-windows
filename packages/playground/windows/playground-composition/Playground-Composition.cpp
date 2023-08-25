@@ -5,6 +5,7 @@
 #include <windowsx.h>
 
 #include <memory>
+#include <cstdlib>
 
 // Disabled until we have a 3rd party story for custom components
 // #include "AutolinkedNativeModules.g.h"
@@ -41,6 +42,37 @@ struct CustomProps : winrt::implements<CustomProps, winrt::Microsoft::ReactNativ
   winrt::Microsoft::ReactNative::ViewProps m_props;
 };
 
+winrt::Windows::UI::Composition::SpotLight AttachSpotlightToVisual(winrt::Windows::UI::Composition::SpriteVisual visual)
+{
+  auto compositor = visual.Compositor();
+  visual.Brush(compositor.CreateColorBrush(winrt::Windows::UI::Colors::White()));
+
+  auto spotlight = compositor.CreateSpotLight();
+  spotlight.InnerConeAngleInDegrees(50.0f);
+  spotlight.InnerConeColor(winrt::Windows::UI::Colors::FloralWhite());
+  spotlight.InnerConeIntensity(5.0f);
+  spotlight.OuterConeAngleInDegrees(0.0f);
+  spotlight.ConstantAttenuation(1.0f);
+  spotlight.LinearAttenuation(0.253f);
+  spotlight.QuadraticAttenuation(0.58f);
+  spotlight.CoordinateSpace(visual);
+  spotlight.Targets().Add(visual);
+
+  auto animation = compositor.CreateVector3KeyFrameAnimation();
+  auto easeIn = compositor.CreateCubicBezierEasingFunction({0.5f, 0.0f}, {1.0f, 1.0f});
+  animation.InsertKeyFrame(0.00f, {100.0f, 100.0f, 35.0f});
+  animation.InsertKeyFrame(0.25f, {300.0f, 200.0f, 75.0f}, easeIn);
+  animation.InsertKeyFrame(0.50f, {050.0f, 300.0f, 15.0f}, easeIn);
+  animation.InsertKeyFrame(0.75f, {300.0f, 050.0f, 75.0f}, easeIn);
+  animation.InsertKeyFrame(1.00f, {100.0f, 100.0f, 35.0f}, easeIn);
+  animation.Duration(std::chrono::milliseconds(4000));
+  animation.IterationBehavior(winrt::Windows::UI::Composition::AnimationIterationBehavior::Forever);
+
+  spotlight.StartAnimation(L"Offset", animation);
+
+  return spotlight;
+}
+
 struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable> {
   CustomComponent(winrt::Microsoft::ReactNative::Composition::ICompositionContext compContext)
       : m_compContext(compContext) {}
@@ -55,36 +87,9 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
 
   winrt::Microsoft::ReactNative::Composition::IVisual CreateVisual() noexcept {
     m_visual = m_compContext.CreateSpriteVisual();
-    m_visual.Brush(m_compContext.CreateColorBrush(winrt::Windows::UI::Colors::White()));
 
-    auto compositor =
-        winrt::Microsoft::ReactNative::Composition::CompositionContextHelper::InnerCompositor(m_compContext);
-
-    m_spotlight = compositor.CreateSpotLight();
-    m_spotlight.InnerConeAngleInDegrees(50.0f);
-    m_spotlight.InnerConeColor(winrt::Windows::UI::Colors::FloralWhite());
-    m_spotlight.InnerConeIntensity(5.0f);
-    m_spotlight.OuterConeAngleInDegrees(0.0f);
-    m_spotlight.ConstantAttenuation(1.0f);
-    m_spotlight.LinearAttenuation(0.253f);
-    m_spotlight.QuadraticAttenuation(0.58f);
-    m_spotlight.CoordinateSpace(
-        winrt::Microsoft::ReactNative::Composition::CompositionContextHelper::InnerVisual(m_visual));
-    m_spotlight.Targets().Add(
-        winrt::Microsoft::ReactNative::Composition::CompositionContextHelper::InnerVisual(m_visual));
-
-    auto animation = compositor.CreateVector3KeyFrameAnimation();
-    auto easeIn = compositor.CreateCubicBezierEasingFunction({0.5f, 0.0f}, {1.0f, 1.0f});
-    animation.InsertKeyFrame(0.00f, {100.0f, 100.0f, 35.0f});
-    animation.InsertKeyFrame(0.25f, {300.0f, 200.0f, 75.0f}, easeIn);
-    animation.InsertKeyFrame(0.50f, {050.0f, 300.0f, 15.0f}, easeIn);
-    animation.InsertKeyFrame(0.75f, {300.0f, 050.0f, 75.0f}, easeIn);
-    animation.InsertKeyFrame(1.00f, {100.0f, 100.0f, 35.0f}, easeIn);
-    animation.Duration(std::chrono::milliseconds(4000));
-    animation.IterationBehavior(winrt::Windows::UI::Composition::AnimationIterationBehavior::Forever);
-
-    m_spotlight.StartAnimation(L"Offset", animation);
-
+    m_spotlight = AttachSpotlightToVisual(winrt::Microsoft::ReactNative::Composition::CompositionContextHelper::InnerVisual(m_visual)
+                                .as<winrt::Windows::UI::Composition::SpriteVisual>());
     return m_visual;
   }
 
@@ -191,11 +196,14 @@ struct WindowData {
 
   std::wstring m_bundleFile;
   bool m_windowInited{false};
+  winrt::Microsoft::ReactNative::Composition::ICompositionContext m_compContext;
   winrt::Microsoft::ReactNative::CompositionHwndHost m_CompositionHwndHost{nullptr};
   winrt::Microsoft::ReactNative::ReactNativeHost m_host{nullptr};
   winrt::Microsoft::ReactNative::ReactInstanceSettings m_instanceSettings{nullptr};
-  winrt::Windows::System::DispatcherQueueController m_dispatcherQueueController{nullptr};
+  winrt::Windows::System::DispatcherQueueController m_compositorDispatcherQueueController{nullptr};
+  winrt::Windows::System::DispatcherQueueController m_uiDispatcherQueueController{nullptr};
 
+  bool m_backgroundCompositor{false};
   bool m_useWebDebugger{false};
   bool m_fastRefreshEnabled{true};
   bool m_useDirectDebugger{false};
@@ -203,7 +211,60 @@ struct WindowData {
   uint16_t m_debuggerPort{defaultDebuggerPort};
   xaml::ElementTheme m_theme{xaml::ElementTheme::Default};
 
-  WindowData(const winrt::Microsoft::ReactNative::CompositionHwndHost &compHost) : m_CompositionHwndHost(compHost) {}
+  WindowData(const winrt::Microsoft::ReactNative::CompositionHwndHost &compHost, bool background)
+      : m_CompositionHwndHost(compHost), m_backgroundCompositor(background) {
+    CreateCompositor(background);
+
+    auto uiDispatcher = winrt::Microsoft::ReactNative::ReactDispatcherHelper::UIThreadDispatcher();
+    assert(uiDispatcher);
+    InstanceSettings().UIDispatcher(uiDispatcher);
+  }
+
+// The compositor could be running on a background or foreground thread.
+  // Office runs it on a background thread, so its useful to be able to test that case
+  void CreateCompositor(bool background) {
+    // Create the UI thread
+    DispatcherQueueOptions options{
+        sizeof(DispatcherQueueOptions), /* dwSize */
+        DQTYPE_THREAD_CURRENT, /* threadType */
+        DQTAT_COM_STA /* apartmentType */
+    };
+
+    // Need to have a Dispatcher on the current thread to be able to create a Compositor
+    winrt::check_hresult(CreateDispatcherQueueController(
+        options,
+        reinterpret_cast<ABI::Windows::System::IDispatcherQueueController **>(
+            winrt::put_abi(m_uiDispatcherQueueController))));
+
+    if (background) {
+      DispatcherQueueOptions optionsBackground{
+          sizeof(DispatcherQueueOptions), /* dwSize */
+          DQTYPE_THREAD_DEDICATED, /* threadType */
+          DQTAT_COM_STA /* apartmentType */
+      };
+
+      // Need to have a Dispatcher on the current thread to be able to create a Compositor
+      winrt::check_hresult(CreateDispatcherQueueController(
+          optionsBackground,
+          reinterpret_cast<ABI::Windows::System::IDispatcherQueueController **>(
+              winrt::put_abi(m_compositorDispatcherQueueController))));
+
+      m_compositorDispatcherQueueController.DispatcherQueue().TryEnqueue([windowData = this]() {
+        windowData->m_compContext = winrt::Microsoft::ReactNative::Composition::CompositionContextHelper::CreateContext(
+            winrt::Windows::UI::Composition::Compositor());
+        winrt::Microsoft::ReactNative::Composition::CompositionUIService::SetCompositionContext(
+            windowData->InstanceSettings().Properties(), windowData->m_compContext);
+      });
+    } else {
+      // Compositor uses UI queue
+      m_compositorDispatcherQueueController = m_uiDispatcherQueueController;
+      m_compContext = winrt::Microsoft::ReactNative::Composition::CompositionContextHelper::CreateContext(
+          winrt::Windows::UI::Composition::Compositor());
+      winrt::Microsoft::ReactNative::Composition::CompositionUIService::SetCompositionContext(
+          InstanceSettings().Properties(), m_compContext);
+    }
+  }
+
 
   static WindowData *GetFromWindow(HWND hwnd) {
     auto data = reinterpret_cast<WindowData *>(GetProp(hwnd, WindowDataProperty));
@@ -301,10 +362,42 @@ struct WindowData {
 
   LRESULT TranslateMessage(UINT message, WPARAM wparam, LPARAM lparam) noexcept {
     if (m_CompositionHwndHost) {
+
+      if (message == WM_MOUSEMOVE) {
+        QueueWorkOnCompositor();
+      }
       return static_cast<LRESULT>(m_CompositionHwndHost.TranslateMessage(message, wparam, lparam));
     }
     return 0;
   }
+
+  // Used to stress the compositor by causing additional commits to happen on the background compositor
+  void QueueWorkOnCompositor()
+  {
+    if (m_CompositionHwndHost.CompositionRootView()) {
+      auto rootVisual = m_CompositionHwndHost.CompositionRootView().RootVisual();
+
+      m_compositorDispatcherQueueController.DispatcherQueue().TryEnqueue([compContext = m_compContext, rootVisual]() {
+
+        auto compositor =
+            winrt::Microsoft::ReactNative::Composition::CompositionContextHelper::InnerCompositor(compContext);
+
+        auto visual = compositor.CreateSpriteVisual();
+        auto spotlight = AttachSpotlightToVisual(visual);
+        // Leak!
+        reinterpret_cast<ABI::Windows::UI::Composition::ISpotLight*>(winrt::get_abi(spotlight))->AddRef();
+        
+        //visual.Brush(compositor.CreateColorBrush(winrt::Windows::UI::Colors::Red()));
+        visual.Size({static_cast<float>(std::rand() % 100 + 10),static_cast<float>(std::rand() % 100 + 10)});
+        visual.Offset({static_cast<float>(std::rand() % 300 + 10),static_cast<float>(std::rand() % 300 + 10), 0.0f});
+        winrt::Microsoft::ReactNative::Composition::CompositionContextHelper::InnerVisual(rootVisual)
+            .as<winrt::Windows::UI::Composition::ContainerVisual>()
+            .Children()
+            .InsertAtBottom(visual);
+      });
+    }
+  }
+
 
   /// Message handler for about box.
   static INT_PTR CALLBACK About(HWND hwnd, UINT message, WPARAM wparam, LPARAM /* lparam */) noexcept {
@@ -465,7 +558,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
           hwnd, LOWORD(wparam), reinterpret_cast<HWND>(lparam), HIWORD(wparam));
     }
     case WM_DESTROY: {
-      windowData->m_dispatcherQueueController.ShutdownQueueAsync();
+      if (windowData->m_backgroundCompositor)
+         windowData->m_compositorDispatcherQueueController.ShutdownQueueAsync();
+      windowData->m_uiDispatcherQueueController.ShutdownQueueAsync();
       delete windowData;
       SetProp(hwnd, WindowDataProperty, 0);
       PostQuitMessage(0);
@@ -500,42 +595,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
 
 constexpr PCWSTR c_windowClassName = L"MS_REACTNATIVE_PLAYGROUND_COMPOSITION";
 
-// The compositor could be running on a background or foreground thread.
-// Office runs it on a background thread, so its useful to be able to test that case
-void CreateCompositor(bool background, WindowData *windowData) {
-  DispatcherQueueOptions options{
-      sizeof(DispatcherQueueOptions), /* dwSize */
-      background ? DQTYPE_THREAD_DEDICATED : DQTYPE_THREAD_CURRENT, /* threadType */
-      DQTAT_COM_STA /* apartmentType */
-  };
-
-  // Need to have a Dispatcher on the current thread to be able to create a Compositor
-  winrt::check_hresult(CreateDispatcherQueueController(
-      options,
-      reinterpret_cast<ABI::Windows::System::IDispatcherQueueController **>(
-          winrt::put_abi(windowData->m_dispatcherQueueController))));
-
-  if (background) {
-    windowData->m_dispatcherQueueController.DispatcherQueue().TryEnqueue([windowData]() {
-      winrt::Microsoft::ReactNative::Composition::CompositionUIService::SetCompositionContext(
-          windowData->InstanceSettings().Properties(),
-          winrt::Microsoft::ReactNative::Composition::CompositionContextHelper::CreateContext(
-              winrt::Windows::UI::Composition::Compositor()));
-    });
-  } else {
-    winrt::Microsoft::ReactNative::Composition::CompositionUIService::SetCompositionContext(
-        windowData->InstanceSettings().Properties(),
-        winrt::Microsoft::ReactNative::Composition::CompositionContextHelper::CreateContext(
-            winrt::Windows::UI::Composition::Compositor()));
-  }
-}
-
 int RunPlayground(int showCmd, bool useWebDebugger) {
   constexpr PCWSTR appName = L"React Native Playground (Composition)";
 
-  auto windowData = std::make_unique<WindowData>(winrt::Microsoft::ReactNative::CompositionHwndHost());
-
-  CreateCompositor(true /*background compositor*/, windowData.get());
+  auto windowData = std::make_unique<WindowData>(winrt::Microsoft::ReactNative::CompositionHwndHost(), true /*background compositor*/);
 
   HWND hwnd = CreateWindow(
       c_windowClassName,

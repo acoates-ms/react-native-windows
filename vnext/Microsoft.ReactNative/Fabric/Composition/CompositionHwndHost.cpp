@@ -30,6 +30,10 @@ winrt::Windows::UI::Composition::Desktop::DesktopWindowTarget CompositionHwndHos
   return m_target;
 }
 
+winrt::Microsoft::ReactNative::CompositionRootView CompositionHwndHost::CompositionRootView() const noexcept {
+  return m_compRootView;
+}
+
 void CompositionHwndHost::CreateDesktopWindowTarget(HWND window) {
   namespace abi = ABI::Windows::UI::Composition::Desktop;
 
@@ -153,7 +157,7 @@ winrt::Windows::UI::Composition::Compositor CompositionHwndHost::Compositor() co
       compositionContext);
 }
 
-IInspectable CompositionHwndHost::UiaProvider() noexcept {
+IInspectable CompositionHwndHost::UiaProvider() const noexcept {
   auto compRootView = winrt::get_self<implementation::CompositionRootView>(m_compRootView);
   auto provider = compRootView->GetUiaProvider();
   auto pRootProvider = static_cast<CompositionRootAutomationProvider *>(provider.as<IRawElementProviderSimple>().get());
