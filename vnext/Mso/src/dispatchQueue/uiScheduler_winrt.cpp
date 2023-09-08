@@ -9,7 +9,7 @@
 
 using namespace winrt;
 using namespace Windows::Foundation;
-#ifndef USE_WINUI3
+#ifndef USE_WINUI3_NEVER
 #include "winrt/Windows.System.h"
 using namespace Windows::System;
 #else

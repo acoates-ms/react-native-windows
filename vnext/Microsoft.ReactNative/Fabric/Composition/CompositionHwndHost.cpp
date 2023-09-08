@@ -17,6 +17,10 @@
 #include "CompositionRootAutomationProvider.h"
 #include "CompositionRootView.h"
 
+#include <winrt/Microsoft.UI.Dispatching.h>
+#include <winrt/Microsoft.UI.Windowing.h>
+
+
 WINUSERAPI UINT WINAPI GetDpiForWindow(_In_ HWND hwnd);
 
 namespace winrt::Microsoft::ReactNative::implementation {
@@ -61,7 +65,8 @@ void CompositionHwndHost::Initialize(uint64_t hwnd) noexcept {
 
   m_compRootView.ScaleFactor(ScaleFactor());
   m_compRootView.RootVisual(
-      winrt::Microsoft::ReactNative::Composition::implementation::CompositionContextHelper::CreateVisual(RootVisual()));
+      winrt::Microsoft::ReactNative::Composition::implementation::WindowsCompositionContextHelper::CreateVisual(
+          RootVisual()));
 
   UpdateSize();
 }
@@ -91,6 +96,12 @@ LRESULT CompositionHwndHost::TranslateMessage(int msg, uint64_t wParam, int64_t 
 
   switch (msg) {
     case WM_MOUSEWHEEL: {
+
+  auto aqua = winrt::Microsoft::UI::Colors::Aqua();
+  auto window = winrt::Microsoft::UI::Windowing::AppWindow::Create();
+  auto dispatcherQueueController { winrt::Microsoft::UI::Dispatching::DispatcherQueueController::CreateOnCurrentThread() };
+
+
       POINT pt = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
       ::ScreenToClient(m_hwnd, &pt);
       int32_t delta = GET_WHEEL_DELTA_WPARAM(wParam);
@@ -149,7 +160,7 @@ winrt::Windows::UI::Composition::Compositor CompositionHwndHost::Compositor() co
       winrt::Microsoft::ReactNative::Composition::implementation::CompositionUIService::GetCompositionContext(
           m_reactViewHost.ReactNativeHost().InstanceSettings().Properties());
 
-  return winrt::Microsoft::ReactNative::Composition::implementation::CompositionContextHelper::InnerCompositor(
+  return winrt::Microsoft::ReactNative::Composition::implementation::WindowsCompositionContextHelper::InnerCompositor(
       compositionContext);
 }
 
