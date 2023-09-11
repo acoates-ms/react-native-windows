@@ -58,14 +58,11 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
   CustomComponent(winrt::Microsoft::ReactNative::Composition::ICompositionContext compContext)
       : m_compContext(compContext) {}
 
-  ~CustomComponent()
-  {
-      if (m_systemVisualSiteBridge)
-      {
-          m_systemVisualSiteBridge.Close();
-      }
+  ~CustomComponent() {
+    if (m_systemVisualSiteBridge) {
+      m_systemVisualSiteBridge.Close();
+    }
   }
-
 
   void UpdateProps(winrt::Microsoft::ReactNative::IComponentProps props) noexcept {
     auto customProps = props.as<CustomProps>();
@@ -163,7 +160,8 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
     m_appContent.Root().as<winrt::Microsoft::UI::Composition::SpriteVisual>().Brush(g_liftedCompositor.CreateColorBrush(
         m_islandToggle ? winrt::Windows::UI::Colors::Pink() : winrt::Windows::UI::Colors::Red()));
 
-    // If this was not marked as handled - Should the host of the island get WM_LBUTTONDOWN? - Or is all pointer input essentially captured by the island?
+    // If this was not marked as handled - Should the host of the island get WM_LBUTTONDOWN? - Or is all pointer input
+    // essentially captured by the island?
     args.Handled(true);
   }
 
@@ -269,12 +267,14 @@ struct WindowData {
   static constexpr uint16_t defaultDebuggerPort = 9229;
 
   std::wstring m_bundleFile;
-  bool m_windowInited{false};
-  winrt::Microsoft::ReactNative::CompositionHwndHost m_CompositionHwndHost{nullptr};
+  winrt::Microsoft::ReactNative::CompositionRootView m_compRootView{nullptr};
   winrt::Microsoft::ReactNative::ReactNativeHost m_host{nullptr};
   winrt::Microsoft::ReactNative::ReactInstanceSettings m_instanceSettings{nullptr};
+  winrt::Windows::UI::Composition::Desktop::DesktopWindowTarget m_target{nullptr};
+  LONG m_height{0};
+  LONG m_width{0};
 
-  WindowData(const winrt::Microsoft::ReactNative::CompositionHwndHost &compHost) : m_CompositionHwndHost(compHost) {
+  WindowData() {
     // By using the WindowsCompositionContextHelper here, React Native Windows will use System Visuals for its tree.
     // If we instead used MicrosoftCompositionContextHelper, React Native Windows would use a Lifted Visuals tree.
     winrt::Microsoft::ReactNative::Composition::CompositionUIService::SetCompositionContext(
@@ -335,13 +335,35 @@ struct WindowData {
 
           winrt::Microsoft::ReactNative::ReactViewOptions viewOptions;
           viewOptions.ComponentName(appName);
-          m_CompositionHwndHost.ReactViewHost(
+
+          if (!m_compRootView) {
+            m_compRootView = winrt::Microsoft::ReactNative::CompositionRootView();
+          }
+
+          m_compRootView.ReactViewHost(
               winrt::Microsoft::ReactNative::ReactCoreInjection::MakeViewHost(host, viewOptions));
 
           auto windowData = WindowData::GetFromWindow(hwnd);
-          if (!windowData->m_windowInited) {
-            m_CompositionHwndHost.Initialize((uint64_t)hwnd);
-            windowData->m_windowInited = true;
+
+          if (!m_target) {
+            auto interop = g_compositor.as<ABI::Windows::UI::Composition::Desktop::ICompositorDesktopInterop>();
+            winrt::Windows::UI::Composition::Desktop::DesktopWindowTarget target{nullptr};
+            winrt::check_hresult(interop->CreateDesktopWindowTarget(
+                hwnd,
+                false,
+                reinterpret_cast<ABI::Windows::UI::Composition::Desktop::IDesktopWindowTarget **>(
+                    winrt::put_abi(target))));
+            m_target = target;
+
+            auto root = g_compositor.CreateContainerVisual();
+            root.RelativeSizeAdjustment({1.0f, 1.0f});
+            root.Offset({0, 0, 0});
+            m_target.Root(root);
+            m_compRootView.RootVisual(
+                winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::CreateVisual(root));
+            m_compRootView.ScaleFactor(ScaleFactor(hwnd));
+            m_compRootView.Size(
+                {static_cast<float>(m_width / ScaleFactor(hwnd)), static_cast<float>(m_height / ScaleFactor(hwnd))});
           }
         }
 
@@ -373,9 +395,36 @@ struct WindowData {
     return 0;
   }
 
-  LRESULT TranslateMessage(UINT message, WPARAM wparam, LPARAM lparam) noexcept {
-    if (m_CompositionHwndHost) {
-      return static_cast<LRESULT>(m_CompositionHwndHost.TranslateMessage(message, wparam, lparam));
+  double ScaleFactor(HWND hwnd) noexcept {
+    return GetDpiForWindow(hwnd) / 96.0;
+  }
+
+  void UpdateSize(HWND hwnd) noexcept {
+    RECT rc;
+    if (GetClientRect(hwnd, &rc)) {
+      if (m_height != (rc.bottom - rc.top) || m_width != (rc.right - rc.left)) {
+        m_height = rc.bottom - rc.top;
+        m_width = rc.right - rc.left;
+
+        if (m_compRootView) {
+          winrt::Windows::Foundation::Size size{
+              static_cast<float>(m_width / ScaleFactor(hwnd)), static_cast<float>(m_height / ScaleFactor(hwnd))};
+          m_compRootView.Size(size);
+        }
+      }
+    }
+  }
+
+  LRESULT TranslateMessage(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) noexcept {
+    if (m_compRootView) {
+      if (message == WM_MOUSEWHEEL) {
+        POINT pt = {GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
+        ::ScreenToClient(hwnd, &pt);
+        int32_t delta = GET_WHEEL_DELTA_WPARAM(wparam);
+        m_compRootView.OnScrollWheel({static_cast<float>(pt.x), static_cast<float>(pt.y)}, delta);
+      }
+
+      return static_cast<LRESULT>(m_compRootView.SendMessage(message, wparam, lparam));
     }
     return 0;
   }
@@ -521,7 +570,7 @@ HINSTANCE WindowData::s_instance = reinterpret_cast<HINSTANCE>(&__ImageBase);
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) noexcept {
   auto windowData = WindowData::GetFromWindow(hwnd);
   if (windowData) {
-    auto result = WindowData::GetFromWindow(hwnd)->TranslateMessage(message, wparam, lparam);
+    auto result = WindowData::GetFromWindow(hwnd)->TranslateMessage(hwnd, message, wparam, lparam);
     if (result)
       return result;
   }
@@ -547,17 +596,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam) 
     case WM_GETOBJECT: {
       if (lparam == UiaRootObjectId) {
         auto windowData = WindowData::GetFromWindow(hwnd);
-        if (windowData == nullptr || !windowData->m_windowInited)
+        if (windowData == nullptr || !windowData->m_compRootView)
           break;
 
-        auto hwndHost = windowData->m_CompositionHwndHost;
+        auto rootView = windowData->m_compRootView;
         winrt::com_ptr<IRawElementProviderSimple> spReps;
-        if (!hwndHost.UiaProvider().try_as(spReps)) {
+        if (!rootView.GetUiaProvider().try_as(spReps)) {
           break;
         }
         LRESULT lResult = UiaReturnRawElementProvider(hwnd, wparam, lparam, spReps.get());
         return lResult;
       }
+    }
+    case WM_WINDOWPOSCHANGED: {
+      auto windowData = WindowData::GetFromWindow(hwnd);
+      windowData->UpdateSize(hwnd);
+      break;
     }
   }
 
@@ -569,7 +623,7 @@ constexpr PCWSTR c_windowClassName = L"MS_REACTNATIVE_PLAYGROUND_COMPOSITION";
 int RunPlayground(int showCmd, bool useWebDebugger) {
   constexpr PCWSTR appName = L"React Native Playground (Composition)";
 
-  auto windowData = std::make_unique<WindowData>(winrt::Microsoft::ReactNative::CompositionHwndHost());
+  auto windowData = std::make_unique<WindowData>();
   HWND hwnd = CreateWindow(
       c_windowClassName,
       appName,

@@ -135,7 +135,10 @@ winrt::Windows::Foundation::Size CompositionRootView::Size() noexcept {
 }
 
 void CompositionRootView::Size(winrt::Windows::Foundation::Size value) noexcept {
-  m_size = value;
+  if (value != m_size) {
+    m_size = value;
+    Arrange(m_size);
+  }
 }
 
 double CompositionRootView::ScaleFactor() noexcept {
