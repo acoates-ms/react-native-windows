@@ -31,8 +31,12 @@
 
 winrt::Microsoft::UI::Dispatching::DispatcherQueueController g_liftedDispatcherQueueController{nullptr};
 winrt::Microsoft::UI::Composition::Compositor g_liftedCompositor{nullptr};
-HWND g_hwnd;
+HWND g_hwndTopLevel;
 
+/*
+ * Custom Properties can be passed from JS to this native component
+ * This struct will eventually be codegen'd from the JS spec file
+ */
 struct CustomProps : winrt::implements<CustomProps, winrt::Microsoft::ReactNative::IComponentProps> {
   CustomProps(winrt::Microsoft::ReactNative::ViewProps props) : m_props(props) {}
 
@@ -59,7 +63,8 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
   }
 
   void UpdateLayoutMetrics(winrt::Microsoft::ReactNative::Composition::LayoutMetrics metrics) noexcept {
-    m_visual.Size({metrics.Frame.Width * metrics.PointScaleFactor, metrics.Frame.Height * metrics.PointScaleFactor});
+    m_reactComponentRoot.Size(
+        {metrics.Frame.Width * metrics.PointScaleFactor, metrics.Frame.Height * metrics.PointScaleFactor});
 
     m_systemBridgeRootVisual.Size(
         {metrics.Frame.Width * metrics.PointScaleFactor, metrics.Frame.Height * metrics.PointScaleFactor});
@@ -68,6 +73,7 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
     auto siteWindow = site.Environment();
     auto displayScale = siteWindow.DisplayScale();
 
+    // Size the island to be half the size of the custom component, to more easily test behavior across the island
     site.ParentScale(displayScale);
     site.ActualSize({metrics.Frame.Width / 2, metrics.Frame.Height / 2});
     site.ClientSize(
@@ -76,36 +82,26 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
   }
 
   winrt::Microsoft::ReactNative::Composition::IVisual CreateVisual() noexcept {
-    m_visual = m_compContext.CreateSpriteVisual();
-
-    m_lightVisual = m_compContext.CreateSpriteVisual();
-    m_lightVisual.Brush(m_compContext.CreateColorBrush(winrt::Windows::UI::Colors::Green()));
-    m_lightVisual.RelativeSizeWithOffset({0, 0}, {1, 1});
-    m_lightVisual.Opacity(0.3f);
-    m_visual.InsertAt(m_lightVisual, 0);
+    m_reactComponentRoot = m_compContext.CreateSpriteVisual();
+    m_reactComponentRoot.Brush(m_compContext.CreateColorBrush(winrt::Windows::UI::Colors::Green()));
 
     auto compositor =
         winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::InnerCompositor(m_compContext);
 
-    auto sbrv = compositor.CreateSpriteVisual();
-    sbrv.Brush(compositor.CreateColorBrush(winrt::Windows::UI::Colors::Blue()));
+    m_systemBridgeRootVisual = compositor.CreateSpriteVisual();
+    m_systemBridgeRootVisual.Brush(compositor.CreateColorBrush(winrt::Windows::UI::Colors::Blue()));
 
-    m_systemBridgeRootVisual = sbrv;
-
-    winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::InnerVisual(m_visual)
+    winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::InnerVisual(m_reactComponentRoot)
         .as<winrt::Windows::UI::Composition::ContainerVisual>()
         .Children()
         .InsertAtTop(m_systemBridgeRootVisual);
 
     // SystemVisual Bridge
     m_systemVisualSiteBridge = winrt::Microsoft::UI::Content::SystemVisualSiteBridge::Create(
-        g_liftedCompositor, m_systemBridgeRootVisual, winrt::Microsoft::UI::GetWindowIdFromWindow(g_hwnd));
+        g_liftedCompositor, m_systemBridgeRootVisual, winrt::Microsoft::UI::GetWindowIdFromWindow(g_hwndTopLevel));
     m_systemVisualSiteBridge.Site().ShouldApplyRasterizationScale(false);
 
-    // auto window =
-    // winrt::Microsoft::UI::Windowing::AppWindow::GetFromWindowId(winrt::Microsoft::UI::GetWindowIdFromWindow(g_hwnd))
-
-    return m_visual;
+    return m_reactComponentRoot;
   }
 
   void FinalizeUpdates() {
@@ -116,10 +112,10 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
       liftedVisual.Brush(liftedBrush);
 
       // Create the App's content and connect to the DesktopChildSiteBridge.
-      auto appContent{winrt::Microsoft::UI::Content::ContentIsland::Create(liftedVisual)};
-      m_systemVisualSiteBridge.Connect(appContent);
+      m_appContent = winrt::Microsoft::UI::Content::ContentIsland::Create(liftedVisual);
+      m_systemVisualSiteBridge.Connect(m_appContent);
 
-      m_pointerSource = winrt::Microsoft::UI::Input::InputPointerSource::GetForIsland(appContent);
+      m_pointerSource = winrt::Microsoft::UI::Input::InputPointerSource::GetForIsland(m_appContent);
 
       m_pointerSource.PointerPressed([this](
                                          winrt::Microsoft::UI::Input::InputPointerSource const &,
@@ -130,11 +126,11 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
         if (properties.IsLeftButtonPressed()) {
           Island_OnLeftButtonPressed(args);
         } else if (properties.IsRightButtonPressed()) {
-          // Input_OnRightButtonPressed(args);
+          // Not handling Right Button, so the parent UI should be able to handle it?
         }
       });
 
-      m_inputFocusController = winrt::Microsoft::UI::Input::InputFocusController::GetForIsland(appContent);
+      m_inputFocusController = winrt::Microsoft::UI::Input::InputFocusController::GetForIsland(m_appContent);
 
       m_inputFocusController.GotFocus(
           [this](
@@ -150,35 +146,46 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
   }
 
   void Island_OnLeftButtonPressed(const winrt::Microsoft::UI::Input::PointerEventArgs &args) {
-    // Since this is marked as not being handled, I'd expect
-    args.Handled(false);
+    // Left clicking on the island content will toggle the color of the island content.
+    m_islandToggle = !m_islandToggle;
+    auto compositor =
+        winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::InnerCompositor(m_compContext);
 
-    m_inputFocusController.TrySetFocus();
+    m_appContent.Root().as<winrt::Microsoft::UI::Composition::SpriteVisual>().Brush(g_liftedCompositor.CreateColorBrush(
+        m_islandToggle ? winrt::Windows::UI::Colors::Pink() : winrt::Windows::UI::Colors::Red()));
+
+    args.Handled(true);
   }
 
   void Island_FocusChanged(bool focus) {
     ;
   }
 
-  // TODO - Once we get more complete native eventing we can move spotlight based on pointer position
+  /*
+   * This gets forwarded windows messages through the React Native tree. In the future this will likely get
+   * replaces with
+   * functions / events that look more like Microsoft::Input's - assuming we can create and forward
+   * them from the UI hosting React Native.
+   */
   int64_t SendMessage(uint32_t msg, uint64_t wParam, int64_t lParam) noexcept {
-    if (msg == WM_MOUSEMOVE) {
-      auto x = GET_X_LPARAM(lParam);
-      auto y = GET_Y_LPARAM(lParam);
-    }
-
-    if (msg == WM_LBUTTONDOWN) {
+    if (msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN) {
+      // Toggle the color of the Outer System Visual on mouse down (either right or left)
       m_systemToggle = !m_systemToggle;
       auto compositor =
           winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::InnerCompositor(m_compContext);
 
-      m_systemBridgeRootVisual.as<winrt::Windows::UI::Composition::SpriteVisual>().Brush(compositor.CreateColorBrush(
+      m_systemBridgeRootVisual.Brush(compositor.CreateColorBrush(
           m_systemToggle ? winrt::Windows::UI::Colors::LightBlue() : winrt::Windows::UI::Colors::Blue()));
-    }
 
+      return 1;
+    }
     return 0;
   }
 
+  /*
+   * Custom Component Registration
+   * This will eventually be codegen'd from the JS spec file
+   */
   static void RegisterViewComponent(winrt::Microsoft::ReactNative::IReactPackageBuilder const &packageBuilder) {
     packageBuilder.as<winrt::Microsoft::ReactNative::IReactPackageBuilderFabric>().AddViewComponent(
         L"MyCustomComponent", [](winrt::Microsoft::ReactNative::IReactViewComponentBuilder const &builder) noexcept {
@@ -214,17 +221,21 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
   }
 
  private:
+  // React Content
+  winrt::Microsoft::ReactNative::Composition::ICompositionContext m_compContext;
+  winrt::Microsoft::ReactNative::Composition::ISpriteVisual m_reactComponentRoot{nullptr};
+
+  // System Composition
   bool m_connected{false};
-  winrt::Windows::UI::Composition::ContainerVisual m_systemBridgeRootVisual{nullptr};
+  winrt::Windows::UI::Composition::SpriteVisual m_systemBridgeRootVisual{nullptr};
   bool m_systemToggle{false};
   winrt::Microsoft::UI::Content::SystemVisualSiteBridge m_systemVisualSiteBridge{nullptr};
+
+  // Island Content
+  bool m_islandToggle{false};
   winrt::Microsoft::UI::Input::InputPointerSource m_pointerSource{nullptr};
   winrt::Microsoft::UI::Input::InputFocusController m_inputFocusController{nullptr};
-
-  bool m_islandToggle{false};
-  winrt::Microsoft::ReactNative::Composition::ISpriteVisual m_visual{nullptr};
-  winrt::Microsoft::ReactNative::Composition::ISpriteVisual m_lightVisual{nullptr};
-  winrt::Microsoft::ReactNative::Composition::ICompositionContext m_compContext;
+  winrt::Microsoft::UI::Content::ContentIsland m_appContent{nullptr};
 };
 
 struct CompReactPackageProvider
@@ -243,7 +254,6 @@ constexpr auto WindowDataProperty = L"WindowData";
 int RunPlayground(int showCmd, bool useWebDebugger);
 winrt::Microsoft::ReactNative::IReactPackageProvider CreateStubDeviceInfoPackageProvider() noexcept;
 
-
 struct WindowData {
   static HINSTANCE s_instance;
   static constexpr uint16_t defaultDebuggerPort = 9229;
@@ -254,14 +264,9 @@ struct WindowData {
   winrt::Microsoft::ReactNative::ReactNativeHost m_host{nullptr};
   winrt::Microsoft::ReactNative::ReactInstanceSettings m_instanceSettings{nullptr};
 
-  bool m_useWebDebugger{false};
-  bool m_fastRefreshEnabled{true};
-  bool m_useDirectDebugger{false};
-  bool m_breakOnNextLine{false};
-  uint16_t m_debuggerPort{defaultDebuggerPort};
-  xaml::ElementTheme m_theme{xaml::ElementTheme::Default};
-
   WindowData(const winrt::Microsoft::ReactNative::CompositionHwndHost &compHost) : m_CompositionHwndHost(compHost) {
+    // By using the WindowsCompositionContextHelper here, React Native Windows will use System Visuals for its tree.
+    // If we instead used MicrosoftCompositionContextHelper, React Native Windows would use a Lifted Visuals tree.
     winrt::Microsoft::ReactNative::Composition::CompositionUIService::SetCompositionContext(
         InstanceSettings().Properties(),
         winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::CreateContext(g_compositor));
@@ -283,6 +288,7 @@ struct WindowData {
   winrt::Microsoft::ReactNative::ReactInstanceSettings InstanceSettings() noexcept {
     if (!m_instanceSettings) {
       m_instanceSettings = winrt::Microsoft::ReactNative::ReactInstanceSettings();
+      m_instanceSettings.UseFastRefresh(true);
     }
 
     return m_instanceSettings;
@@ -305,13 +311,8 @@ struct WindowData {
 
           host.InstanceSettings().JavaScriptBundleFile(m_bundleFile);
 
-          host.InstanceSettings().UseWebDebugger(m_useWebDebugger);
-          host.InstanceSettings().UseDirectDebugger(m_useDirectDebugger);
           host.InstanceSettings().BundleRootPath(
               std::wstring(L"file:").append(workingDir).append(L"\\Bundle\\").c_str());
-          host.InstanceSettings().DebuggerBreakOnNextLine(m_breakOnNextLine);
-          host.InstanceSettings().UseFastRefresh(m_fastRefreshEnabled);
-          host.InstanceSettings().DebuggerPort(m_debuggerPort);
           host.InstanceSettings().UseDeveloperSupport(true);
 
           host.PackageProviders().Append(CreateStubDeviceInfoPackageProvider());
@@ -444,26 +445,20 @@ struct WindowData {
       case WM_INITDIALOG: {
         auto boolToCheck = [](bool b) { return b ? BST_CHECKED : BST_UNCHECKED; };
         auto self = reinterpret_cast<WindowData *>(lparam);
-        CheckDlgButton(hwnd, IDC_WEBDEBUGGER, boolToCheck(self->m_useWebDebugger));
-        CheckDlgButton(hwnd, IDC_FASTREFRESH, boolToCheck(self->m_fastRefreshEnabled));
-        CheckDlgButton(hwnd, IDC_DIRECTDEBUGGER, boolToCheck(self->m_useDirectDebugger));
-        CheckDlgButton(hwnd, IDC_BREAKONNEXTLINE, boolToCheck(self->m_breakOnNextLine));
+        CheckDlgButton(hwnd, IDC_FASTREFRESH, boolToCheck(self->m_instanceSettings.UseFastRefresh()));
+        CheckDlgButton(hwnd, IDC_DIRECTDEBUGGER, boolToCheck(self->m_instanceSettings.UseDirectDebugger()));
+        CheckDlgButton(hwnd, IDC_BREAKONNEXTLINE, boolToCheck(self->m_instanceSettings.DebuggerBreakOnNextLine()));
 
         auto portEditControl = GetDlgItem(hwnd, IDC_DEBUGGERPORT);
-        SetWindowTextW(portEditControl, std::to_wstring(self->m_debuggerPort).c_str());
+        SetWindowTextW(portEditControl, std::to_wstring(self->m_instanceSettings.DebuggerPort()).c_str());
         SendMessageW(portEditControl, (UINT)EM_SETLIMITTEXT, (WPARAM)5, (LPARAM)0);
 
         auto cmbEngines = GetDlgItem(hwnd, IDC_JSENGINE);
         SendMessageW(cmbEngines, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)TEXT("Chakra"));
         SendMessageW(cmbEngines, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)TEXT("Hermes"));
         SendMessageW(cmbEngines, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)TEXT("V8"));
+        // Fabric only supports Hermes right now - So dont actually set JS engine override
         // SendMessageW(cmbEngines, CB_SETCURSEL, (WPARAM) static_cast<int32_t>(self->m_jsEngine), (LPARAM)0);
-
-        auto cmbTheme = GetDlgItem(hwnd, IDC_THEME);
-        SendMessageW(cmbTheme, CB_ADDSTRING, 0, (LPARAM)L"Default");
-        SendMessageW(cmbTheme, CB_ADDSTRING, 0, (LPARAM)L"Light");
-        SendMessageW(cmbTheme, CB_ADDSTRING, 0, (LPARAM)L"Dark");
-        ComboBox_SetCurSel(cmbTheme, static_cast<int>(self->m_theme));
 
         return TRUE;
       }
@@ -471,12 +466,10 @@ struct WindowData {
         switch (LOWORD(wparam)) {
           case IDOK: {
             auto self = GetFromWindow(GetParent(hwnd));
-            self->m_useWebDebugger = IsDlgButtonChecked(hwnd, IDC_WEBDEBUGGER) == BST_CHECKED;
-            self->m_fastRefreshEnabled = IsDlgButtonChecked(hwnd, IDC_FASTREFRESH) == BST_CHECKED;
-            self->m_useDirectDebugger = IsDlgButtonChecked(hwnd, IDC_DIRECTDEBUGGER) == BST_CHECKED;
-            self->m_breakOnNextLine = IsDlgButtonChecked(hwnd, IDC_BREAKONNEXTLINE) == BST_CHECKED;
-
-            auto themeComboBox = GetDlgItem(hwnd, IDC_THEME);
+            self->m_instanceSettings.UseFastRefresh(IsDlgButtonChecked(hwnd, IDC_FASTREFRESH) == BST_CHECKED);
+            self->m_instanceSettings.UseDirectDebugger(IsDlgButtonChecked(hwnd, IDC_DIRECTDEBUGGER) == BST_CHECKED);
+            self->m_instanceSettings.DebuggerBreakOnNextLine(
+                IsDlgButtonChecked(hwnd, IDC_BREAKONNEXTLINE) == BST_CHECKED);
 
             WCHAR buffer[6] = {};
             auto portEditControl = GetDlgItem(hwnd, IDC_DEBUGGERPORT);
@@ -486,14 +479,15 @@ struct WindowData {
               auto port = std::stoi(buffer);
               if (port > UINT16_MAX)
                 port = defaultDebuggerPort;
-              self->m_debuggerPort = static_cast<uint16_t>(port);
+              self->m_instanceSettings.DebuggerPort(static_cast<uint16_t>(port));
             } catch (const std::out_of_range &) {
-              self->m_debuggerPort = defaultDebuggerPort;
+              self->m_instanceSettings.DebuggerPort(defaultDebuggerPort);
             } catch (const std::invalid_argument &) {
               // Don't update the debugger port if the new value can't be parsed
               // (E.g. includes letters or symbols).
             }
 
+            // Fabric only supports Hermes right now - So dont actually set JS engine override
             // auto cmbEngines = GetDlgItem(hwnd, IDC_JSENGINE);
             // int itemIndex = (int)SendMessageW(cmbEngines, (UINT)CB_GETCURSEL, (WPARAM)0, (LPARAM)0);
             // self->m_jsEngine = static_cast<Microsoft::ReactNative::JSIEngine>(itemIndex);
@@ -581,7 +575,7 @@ int RunPlayground(int showCmd, bool useWebDebugger) {
 
   WINRT_VERIFY(hwnd);
 
-  g_hwnd = hwnd; // Temporary for prototyping
+  g_hwndTopLevel = hwnd; // Temporary for prototyping
 
   windowData.release();
 
@@ -593,7 +587,7 @@ int RunPlayground(int showCmd, bool useWebDebugger) {
 
   MSG msg = {};
 
-  // This would be the same as the loop below.
+  // This would be the same as the loop below. - Using the lower loop right now for easier debugging.
   // g_liftedDispatcherQueueController.DispatcherQueue().RunEventLoop();
 
   while (GetMessage(&msg, nullptr, 0, 0)) {
@@ -631,11 +625,11 @@ _Use_decl_annotations_ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, PSTR 
       DQTAT_COM_ASTA /* apartmentType */
   };
 
-  // Need to have a Dispatcher on the current thread to be able to create a Compositor
   winrt::check_hresult(CreateDispatcherQueueController(
       options,
       reinterpret_cast<ABI::Windows::System::IDispatcherQueueController **>(
           winrt::put_abi(g_dispatcherQueueController))));
+  g_compositor = winrt::Windows::UI::Composition::Compositor();
 
   // Create a Lifted (WinAppSDK) DispatcherQueue for this thread.  This is needed for
   // Microsoft.UI.Composition, Content, and Input APIs.
@@ -643,6 +637,5 @@ _Use_decl_annotations_ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, PSTR 
       winrt::Microsoft::UI::Dispatching::DispatcherQueueController::CreateOnCurrentThread();
   g_liftedCompositor = winrt::Microsoft::UI::Composition::Compositor();
 
-  g_compositor = winrt::Windows::UI::Composition::Compositor();
   return RunPlayground(showCmd, false);
 }

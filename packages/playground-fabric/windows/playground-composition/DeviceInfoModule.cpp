@@ -41,7 +41,6 @@ struct StubDeviceInfoReactPackageProvider
   }
 };
 
-winrt::Microsoft::ReactNative::IReactPackageProvider CreateStubDeviceInfoPackageProvider() noexcept
-{
+winrt::Microsoft::ReactNative::IReactPackageProvider CreateStubDeviceInfoPackageProvider() noexcept {
   return winrt::make<StubDeviceInfoReactPackageProvider>();
 }
