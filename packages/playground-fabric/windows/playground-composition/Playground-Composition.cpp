@@ -4,14 +4,8 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include <memory>
-
 // Disabled until we have a 3rd party story for custom components
 // #include "AutolinkedNativeModules.g.h"
-
-#include <winrt/Windows.Foundation.Collections.h>
-
-#include "../../../../vnext/codegen/NativeDeviceInfoSpec.g.h"
 
 #include <DispatcherQueue.h>
 #include <UIAutomation.h>
@@ -24,22 +18,20 @@
 #include "NativeModules.h"
 #include "ReactPropertyBag.h"
 
-#include <mddbootstrap.h>
-#include <WindowsAppSDK-VersionInfo.h>
-#include <winrt/Microsoft.UI.h>
-#include <winrt/Microsoft.UI.Content.h>
 #include <winrt/Microsoft.UI.Composition.h>
+#include <winrt/Microsoft.UI.Content.h>
 #include <winrt/Microsoft.UI.Dispatching.h>
+#include <winrt/Microsoft.UI.Input.h>
+#include <winrt/Microsoft.UI.h>
 
 // TODO - Should this header be copied automatically?
 #include <E:\repos\react-native-windows\packages\playground-fabric\windows\packages\Microsoft.WindowsAppSDK.1.5.230906000-experimental\include\Microsoft.UI.Dispatching.Interop.h>
 #include <winrt/Microsoft.UI.Windowing.h>
 #include <winrt/microsoft.ui.interop.h>
 
-winrt::Microsoft::UI::Dispatching::DispatcherQueueController g_liftedDispatcherQueueController { nullptr };
-winrt::Microsoft::UI::Composition::Compositor g_liftedCompositor { nullptr };
+winrt::Microsoft::UI::Dispatching::DispatcherQueueController g_liftedDispatcherQueueController{nullptr};
+winrt::Microsoft::UI::Composition::Compositor g_liftedCompositor{nullptr};
 HWND g_hwnd;
-
 
 struct CustomProps : winrt::implements<CustomProps, winrt::Microsoft::ReactNative::IComponentProps> {
   CustomProps(winrt::Microsoft::ReactNative::ViewProps props) : m_props(props) {}
@@ -67,17 +59,20 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
   }
 
   void UpdateLayoutMetrics(winrt::Microsoft::ReactNative::Composition::LayoutMetrics metrics) noexcept {
-    m_visual.Size({metrics.Frame.Width * metrics.PointScaleFactor, metrics.Frame.Height * metrics.PointScaleFactor });
+    m_visual.Size({metrics.Frame.Width * metrics.PointScaleFactor, metrics.Frame.Height * metrics.PointScaleFactor});
 
-    m_systemBridgeRootVisual.Size({ metrics.Frame.Width * metrics.PointScaleFactor, metrics.Frame.Height * metrics.PointScaleFactor });
+    m_systemBridgeRootVisual.Size(
+        {metrics.Frame.Width * metrics.PointScaleFactor, metrics.Frame.Height * metrics.PointScaleFactor});
 
     auto site = m_systemVisualSiteBridge.Site();
     auto siteWindow = site.Environment();
     auto displayScale = siteWindow.DisplayScale();
 
     site.ParentScale(displayScale);
-    site.ActualSize({ metrics.Frame.Width, metrics.Frame.Height });
-    site.ClientSize({ static_cast<int32_t>(metrics.Frame.Width * metrics.PointScaleFactor), static_cast<int32_t>(metrics.Frame.Height * metrics.PointScaleFactor) });
+    site.ActualSize({metrics.Frame.Width / 2, metrics.Frame.Height / 2});
+    site.ClientSize(
+        {static_cast<int32_t>(metrics.Frame.Width / 2 * metrics.PointScaleFactor),
+         static_cast<int32_t>(metrics.Frame.Height / 2 * metrics.PointScaleFactor)});
   }
 
   winrt::Microsoft::ReactNative::Composition::IVisual CreateVisual() noexcept {
@@ -85,75 +80,84 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
 
     m_lightVisual = m_compContext.CreateSpriteVisual();
     m_lightVisual.Brush(m_compContext.CreateColorBrush(winrt::Windows::UI::Colors::Green()));
-    m_lightVisual.RelativeSizeWithOffset({ 0,0 }, { 1, 1 });
+    m_lightVisual.RelativeSizeWithOffset({0, 0}, {1, 1});
     m_lightVisual.Opacity(0.3f);
     m_visual.InsertAt(m_lightVisual, 0);
 
     auto compositor =
         winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::InnerCompositor(m_compContext);
 
-    m_spotlight = compositor.CreateSpotLight();
-    /*
-    m_spotlight.InnerConeAngleInDegrees(50.0f);
-    m_spotlight.InnerConeColor(winrt::Windows::UI::Colors::FloralWhite());
-    m_spotlight.InnerConeIntensity(5.0f);
-    m_spotlight.OuterConeAngleInDegrees(0.0f);
-    m_spotlight.ConstantAttenuation(1.0f);
-    m_spotlight.LinearAttenuation(0.253f);
-    m_spotlight.QuadraticAttenuation(0.58f);
-    m_spotlight.CoordinateSpace(
-        winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::InnerVisual(m_lightVisual));
-    m_spotlight.Targets().Add(
-        winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::InnerVisual(m_lightVisual));
-
-    auto animation = compositor.CreateVector3KeyFrameAnimation();
-    auto easeIn = compositor.CreateCubicBezierEasingFunction({0.5f, 0.0f}, {1.0f, 1.0f});
-    animation.InsertKeyFrame(0.00f, {100.0f, 100.0f, 35.0f});
-    animation.InsertKeyFrame(0.25f, {300.0f, 200.0f, 75.0f}, easeIn);
-    animation.InsertKeyFrame(0.50f, {050.0f, 300.0f, 15.0f}, easeIn);
-    animation.InsertKeyFrame(0.75f, {300.0f, 050.0f, 75.0f}, easeIn);
-    animation.InsertKeyFrame(1.00f, {100.0f, 100.0f, 35.0f}, easeIn);
-    animation.Duration(std::chrono::milliseconds(4000));
-    animation.IterationBehavior(winrt::Windows::UI::Composition::AnimationIterationBehavior::Forever);
-
-    m_spotlight.StartAnimation(L"Offset", animation);
-        */
-
     auto sbrv = compositor.CreateSpriteVisual();
-    //m_systemBridgeRootVisual = compositor.CreateContainerVisual();
     sbrv.Brush(compositor.CreateColorBrush(winrt::Windows::UI::Colors::Blue()));
 
     m_systemBridgeRootVisual = sbrv;
 
-    winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::InnerVisual(m_visual).as<winrt::Windows::UI::Composition::ContainerVisual>().Children().InsertAtTop(m_systemBridgeRootVisual);
+    winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::InnerVisual(m_visual)
+        .as<winrt::Windows::UI::Composition::ContainerVisual>()
+        .Children()
+        .InsertAtTop(m_systemBridgeRootVisual);
 
     // SystemVisual Bridge
     m_systemVisualSiteBridge = winrt::Microsoft::UI::Content::SystemVisualSiteBridge::Create(
-        g_liftedCompositor,
-        m_systemBridgeRootVisual,
-        winrt::Microsoft::UI::GetWindowIdFromWindow(g_hwnd));
+        g_liftedCompositor, m_systemBridgeRootVisual, winrt::Microsoft::UI::GetWindowIdFromWindow(g_hwnd));
     m_systemVisualSiteBridge.Site().ShouldApplyRasterizationScale(false);
 
-    //auto window = winrt::Microsoft::UI::Windowing::AppWindow::GetFromWindowId(winrt::Microsoft::UI::GetWindowIdFromWindow(g_hwnd))
+    // auto window =
+    // winrt::Microsoft::UI::Windowing::AppWindow::GetFromWindowId(winrt::Microsoft::UI::GetWindowIdFromWindow(g_hwnd))
 
     return m_visual;
   }
 
-  void FinalizeUpdates()
-  {
-      if (!m_connected)
-      {
-          auto liftedBrush = g_liftedCompositor.CreateColorBrush(winrt::Windows::UI::Colors::Red());
-          auto liftedVisual = g_liftedCompositor.CreateSpriteVisual();
-          liftedVisual.RelativeSizeAdjustment({ 1,1 });
-          liftedVisual.Brush(liftedBrush);
+  void FinalizeUpdates() {
+    if (!m_connected) {
+      auto liftedBrush = g_liftedCompositor.CreateColorBrush(winrt::Windows::UI::Colors::Red());
+      auto liftedVisual = g_liftedCompositor.CreateSpriteVisual();
+      liftedVisual.RelativeSizeAdjustment({1, 1});
+      liftedVisual.Brush(liftedBrush);
 
-          // Create the App's content and connect to the DesktopChildSiteBridge.
-          auto appContent { winrt::Microsoft::UI::Content::ContentIsland::Create(liftedVisual)};
-          m_systemVisualSiteBridge.Connect(appContent);
+      // Create the App's content and connect to the DesktopChildSiteBridge.
+      auto appContent{winrt::Microsoft::UI::Content::ContentIsland::Create(liftedVisual)};
+      m_systemVisualSiteBridge.Connect(appContent);
 
-          m_connected = true;
-      }
+      m_pointerSource = winrt::Microsoft::UI::Input::InputPointerSource::GetForIsland(appContent);
+
+      m_pointerSource.PointerPressed([this](
+                                         winrt::Microsoft::UI::Input::InputPointerSource const &,
+                                         winrt::Microsoft::UI::Input::PointerEventArgs const &args) {
+        auto currentPoint = args.CurrentPoint();
+        auto properties = currentPoint.Properties();
+
+        if (properties.IsLeftButtonPressed()) {
+          Island_OnLeftButtonPressed(args);
+        } else if (properties.IsRightButtonPressed()) {
+          // Input_OnRightButtonPressed(args);
+        }
+      });
+
+      m_inputFocusController = winrt::Microsoft::UI::Input::InputFocusController::GetForIsland(appContent);
+
+      m_inputFocusController.GotFocus(
+          [this](
+              winrt::Microsoft::UI::Input::InputFocusController const &,
+              winrt::Microsoft::UI::Input::FocusChangedEventArgs const &args) { Island_FocusChanged(true); });
+      m_inputFocusController.LostFocus(
+          [this](
+              winrt::Microsoft::UI::Input::InputFocusController const &,
+              winrt::Microsoft::UI::Input::FocusChangedEventArgs const &args) { Island_FocusChanged(false); });
+
+      m_connected = true;
+    }
+  }
+
+  void Island_OnLeftButtonPressed(const winrt::Microsoft::UI::Input::PointerEventArgs &args) {
+    // Since this is marked as not being handled, I'd expect
+    args.Handled(false);
+
+    m_inputFocusController.TrySetFocus();
+  }
+
+  void Island_FocusChanged(bool focus) {
+    ;
   }
 
   // TODO - Once we get more complete native eventing we can move spotlight based on pointer position
@@ -161,12 +165,15 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
     if (msg == WM_MOUSEMOVE) {
       auto x = GET_X_LPARAM(lParam);
       auto y = GET_Y_LPARAM(lParam);
+    }
 
-      m_spotlight.Offset({(float)x, (float)y, 15.0f});
+    if (msg == WM_LBUTTONDOWN) {
+      m_systemToggle = !m_systemToggle;
+      auto compositor =
+          winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::InnerCompositor(m_compContext);
 
-      // m_propSet.InsertVector2(L"Position", {x, y});
-      //  TODO expose coordinate translation methods
-      //  TODO convert x/y into local coordinates
+      m_systemBridgeRootVisual.as<winrt::Windows::UI::Composition::SpriteVisual>().Brush(compositor.CreateColorBrush(
+          m_systemToggle ? winrt::Windows::UI::Colors::LightBlue() : winrt::Windows::UI::Colors::Blue()));
     }
 
     return 0;
@@ -196,7 +203,7 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
             return handle.as<CustomComponent>()->CreateVisual();
           });
           compBuilder.SetUpdateFinalizer([](winrt::Windows::Foundation::IInspectable handle) noexcept {
-              return handle.as<CustomComponent>()->FinalizeUpdates();
+            return handle.as<CustomComponent>()->FinalizeUpdates();
           });
           compBuilder.SetMessageHandler(
               [](winrt::Windows::Foundation::IInspectable handle,
@@ -207,51 +214,23 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
   }
 
  private:
-     bool m_connected { false };
-  winrt::Windows::UI::Composition::ContainerVisual m_systemBridgeRootVisual { nullptr };
-  winrt::Windows::UI::Composition::SpotLight m_spotlight{nullptr};
-  winrt::Microsoft::UI::Content::SystemVisualSiteBridge m_systemVisualSiteBridge { nullptr };
+  bool m_connected{false};
+  winrt::Windows::UI::Composition::ContainerVisual m_systemBridgeRootVisual{nullptr};
+  bool m_systemToggle{false};
+  winrt::Microsoft::UI::Content::SystemVisualSiteBridge m_systemVisualSiteBridge{nullptr};
+  winrt::Microsoft::UI::Input::InputPointerSource m_pointerSource{nullptr};
+  winrt::Microsoft::UI::Input::InputFocusController m_inputFocusController{nullptr};
 
-  winrt::Microsoft::ReactNative::Composition::ISpriteVisual m_visual { nullptr };
+  bool m_islandToggle{false};
+  winrt::Microsoft::ReactNative::Composition::ISpriteVisual m_visual{nullptr};
   winrt::Microsoft::ReactNative::Composition::ISpriteVisual m_lightVisual{nullptr};
   winrt::Microsoft::ReactNative::Composition::ICompositionContext m_compContext;
 };
 
-// Work around crash in DeviceInfo when running outside of XAML environment
-// TODO rework built-in DeviceInfo to allow it to be driven without use of HWNDs or XamlApps
-REACT_MODULE(DeviceInfo)
-struct DeviceInfo {
-  using ModuleSpec = Microsoft::ReactNativeSpecs::DeviceInfoSpec;
-
-  REACT_INIT(Initialize)
-  void Initialize(React::ReactContext const &reactContext) noexcept {
-    m_context = reactContext;
-  }
-
-  REACT_GET_CONSTANTS(GetConstants)
-  Microsoft::ReactNativeSpecs::DeviceInfoSpec_Constants GetConstants() noexcept {
-    Microsoft::ReactNativeSpecs::DeviceInfoSpec_Constants constants;
-    Microsoft::ReactNativeSpecs::DeviceInfoSpec_DisplayMetrics screenDisplayMetrics;
-    screenDisplayMetrics.fontScale = 1;
-    screenDisplayMetrics.height = 1024;
-    screenDisplayMetrics.width = 1024;
-    screenDisplayMetrics.scale = 1;
-    constants.Dimensions.screen = screenDisplayMetrics;
-    constants.Dimensions.window = screenDisplayMetrics;
-    return constants;
-  }
-
- private:
-  winrt::Microsoft::ReactNative::ReactContext m_context;
-};
-
-// Have to use TurboModules to override built in modules.. so the standard attributed package provider doesn't work.
 struct CompReactPackageProvider
     : winrt::implements<CompReactPackageProvider, winrt::Microsoft::ReactNative::IReactPackageProvider> {
  public: // IReactPackageProvider
   void CreatePackage(winrt::Microsoft::ReactNative::IReactPackageBuilder const &packageBuilder) noexcept {
-    AddAttributedModules(packageBuilder, true);
-
     CustomComponent::RegisterViewComponent(packageBuilder);
   }
 };
@@ -262,6 +241,8 @@ winrt::Windows::UI::Composition::Compositor g_compositor{nullptr};
 constexpr auto WindowDataProperty = L"WindowData";
 
 int RunPlayground(int showCmd, bool useWebDebugger);
+winrt::Microsoft::ReactNative::IReactPackageProvider CreateStubDeviceInfoPackageProvider() noexcept;
+
 
 struct WindowData {
   static HINSTANCE s_instance;
@@ -333,6 +314,7 @@ struct WindowData {
           host.InstanceSettings().DebuggerPort(m_debuggerPort);
           host.InstanceSettings().UseDeveloperSupport(true);
 
+          host.PackageProviders().Append(CreateStubDeviceInfoPackageProvider());
           host.PackageProviders().Append(winrt::make<CompReactPackageProvider>());
           winrt::Microsoft::ReactNative::ReactCoreInjection::SetTopLevelWindowId(
               host.InstanceSettings().Properties(), reinterpret_cast<uint64_t>(hwnd));
@@ -611,20 +593,19 @@ int RunPlayground(int showCmd, bool useWebDebugger) {
 
   MSG msg = {};
 
-  g_liftedDispatcherQueueController.DispatcherQueue().RunEventLoop();
+  // This would be the same as the loop below.
+  // g_liftedDispatcherQueueController.DispatcherQueue().RunEventLoop();
 
   while (GetMessage(&msg, nullptr, 0, 0)) {
-      if (!ContentPreTranslateMessage(&msg))
-      {
-          if (!TranslateAccelerator(hwnd, hAccelTable, &msg))
-          {
-              TranslateMessage(&msg);
-              DispatchMessage(&msg);
-          }
+    if (!ContentPreTranslateMessage(&msg)) {
+      if (!TranslateAccelerator(hwnd, hAccelTable, &msg)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
       }
+    }
   }
 
-    return static_cast<int>(msg.wParam);
+  return static_cast<int>(msg.wParam);
 }
 
 _Use_decl_annotations_ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, PSTR /* commandLine */, int showCmd) {
@@ -658,7 +639,8 @@ _Use_decl_annotations_ int CALLBACK WinMain(HINSTANCE instance, HINSTANCE, PSTR 
 
   // Create a Lifted (WinAppSDK) DispatcherQueue for this thread.  This is needed for
   // Microsoft.UI.Composition, Content, and Input APIs.
-  g_liftedDispatcherQueueController = winrt::Microsoft::UI::Dispatching::DispatcherQueueController::CreateOnCurrentThread();
+  g_liftedDispatcherQueueController =
+      winrt::Microsoft::UI::Dispatching::DispatcherQueueController::CreateOnCurrentThread();
   g_liftedCompositor = winrt::Microsoft::UI::Composition::Compositor();
 
   g_compositor = winrt::Windows::UI::Composition::Compositor();

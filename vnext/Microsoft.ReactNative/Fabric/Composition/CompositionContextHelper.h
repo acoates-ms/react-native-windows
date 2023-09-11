@@ -16,7 +16,7 @@ using CompositionContextHelper = MicrosoftCompositionContextHelper;
 #else
 using CompositionContextHelper = WindowsCompositionContextHelper;
 #endif
-}
+} // namespace winrt::Microsoft::ReactNative::Composition
 
 namespace winrt::Microsoft::ReactNative::Composition::implementation {
 

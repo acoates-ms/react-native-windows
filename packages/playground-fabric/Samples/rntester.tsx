@@ -18,10 +18,12 @@ require('react-native');
 
 const nativeComponentRegistry = require('react-native/Libraries/NativeComponent/NativeComponentRegistry');
 nativeComponentRegistry.setRuntimeConfigProvider((name: string) => {
+  // Since MyCustomComponent does not have a ViewManager, we need to override the config provider
+// to say that MyCustomComponent should get its config from JS, not native
   return {
-    native: true,
+    native: name !== 'MyCustomComponent', // To enable the Fabric Native Component test page
     strict: false,
-    verify: true,
+    verify: false,
   };
 });
 

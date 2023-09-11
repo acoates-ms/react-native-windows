@@ -17,10 +17,6 @@
 #include "CompositionRootAutomationProvider.h"
 #include "CompositionRootView.h"
 
-#include <winrt/Microsoft.UI.Dispatching.h>
-#include <winrt/Microsoft.UI.Windowing.h>
-
-
 WINUSERAPI UINT WINAPI GetDpiForWindow(_In_ HWND hwnd);
 
 namespace winrt::Microsoft::ReactNative::implementation {
@@ -96,12 +92,6 @@ LRESULT CompositionHwndHost::TranslateMessage(int msg, uint64_t wParam, int64_t 
 
   switch (msg) {
     case WM_MOUSEWHEEL: {
-
-  auto aqua = winrt::Microsoft::UI::Colors::Aqua();
-  auto window = winrt::Microsoft::UI::Windowing::AppWindow::Create();
-  auto dispatcherQueueController { winrt::Microsoft::UI::Dispatching::DispatcherQueueController::CreateOnCurrentThread() };
-
-
       POINT pt = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
       ::ScreenToClient(m_hwnd, &pt);
       int32_t delta = GET_WHEEL_DELTA_WPARAM(wParam);

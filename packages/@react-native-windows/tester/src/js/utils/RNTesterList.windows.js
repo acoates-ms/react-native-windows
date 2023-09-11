@@ -49,6 +49,11 @@ const Components: Array<RNTesterModuleInfo> = [
     module: require('../examples-win/DisplayNone/DisplayNoneExample'),
   },
   {
+    key: 'FabricNativeComponentExample',
+    category: 'Basic',
+    module: require('../examples-win/Fabric/CustomNativeComponent'),
+  },
+  {
     key: 'FastTextExample',
     category: 'Basic',
     module: require('../examples-win/FastText/FastTextExample'),
