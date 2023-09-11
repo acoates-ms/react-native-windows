@@ -58,6 +58,15 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
   CustomComponent(winrt::Microsoft::ReactNative::Composition::ICompositionContext compContext)
       : m_compContext(compContext) {}
 
+  ~CustomComponent()
+  {
+      if (m_systemVisualSiteBridge)
+      {
+          m_systemVisualSiteBridge.Close();
+      }
+  }
+
+
   void UpdateProps(winrt::Microsoft::ReactNative::IComponentProps props) noexcept {
     auto customProps = props.as<CustomProps>();
   }
