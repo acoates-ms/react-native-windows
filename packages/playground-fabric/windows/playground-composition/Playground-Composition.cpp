@@ -154,6 +154,7 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
     m_appContent.Root().as<winrt::Microsoft::UI::Composition::SpriteVisual>().Brush(g_liftedCompositor.CreateColorBrush(
         m_islandToggle ? winrt::Windows::UI::Colors::Pink() : winrt::Windows::UI::Colors::Red()));
 
+    // If this was not marked as handled - Should the host of the island get WM_LBUTTONDOWN? - Or is all pointer input essentially captured by the island?
     args.Handled(true);
   }
 
@@ -168,8 +169,8 @@ struct CustomComponent : winrt::implements<CustomComponent, winrt::IInspectable>
    * them from the UI hosting React Native.
    */
   int64_t SendMessage(uint32_t msg, uint64_t wParam, int64_t lParam) noexcept {
-    if (msg == WM_LBUTTONDOWN || msg == WM_RBUTTONDOWN) {
-      // Toggle the color of the Outer System Visual on mouse down (either right or left)
+    if (msg == WM_LBUTTONDOWN) {
+      // Toggle the color of the Outer System Visual on mouse down
       m_systemToggle = !m_systemToggle;
       auto compositor =
           winrt::Microsoft::ReactNative::Composition::WindowsCompositionContextHelper::InnerCompositor(m_compContext);
