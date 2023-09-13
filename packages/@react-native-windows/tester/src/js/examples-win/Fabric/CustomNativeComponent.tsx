@@ -8,6 +8,11 @@ import {View} from 'react-native';
 
 import React from 'react';
 
+import {
+  get,
+  // @ts-ignore - NativeComponentRegistry is internal and has no types.  Need it for now since we have no viewmanager for this component
+} from 'react-native/Libraries/NativeComponent/NativeComponentRegistry';
+
 interface NativeProps {
   label: string;
 }
