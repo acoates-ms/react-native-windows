@@ -47,7 +47,7 @@ void* __stdcall winrt_get_activation_factory([[maybe_unused]] std::wstring_view 
     if (requal(name, L"Microsoft.ReactNative.CompositionRootView")) {
       return winrt_make_Microsoft_ReactNative_CompositionRootView();
     }
-#ifdef USE_WINUI3    
+#ifdef USE_WINUI3
     if (requal(name, L"Microsoft.ReactNative.Composition.MicrosoftCompositionContextHelper")) {
       return winrt_make_Microsoft_ReactNative_Composition_MicrosoftCompositionContextHelper();
     }

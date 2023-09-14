@@ -73,7 +73,7 @@
   </ImportGroup>
   <ImportGroup Label="ReactNativeWindowsPropertySheets">
     <Import Project="$(ReactNativeWindowsDir)\PropertySheets\External\Microsoft.ReactNative.Uwp.CppApp.props" />
-    <Import Project="$(MSBuildThisFileDirectory)\..\packages\Microsoft.WindowsAppSDK.$(WinUIPackageVersion)\build\native\Microsoft.WindowsAppSDK.props" />
+    <Import Project="$(MSBuildThisFileDirectory)\..\packages\Microsoft.WindowsAppSDK.$(WinUIPackageVersion)\build\native\Microsoft.WindowsAppSDK.props"  Condition="Exists('$(MSBuildThisFileDirectory)\..\packages\Microsoft.WindowsAppSDK.$(WinUIPackageVersion)\build\native\Microsoft.WindowsAppSDK.props')"  />
   </ImportGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -181,7 +181,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ReactNativeWindowsTargets">
     <Import Project="$(ReactNativeWindowsDir)\PropertySheets\External\Microsoft.ReactNative.Uwp.CppApp.targets" Condition="Exists('$(ReactNativeWindowsDir)\PropertySheets\External\Microsoft.ReactNative.Uwp.CppApp.targets')" />
-    <Import Project="$(MSBuildThisFileDirectory)\..\packages\Microsoft.WindowsAppSDK.$(WinUIPackageVersion)\build\native\Microsoft.WindowsAppSDK.targets" />
+    <Import Project="$(MSBuildThisFileDirectory)\..\packages\Microsoft.WindowsAppSDK.$(WinUIPackageVersion)\build\native\Microsoft.WindowsAppSDK.targets" Condition="Exists('$(MSBuildThisFileDirectory)\..\packages\Microsoft.WindowsAppSDK.$(WinUIPackageVersion)\build\native\Microsoft.WindowsAppSDK.targets')" />
   </ImportGroup>
   <ItemGroup>
     <PackageReference Include="boost" Version="1.76.0.0" />

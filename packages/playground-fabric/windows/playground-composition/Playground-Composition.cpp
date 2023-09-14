@@ -25,7 +25,7 @@
 #include <winrt/Microsoft.UI.h>
 
 // TODO - Should this header be copied automatically?
-#include <E:\repos\react-native-windows\packages\playground-fabric\windows\packages\Microsoft.WindowsAppSDK.1.5.230906000-experimental\include\Microsoft.UI.Dispatching.Interop.h>
+#include <..\packages\Microsoft.WindowsAppSDK.1.5.230906000-experimental\include\Microsoft.UI.Dispatching.Interop.h>
 #include <winrt/Microsoft.UI.Windowing.h>
 #include <winrt/microsoft.ui.interop.h>
 
