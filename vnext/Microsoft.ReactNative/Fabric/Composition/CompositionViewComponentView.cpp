@@ -166,6 +166,7 @@ int64_t CompositionBaseComponentView::sendMessage(uint32_t msg, uint64_t wParam,
     }
   }
 
+  // Should return 0/1 based on KeyEvents props for now -- until we can get sync events to JS
   return 0;
 }
 
