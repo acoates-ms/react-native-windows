@@ -1,6 +1,6 @@
 {
   "type": "prerelease",
-  "comment": "Be more explicit when using winrt::Windows types, to avoid conflicts with WinAppSDK",
+  "comment": "[Fabric] Custom native components should have access to the ReactContext",
   "packageName": "react-native-windows",
   "email": "30809111+acoates-ms@users.noreply.github.com",
   "dependentChangeType": "patch"

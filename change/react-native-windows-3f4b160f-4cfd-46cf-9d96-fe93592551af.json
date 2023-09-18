@@ -1,6 +1,6 @@
 {
   "type": "prerelease",
-  "comment": "extract shadow properties to baseComponentView",
+  "comment": "add Fabric ActivityIndicator animating property",
   "packageName": "react-native-windows",
   "email": "tatianakapos@microsoft.com",
   "dependentChangeType": "patch"
