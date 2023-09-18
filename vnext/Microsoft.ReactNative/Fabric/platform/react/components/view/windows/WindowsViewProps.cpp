@@ -7,7 +7,7 @@
 
 #include "WindowsViewProps.h"
 
-#include <react/renderer/core/propsConversions.h>
+#include "propsConversions.h"
 #include <react/utils/CoreFeatures.h>
 
 namespace facebook::react {
@@ -45,6 +45,8 @@ void WindowsViewProps::setProp(
     WINDOWS_VIEW_EVENT_CASE(Blur);
     WINDOWS_VIEW_EVENT_CASE(KeyUp);
     WINDOWS_VIEW_EVENT_CASE(KeyDown);
+    RAW_SET_PROP_SWITCH_CASE_BASIC(keyDownEvents);
+    RAW_SET_PROP_SWITCH_CASE_BASIC(keyUpEvents);
     RAW_SET_PROP_SWITCH_CASE_BASIC(focusable);
     RAW_SET_PROP_SWITCH_CASE_BASIC(enableFocusRing);
   }
