@@ -39,10 +39,7 @@ inline static bool operator!=(WindowsViewEvents const &lhs, WindowsViewEvents co
 }
 
 struct HandledKeyEvent {
-  enum class EventPhase {
-    Capturing = 1,
-    Bubbling = 3
-  };
+  enum class EventPhase { Capturing = 1, Bubbling = 3 };
 
   EventPhase eventPhase{EventPhase::Bubbling};
   bool altKey{false};
