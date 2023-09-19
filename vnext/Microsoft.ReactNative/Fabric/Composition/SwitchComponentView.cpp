@@ -241,7 +241,7 @@ int64_t SwitchComponentView::sendMessage(uint32_t msg, uint64_t wParam, int64_t 
 
       if (!switchProps->disabled) {
         if (auto root = rootComponentView()) {
-            root->TrySetFocusedComponent(*this);
+          root->TrySetFocusedComponent(*this);
         }
         toggle();
       }

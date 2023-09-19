@@ -326,8 +326,7 @@
       "type": "derived",
       "file": "src/Libraries/Components/Switch/Switch.windows.js",
       "baseFile": "packages/react-native/Libraries/Components/Switch/Switch.js",
-      "baseHash": "31b8cd62b5acb1a237f5373d1618869f5afebdd3",
-      "issue": 123
+      "baseHash": "31b8cd62b5acb1a237f5373d1618869f5afebdd3"
     },
     {
       "type": "patch",

@@ -69,13 +69,13 @@ struct IComponentView {
   virtual bool runOnChildren(bool forward, Mso::Functor<bool(IComponentView &)> &fn) noexcept = 0;
   virtual RECT getClientRect() const noexcept = 0;
   virtual void onFocusLost() noexcept = 0;
+  virtual void onFocusGained() noexcept = 0;
   virtual void onKeyDown(
       const winrt::Microsoft::ReactNative::Composition::Input::KeyboardSource &source,
       const winrt::Microsoft::ReactNative::Composition::Input::KeyRoutedEventArgs &args) noexcept = 0;
   virtual void onKeyUp(
       const winrt::Microsoft::ReactNative::Composition::Input::KeyboardSource &source,
       const winrt::Microsoft::ReactNative::Composition::Input::KeyRoutedEventArgs &args) noexcept = 0;
-  virtual void onFocusGained() noexcept = 0;
   virtual bool focusable() const noexcept = 0;
   virtual facebook::react::SharedTouchEventEmitter touchEventEmitterAtPoint(facebook::react::Point pt) noexcept = 0;
   virtual facebook::react::SharedTouchEventEmitter touchEventEmitter() noexcept = 0;

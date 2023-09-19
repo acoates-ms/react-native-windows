@@ -33,14 +33,14 @@ struct CompositionBaseComponentView : public IComponentView,
   void parent(IComponentView *parent) noexcept override;
   IComponentView *parent() const noexcept override;
   bool runOnChildren(bool forward, Mso::Functor<bool(IComponentView &)> &fn) noexcept override;
+  void onFocusLost() noexcept override;
+  void onFocusGained() noexcept override;
   void onKeyDown(
       const winrt::Microsoft::ReactNative::Composition::Input::KeyboardSource &source,
       const winrt::Microsoft::ReactNative::Composition::Input::KeyRoutedEventArgs &args) noexcept override;
   void onKeyUp(
       const winrt::Microsoft::ReactNative::Composition::Input::KeyboardSource &source,
       const winrt::Microsoft::ReactNative::Composition::Input::KeyRoutedEventArgs &args) noexcept override;
-  void onFocusLost() noexcept override;
-  void onFocusGained() noexcept override;
   bool focusable() const noexcept override;
   std::vector<facebook::react::ComponentDescriptorProvider> supplementalComponentDescriptorProviders() noexcept
       override;
