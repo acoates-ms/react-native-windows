@@ -775,7 +775,7 @@ struct CompActivityVisual : winrt::implements<
     }
   }
 
-  void updateColor(winrt::Windows::UI::Color color) noexcept {
+  void Color(winrt::Windows::UI::Color color) noexcept {
     // Change the color of each SpriteVisual
     for (auto &spriteVisual : m_spriteVisuals) {
       auto colorBrush = m_visual.Compositor().CreateColorBrush(color);
@@ -978,6 +978,10 @@ struct CompCaretVisual
 
   winrt::Microsoft::ReactNative::Composition::IVisual InnerVisual() const noexcept {
     return m_visual;
+  }
+
+  void Color(winrt::Windows::UI::Color color) noexcept {
+    m_compVisual.Brush(m_compositor.CreateColorBrush(color));
   }
 
   void Size(winrt::Windows::Foundation::Numerics::float2 size) noexcept {
