@@ -12,8 +12,6 @@ using namespace Windows::Foundation;
 #include "winrt/Windows.System.h"
 
 #ifdef USE_WINUI3
-
-#ifdef USE_WINUI3
 #include "winrt/Microsoft.UI.Dispatching.h"
 #endif
 
@@ -68,24 +66,19 @@ struct ThreadSafeMap {
 } // namespace
 
 template <typename TDispatcherTraits>
-template <typename TDispatcherTraits>
 struct UISchedulerWinRT;
 
-
 template <typename TDispatcherTraits>
-struct DispatcherTraits
-{
-};
+struct DispatcherTraits {};
 
 template <typename TDispatcherTraits>
 struct TaskDispatcherHandler;
 
 struct WindowsTypeTag;
-using  WindowsTaskDispatcherHandler = TaskDispatcherHandler<DispatcherTraits<WindowsTypeTag>>;
+using WindowsTaskDispatcherHandler = TaskDispatcherHandler<DispatcherTraits<WindowsTypeTag>>;
 
 template <>
-struct DispatcherTraits<WindowsTypeTag>
-{
+struct DispatcherTraits<WindowsTypeTag> {
   using DispatcherQueueHandler = Windows::System::DispatcherQueueHandler;
   using DispatcherQueue = Windows::System::DispatcherQueue;
   using DispatcherQueue_ShutdownCompleted_revoker = Windows::System::DispatcherQueue::ShutdownCompleted_revoker;
@@ -95,15 +88,15 @@ using WindowsDispatcherTraits = DispatcherTraits<WindowsTypeTag>;
 
 #ifdef USE_WINUI3
 struct MicrosoftTypeTag;
-using  MicrosoftTaskDispatcherHandler = TaskDispatcherHandler<DispatcherTraits<MicrosoftTypeTag>>;
+using MicrosoftTaskDispatcherHandler = TaskDispatcherHandler<DispatcherTraits<MicrosoftTypeTag>>;
 
 template <>
-struct DispatcherTraits<MicrosoftTypeTag>
-{
+struct DispatcherTraits<MicrosoftTypeTag> {
   using DispatcherQueueHandler = Microsoft::UI::Dispatching::DispatcherQueueHandler;
   using DispatcherQueue = Microsoft::UI::Dispatching::DispatcherQueue;
-  using DispatcherQueue_ShutdownCompleted_revoker = Microsoft::UI::Dispatching::DispatcherQueue::ShutdownCompleted_revoker;
-    using TaskDispatcherHandler = MicrosoftTaskDispatcherHandler;
+  using DispatcherQueue_ShutdownCompleted_revoker =
+      Microsoft::UI::Dispatching::DispatcherQueue::ShutdownCompleted_revoker;
+  using TaskDispatcherHandler = MicrosoftTaskDispatcherHandler;
 };
 using MicrosoftDispatcherTraits = DispatcherTraits<MicrosoftTypeTag>;
 
@@ -111,30 +104,28 @@ using MicrosoftDispatcherTraits = DispatcherTraits<MicrosoftTypeTag>;
 
 //! TaskDispatcherHandler is a DispatcherQueueHandler delegate that we pass to DispatcherQueue.
 //! We use custom ref counting to avoid extra memory allocations and to handle reference to DispatchTask.
-template<typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 struct TaskDispatcherHandler final : impl::abi_t<typename TDispatcherTraits::DispatcherQueueHandler> {
-  TaskDispatcherHandler(UISchedulerWinRT< TDispatcherTraits>*scheduler) noexcept;
+  TaskDispatcherHandler(UISchedulerWinRT<TDispatcherTraits> *scheduler) noexcept;
   int32_t __stdcall QueryInterface(guid const &id, void **result) noexcept final;
   uint32_t __stdcall AddRef() noexcept final;
   uint32_t __stdcall Release() noexcept final;
   int32_t __stdcall Invoke() noexcept final;
 
  private:
-  UISchedulerWinRT< TDispatcherTraits> *m_scheduler;
+  UISchedulerWinRT<TDispatcherTraits> *m_scheduler;
 };
 
 using WindowsTaskDispatcherHandler = TaskDispatcherHandler<DispatcherTraits<WindowsTypeTag>>;
 
-template<typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 struct UISchedulerWinRT : Mso::UnknownObject<Mso::RefCountStrategy::WeakRef, IDispatchQueueScheduler> {
-  UISchedulerWinRT(typename TDispatcherTraits::DispatcherQueue &&dispatcher) noexcept;
   UISchedulerWinRT(typename TDispatcherTraits::DispatcherQueue &&dispatcher) noexcept;
   ~UISchedulerWinRT() noexcept override;
 
   uint32_t AddHandlerRef() noexcept;
   uint32_t ReleaseHandlerRef() noexcept;
 
-  typename TDispatcherTraits::DispatcherQueueHandler MakeDispatcherQueueHandler() noexcept;
   typename TDispatcherTraits::DispatcherQueueHandler MakeDispatcherQueueHandler() noexcept;
   bool TryTakeTask(Mso::CntPtr<IDispatchQueueService> &queue, DispatchTask &task) noexcept;
 
@@ -168,8 +159,6 @@ struct UISchedulerWinRT : Mso::UnknownObject<Mso::RefCountStrategy::WeakRef, IDi
  private:
   typename TDispatcherTraits::DispatcherQueue m_dispatcher{nullptr};
   typename TDispatcherTraits::TaskDispatcherHandler m_dispatcherHandler{this};
-  typename TDispatcherTraits::DispatcherQueue m_dispatcher{nullptr};
-  typename TDispatcherTraits::TaskDispatcherHandler m_dispatcherHandler{this};
   ManualResetEvent m_terminationEvent;
   ThreadMutex m_mutex;
   Mso::WeakPtr<IDispatchQueueService> m_queue;
@@ -179,20 +168,20 @@ struct UISchedulerWinRT : Mso::UnknownObject<Mso::RefCountStrategy::WeakRef, IDi
   bool m_isShutdown{false};
   std::thread::id m_threadId{std::this_thread::get_id()};
   typename TDispatcherTraits::DispatcherQueue_ShutdownCompleted_revoker m_shutdownCompletedRevoker;
-  typename TDispatcherTraits::DispatcherQueue_ShutdownCompleted_revoker m_shutdownCompletedRevoker;
 };
 
 //=============================================================================
 // TaskDispatcherHandler implementation
 //=============================================================================
 
-template< typename TDispatcherTraits>
-TaskDispatcherHandler<TDispatcherTraits>::TaskDispatcherHandler(UISchedulerWinRT<TDispatcherTraits> *scheduler) noexcept : m_scheduler{scheduler} {}
+template <typename TDispatcherTraits>
+TaskDispatcherHandler<TDispatcherTraits>::TaskDispatcherHandler(UISchedulerWinRT<TDispatcherTraits> *scheduler) noexcept
+    : m_scheduler{scheduler} {}
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 int32_t __stdcall TaskDispatcherHandler<TDispatcherTraits>::QueryInterface(guid const &id, void **result) noexcept {
-  if (is_guid_of<typename TDispatcherTraits::DispatcherQueueHandler>(id) || is_guid_of<Windows::Foundation::IUnknown>(id) ||
-      is_guid_of<IAgileObject>(id)) {
+  if (is_guid_of<typename TDispatcherTraits::DispatcherQueueHandler>(id) ||
+      is_guid_of<Windows::Foundation::IUnknown>(id) || is_guid_of<IAgileObject>(id)) {
     *result = static_cast<impl::abi_t<typename TDispatcherTraits::DispatcherQueueHandler> *>(this);
     AddRef();
     return impl::error_ok;
@@ -206,17 +195,17 @@ int32_t __stdcall TaskDispatcherHandler<TDispatcherTraits>::QueryInterface(guid 
   return impl::error_no_interface;
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 uint32_t __stdcall TaskDispatcherHandler<TDispatcherTraits>::AddRef() noexcept {
   return m_scheduler->AddHandlerRef();
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 uint32_t __stdcall TaskDispatcherHandler<TDispatcherTraits>::Release() noexcept {
   return m_scheduler->ReleaseHandlerRef();
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 int32_t __stdcall TaskDispatcherHandler<TDispatcherTraits>::Invoke() noexcept {
   Mso::CntPtr<IDispatchQueueService> queue;
   DispatchTask task;
@@ -231,27 +220,28 @@ int32_t __stdcall TaskDispatcherHandler<TDispatcherTraits>::Invoke() noexcept {
 // UISchedulerWinRT implementation
 //=============================================================================
 
-template< typename TDispatcherTraits>
-UISchedulerWinRT<TDispatcherTraits>::UISchedulerWinRT(typename TDispatcherTraits::DispatcherQueue &&dispatcher) noexcept : m_dispatcher{std::move(dispatcher)} {
-  m_shutdownCompletedRevoker =
-      m_dispatcher.ShutdownCompleted(winrt::auto_revoke, [](typename TDispatcherTraits::DispatcherQueue const &, IInspectable const &) noexcept {
+template <typename TDispatcherTraits>
+UISchedulerWinRT<TDispatcherTraits>::UISchedulerWinRT(typename TDispatcherTraits::DispatcherQueue &&dispatcher) noexcept
+    : m_dispatcher{std::move(dispatcher)} {
+  m_shutdownCompletedRevoker = m_dispatcher.ShutdownCompleted(
+      winrt::auto_revoke, [](typename TDispatcherTraits::DispatcherQueue const &, IInspectable const &) noexcept {
         GetDispatchQueueRegistry().Remove(std::this_thread::get_id());
       });
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 UISchedulerWinRT<TDispatcherTraits>::~UISchedulerWinRT() noexcept {
   GetDispatchQueueRegistry().Remove(m_threadId);
   AwaitTermination();
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 uint32_t UISchedulerWinRT<TDispatcherTraits>::AddHandlerRef() noexcept {
   std::lock_guard lock{m_mutex};
   return ++m_handlerRefCount;
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 uint32_t UISchedulerWinRT<TDispatcherTraits>::ReleaseHandlerRef() noexcept {
   Mso::CntPtr<UISchedulerWinRT> self;
   CleanupContext context{this};
@@ -271,8 +261,10 @@ uint32_t UISchedulerWinRT<TDispatcherTraits>::ReleaseHandlerRef() noexcept {
   }
 }
 
-template< typename TDispatcherTraits>
-bool UISchedulerWinRT<TDispatcherTraits>::TryTakeTask(Mso::CntPtr<IDispatchQueueService> &queue, DispatchTask &task) noexcept {
+template <typename TDispatcherTraits>
+bool UISchedulerWinRT<TDispatcherTraits>::TryTakeTask(
+    Mso::CntPtr<IDispatchQueueService> &queue,
+    DispatchTask &task) noexcept {
   {
     std::lock_guard lock{m_mutex};
     VerifyElseCrashSz(m_taskCount, "Task count cannot be negative");
@@ -286,8 +278,9 @@ bool UISchedulerWinRT<TDispatcherTraits>::TryTakeTask(Mso::CntPtr<IDispatchQueue
   return false;
 }
 
-template< typename TDispatcherTraits>
-typename TDispatcherTraits::DispatcherQueueHandler UISchedulerWinRT<TDispatcherTraits>::MakeDispatcherQueueHandler() noexcept {
+template <typename TDispatcherTraits>
+typename TDispatcherTraits::DispatcherQueueHandler
+UISchedulerWinRT<TDispatcherTraits>::MakeDispatcherQueueHandler() noexcept {
   VerifyElseCrash(m_mutex.IsLockedByMe());
 
   if (m_handlerRefCount == 0) {
@@ -298,24 +291,24 @@ typename TDispatcherTraits::DispatcherQueueHandler UISchedulerWinRT<TDispatcherT
   return {static_cast<void *>(&m_dispatcherHandler), take_ownership_from_abi};
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 void UISchedulerWinRT<TDispatcherTraits>::InitializeScheduler(Mso::WeakPtr<IDispatchQueueService> &&queue) noexcept {
   m_queue = std::move(queue);
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 bool UISchedulerWinRT<TDispatcherTraits>::HasThreadAccess() noexcept {
   // m_dispatcher.HasThreadAccess() is implemented only in Windows 19H1.
   // We must use an alternative implementation.
   return m_threadId == std::this_thread::get_id();
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 bool UISchedulerWinRT<TDispatcherTraits>::IsSerial() noexcept {
   return true;
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 void UISchedulerWinRT<TDispatcherTraits>::Post() noexcept {
   typename TDispatcherTraits::DispatcherQueueHandler handler;
   {
@@ -331,7 +324,7 @@ void UISchedulerWinRT<TDispatcherTraits>::Post() noexcept {
   }
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 void UISchedulerWinRT<TDispatcherTraits>::Shutdown() noexcept {
   CleanupContext context{this};
   {
@@ -341,13 +334,13 @@ void UISchedulerWinRT<TDispatcherTraits>::Shutdown() noexcept {
   }
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 void UISchedulerWinRT<TDispatcherTraits>::AwaitTermination() noexcept {
   Shutdown();
   m_terminationEvent.Wait();
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 /*static*/ DispatchQueue UISchedulerWinRT<TDispatcherTraits>::GetOrCreateUIThreadQueue() noexcept {
   std::thread::id threadId{std::this_thread::get_id()};
   std::optional<Mso::WeakPtr<IDispatchQueueService>> weakQueue = GetDispatchQueueRegistry().Get(threadId);
@@ -357,9 +350,7 @@ template< typename TDispatcherTraits>
   }
 
   decltype(TDispatcherTraits::DispatcherQueue::GetForCurrentThread()) dispatcher{nullptr};
-  decltype(TDispatcherTraits::DispatcherQueue::GetForCurrentThread()) dispatcher{nullptr};
   try {
-    dispatcher = TDispatcherTraits::DispatcherQueue::GetForCurrentThread();
     dispatcher = TDispatcherTraits::DispatcherQueue::GetForCurrentThread();
   } catch (winrt::hresult_error const &) {
   }
@@ -374,8 +365,9 @@ template< typename TDispatcherTraits>
   return queue;
 }
 
-template< typename TDispatcherTraits>
-/*static*/ typename UISchedulerWinRT<TDispatcherTraits>::DispatchQueueRegistry & UISchedulerWinRT<TDispatcherTraits>::GetDispatchQueueRegistry() noexcept {
+template <typename TDispatcherTraits>
+/*static*/ typename UISchedulerWinRT<TDispatcherTraits>::DispatchQueueRegistry &
+UISchedulerWinRT<TDispatcherTraits>::GetDispatchQueueRegistry() noexcept {
   static std::recursive_mutex mutex;
   static DispatchQueueRegistry registry{mutex};
   return registry;
@@ -385,10 +377,12 @@ template< typename TDispatcherTraits>
 // UISchedulerWinRT::CleanupContext implementation
 //=============================================================================
 
-template< typename TDispatcherTraits>
-UISchedulerWinRT<TDispatcherTraits>::CleanupContext::CleanupContext(UISchedulerWinRT<TDispatcherTraits> *scheduler) noexcept : m_scheduler{scheduler} {}
+template <typename TDispatcherTraits>
+UISchedulerWinRT<TDispatcherTraits>::CleanupContext::CleanupContext(
+    UISchedulerWinRT<TDispatcherTraits> *scheduler) noexcept
+    : m_scheduler{scheduler} {}
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 UISchedulerWinRT<TDispatcherTraits>::CleanupContext::~CleanupContext() noexcept {
   if (m_isTerminated) {
     m_scheduler->m_terminationEvent.Set();
@@ -401,7 +395,7 @@ UISchedulerWinRT<TDispatcherTraits>::CleanupContext::~CleanupContext() noexcept 
   }
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 void UISchedulerWinRT<TDispatcherTraits>::CleanupContext::CheckShutdown() noexcept {
   // See if dispatcher queue released all handlers without invoking them.
   if (m_scheduler->m_taskCount != 0 && m_scheduler->m_handlerRefCount == 0) {
@@ -411,7 +405,7 @@ void UISchedulerWinRT<TDispatcherTraits>::CleanupContext::CheckShutdown() noexce
   }
 }
 
-template< typename TDispatcherTraits>
+template <typename TDispatcherTraits>
 void UISchedulerWinRT<TDispatcherTraits>::CleanupContext::CheckTermination() noexcept {
   m_isTerminated = m_scheduler->m_isShutdown && (m_scheduler->m_handlerRefCount == 0);
 }
@@ -421,11 +415,10 @@ void UISchedulerWinRT<TDispatcherTraits>::CleanupContext::CheckTermination() noe
 //=============================================================================
 
 DispatchQueue DispatchQueueStatic::GetCurrentUIThreadQueue() noexcept {
-  DispatchQueue queue { nullptr };
+  DispatchQueue queue{nullptr};
 #if USE_WINUI3
   queue = UISchedulerWinRT<MicrosoftDispatcherTraits>::GetOrCreateUIThreadQueue();
-  if (!queue)
-  {
+  if (!queue) {
 #endif
     queue = UISchedulerWinRT<WindowsDispatcherTraits>::GetOrCreateUIThreadQueue();
 #if USE_WINUI3
