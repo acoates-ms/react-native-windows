@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 #pragma once
 
+#ifdef USE_WINUI3
 #include "Composition.MicrosoftCompositionContextHelper.g.h"
+#endif
 #include "Composition.WindowsCompositionContextHelper.g.h"
 
 #include <d2d1_1.h>
@@ -32,6 +34,7 @@ struct WindowsCompositionContextHelper : WindowsCompositionContextHelperT<Window
   static winrt::Windows::UI::Composition::ICompositionSurface InnerSurface(IDrawingSurfaceBrush surface) noexcept;
 };
 
+#ifdef USE_WINUI3
 struct MicrosoftCompositionContextHelper : MicrosoftCompositionContextHelperT<MicrosoftCompositionContextHelper> {
   MicrosoftCompositionContextHelper() = default;
 
@@ -43,6 +46,7 @@ struct MicrosoftCompositionContextHelper : MicrosoftCompositionContextHelperT<Mi
   static winrt::Microsoft::UI::Composition::CompositionBrush InnerBrush(IBrush brush) noexcept;
   static winrt::Microsoft::UI::Composition::ICompositionSurface InnerSurface(IDrawingSurfaceBrush surface) noexcept;
 };
+#endif
 
 } // namespace winrt::Microsoft::ReactNative::Composition::implementation
 
@@ -52,8 +56,10 @@ struct WindowsCompositionContextHelper : WindowsCompositionContextHelperT<
                                              WindowsCompositionContextHelper,
                                              implementation::WindowsCompositionContextHelper> {};
 
+#ifdef USE_WINUI3
 struct MicrosoftCompositionContextHelper : MicrosoftCompositionContextHelperT<
                                                MicrosoftCompositionContextHelper,
                                                implementation::MicrosoftCompositionContextHelper> {};
+#endif
 
 } // namespace winrt::Microsoft::ReactNative::Composition::factory_implementation

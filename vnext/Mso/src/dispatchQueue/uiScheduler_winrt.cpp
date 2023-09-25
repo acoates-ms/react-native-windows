@@ -12,6 +12,8 @@ using namespace Windows::Foundation;
 #include "winrt/Windows.System.h"
 
 #ifdef USE_WINUI3
+
+#ifdef USE_WINUI3
 #include "winrt/Microsoft.UI.Dispatching.h"
 #endif
 
@@ -65,6 +67,7 @@ struct ThreadSafeMap {
 
 } // namespace
 
+template <typename TDispatcherTraits>
 template <typename TDispatcherTraits>
 struct UISchedulerWinRT;
 
@@ -125,11 +128,13 @@ using WindowsTaskDispatcherHandler = TaskDispatcherHandler<DispatcherTraits<Wind
 template<typename TDispatcherTraits>
 struct UISchedulerWinRT : Mso::UnknownObject<Mso::RefCountStrategy::WeakRef, IDispatchQueueScheduler> {
   UISchedulerWinRT(typename TDispatcherTraits::DispatcherQueue &&dispatcher) noexcept;
+  UISchedulerWinRT(typename TDispatcherTraits::DispatcherQueue &&dispatcher) noexcept;
   ~UISchedulerWinRT() noexcept override;
 
   uint32_t AddHandlerRef() noexcept;
   uint32_t ReleaseHandlerRef() noexcept;
 
+  typename TDispatcherTraits::DispatcherQueueHandler MakeDispatcherQueueHandler() noexcept;
   typename TDispatcherTraits::DispatcherQueueHandler MakeDispatcherQueueHandler() noexcept;
   bool TryTakeTask(Mso::CntPtr<IDispatchQueueService> &queue, DispatchTask &task) noexcept;
 
@@ -163,6 +168,8 @@ struct UISchedulerWinRT : Mso::UnknownObject<Mso::RefCountStrategy::WeakRef, IDi
  private:
   typename TDispatcherTraits::DispatcherQueue m_dispatcher{nullptr};
   typename TDispatcherTraits::TaskDispatcherHandler m_dispatcherHandler{this};
+  typename TDispatcherTraits::DispatcherQueue m_dispatcher{nullptr};
+  typename TDispatcherTraits::TaskDispatcherHandler m_dispatcherHandler{this};
   ManualResetEvent m_terminationEvent;
   ThreadMutex m_mutex;
   Mso::WeakPtr<IDispatchQueueService> m_queue;
@@ -171,6 +178,7 @@ struct UISchedulerWinRT : Mso::UnknownObject<Mso::RefCountStrategy::WeakRef, IDi
   uint32_t m_taskCount{0};
   bool m_isShutdown{false};
   std::thread::id m_threadId{std::this_thread::get_id()};
+  typename TDispatcherTraits::DispatcherQueue_ShutdownCompleted_revoker m_shutdownCompletedRevoker;
   typename TDispatcherTraits::DispatcherQueue_ShutdownCompleted_revoker m_shutdownCompletedRevoker;
 };
 
@@ -349,7 +357,9 @@ template< typename TDispatcherTraits>
   }
 
   decltype(TDispatcherTraits::DispatcherQueue::GetForCurrentThread()) dispatcher{nullptr};
+  decltype(TDispatcherTraits::DispatcherQueue::GetForCurrentThread()) dispatcher{nullptr};
   try {
+    dispatcher = TDispatcherTraits::DispatcherQueue::GetForCurrentThread();
     dispatcher = TDispatcherTraits::DispatcherQueue::GetForCurrentThread();
   } catch (winrt::hresult_error const &) {
   }

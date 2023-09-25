@@ -4,8 +4,10 @@
 #if __has_include("Composition.WindowsCompositionContextHelper.g.cpp")
 #include "Composition.WindowsCompositionContextHelper.g.cpp"
 #endif
+#ifdef USE_WINUI3
 #if __has_include("Composition.MicrosoftCompositionContextHelper.g.cpp")
 #include "Composition.MicrosoftCompositionContextHelper.g.cpp"
+#endif
 #endif
 
 #include <Windows.Graphics.Interop.h>
@@ -1359,6 +1361,7 @@ winrt::Windows::UI::Composition::ICompositionSurface WindowsCompositionContextHe
   return s ? s->Inner() : nullptr;
 }
 
+#ifdef USE_WINUI3
 ICompositionContext MicrosoftCompositionContextHelper::CreateContext(
     winrt::Microsoft::UI::Composition::Compositor const &compositor) noexcept {
   return winrt::make<::Microsoft::ReactNative::Composition::MicrosoftCompContext>(compositor);
@@ -1404,5 +1407,6 @@ winrt::Microsoft::UI::Composition::ICompositionSurface MicrosoftCompositionConte
   surface.as(s);
   return s ? s->Inner() : nullptr;
 }
+#endif
 
 } // namespace winrt::Microsoft::ReactNative::Composition::implementation
