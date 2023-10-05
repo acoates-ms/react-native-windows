@@ -7,7 +7,9 @@
 #include "winrt/base.h"
 void* winrt_make_Microsoft_Internal_TestController();
 void* winrt_make_Microsoft_ReactNative_CompositionRootView();
+#ifdef USE_WINUI3
 void *winrt_make_Microsoft_ReactNative_Composition_MicrosoftCompositionContextHelper();
+#endif
 void *winrt_make_Microsoft_ReactNative_Composition_WindowsCompositionContextHelper();
 void *winrt_make_Microsoft_ReactNative_Composition_CompositionUIService();
 void* winrt_make_Microsoft_ReactNative_JsiRuntime();

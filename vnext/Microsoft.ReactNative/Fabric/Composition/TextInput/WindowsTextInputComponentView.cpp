@@ -644,6 +644,7 @@ void WindowsTextInputComponentView::unmountChildComponentView(
 void WindowsTextInputComponentView::onFocusLost() noexcept {
   Super::onFocusLost();
   sendMessage(WM_KILLFOCUS, 0, 0);
+  m_caretVisual.IsVisible(false);
 }
 
 void WindowsTextInputComponentView::onFocusGained() noexcept {
@@ -657,6 +658,14 @@ bool WindowsTextInputComponentView::focusable() const noexcept {
 
 std::string WindowsTextInputComponentView::DefaultControlType() const noexcept {
   return "textinput";
+}
+
+std::string WindowsTextInputComponentView::DefaultAccessibleName() const noexcept {
+  return m_props->placeholder;
+}
+
+std::string WindowsTextInputComponentView::DefaultHelpText() const noexcept {
+  return m_props->placeholder;
 }
 
 void WindowsTextInputComponentView::updateProps(
@@ -710,6 +719,10 @@ void WindowsTextInputComponentView::updateProps(
 
   if (oldTextInputProps.backgroundColor != newTextInputProps.backgroundColor) {
     m_needsRedraw = true;
+  }
+
+  if (oldTextInputProps.cursorColor != newTextInputProps.cursorColor) {
+    m_caretVisual.Color(newTextInputProps.cursorColor.AsWindowsColor());
   }
 
   /*

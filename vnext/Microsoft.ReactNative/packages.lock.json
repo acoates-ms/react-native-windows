@@ -24,6 +24,12 @@
           "Microsoft.SourceLink.Common": "1.1.1"
         }
       },
+      "Microsoft.UI.Xaml": {
+        "type": "Direct",
+        "requested": "[2.7.0-prerelease.210913003, )",
+        "resolved": "2.7.0-prerelease.210913003",
+        "contentHash": "eLUEu31PenwzXowSTm/HPRaaEClPd0FKPLirfHLM84wH3nPDHX18l/ngHm1Ny2rnwVyc1cYngPjYEv6DOQmw1A=="
+      },
       "Microsoft.Windows.CppWinRT": {
         "type": "Direct",
         "requested": "[2.0.211028.7, )",
@@ -49,11 +55,6 @@
         "resolved": "1.1.1",
         "contentHash": "WMcGpWKrmJmzrNeuaEb23bEMnbtR/vLmvZtkAP5qWu7vQsY59GqfRJd65sFpBszbd2k/bQ8cs8eWawQKAabkVg=="
       },
-      "Microsoft.Windows.SDK.BuildTools": {
-        "type": "Transitive",
-        "resolved": "10.0.22621.1",
-        "contentHash": "Sp1DkYvg7yxuhamwxv+qFC66KC3paKQpwK8Q1J6XuAh6nzXIInmsDcpJ3szr0XGud4ysXojqwTfGdW01gvZ/0g=="
-      },
       "common": {
         "type": "Project"
       },
@@ -76,80 +77,59 @@
       }
     },
     "native,Version=v0.0/win10-arm": {
-      "Microsoft.WindowsAppSDK": {
+      "Microsoft.UI.Xaml": {
         "type": "Direct",
-        "requested": "[1.5.230906000-experimental, )",
-        "resolved": "1.5.230906000-experimental",
-        "contentHash": "szebQTWX92tV7zVfEYRbrlSYfmvY+8yGGxW5DO2YztM0zONG1OYnQbT+Ata4j89xfLOSB/dXSlwQFIM3nVZpjw==",
-        "dependencies": {
-          "Microsoft.Windows.SDK.BuildTools": "10.0.22621.1"
-        }
+        "requested": "[2.7.0-prerelease.210913003, )",
+        "resolved": "2.7.0-prerelease.210913003",
+        "contentHash": "eLUEu31PenwzXowSTm/HPRaaEClPd0FKPLirfHLM84wH3nPDHX18l/ngHm1Ny2rnwVyc1cYngPjYEv6DOQmw1A=="
       }
     },
     "native,Version=v0.0/win10-arm-aot": {
-      "Microsoft.WindowsAppSDK": {
+      "Microsoft.UI.Xaml": {
         "type": "Direct",
-        "requested": "[1.5.230906000-experimental, )",
-        "resolved": "1.5.230906000-experimental",
-        "contentHash": "szebQTWX92tV7zVfEYRbrlSYfmvY+8yGGxW5DO2YztM0zONG1OYnQbT+Ata4j89xfLOSB/dXSlwQFIM3nVZpjw==",
-        "dependencies": {
-          "Microsoft.Windows.SDK.BuildTools": "10.0.22621.1"
-        }
+        "requested": "[2.7.0-prerelease.210913003, )",
+        "resolved": "2.7.0-prerelease.210913003",
+        "contentHash": "eLUEu31PenwzXowSTm/HPRaaEClPd0FKPLirfHLM84wH3nPDHX18l/ngHm1Ny2rnwVyc1cYngPjYEv6DOQmw1A=="
       }
     },
     "native,Version=v0.0/win10-arm64-aot": {
-      "Microsoft.WindowsAppSDK": {
+      "Microsoft.UI.Xaml": {
         "type": "Direct",
-        "requested": "[1.5.230906000-experimental, )",
-        "resolved": "1.5.230906000-experimental",
-        "contentHash": "szebQTWX92tV7zVfEYRbrlSYfmvY+8yGGxW5DO2YztM0zONG1OYnQbT+Ata4j89xfLOSB/dXSlwQFIM3nVZpjw==",
-        "dependencies": {
-          "Microsoft.Windows.SDK.BuildTools": "10.0.22621.1"
-        }
+        "requested": "[2.7.0-prerelease.210913003, )",
+        "resolved": "2.7.0-prerelease.210913003",
+        "contentHash": "eLUEu31PenwzXowSTm/HPRaaEClPd0FKPLirfHLM84wH3nPDHX18l/ngHm1Ny2rnwVyc1cYngPjYEv6DOQmw1A=="
       }
     },
     "native,Version=v0.0/win10-x64": {
-      "Microsoft.WindowsAppSDK": {
+      "Microsoft.UI.Xaml": {
         "type": "Direct",
-        "requested": "[1.5.230906000-experimental, )",
-        "resolved": "1.5.230906000-experimental",
-        "contentHash": "szebQTWX92tV7zVfEYRbrlSYfmvY+8yGGxW5DO2YztM0zONG1OYnQbT+Ata4j89xfLOSB/dXSlwQFIM3nVZpjw==",
-        "dependencies": {
-          "Microsoft.Windows.SDK.BuildTools": "10.0.22621.1"
-        }
+        "requested": "[2.7.0-prerelease.210913003, )",
+        "resolved": "2.7.0-prerelease.210913003",
+        "contentHash": "eLUEu31PenwzXowSTm/HPRaaEClPd0FKPLirfHLM84wH3nPDHX18l/ngHm1Ny2rnwVyc1cYngPjYEv6DOQmw1A=="
       }
     },
     "native,Version=v0.0/win10-x64-aot": {
-      "Microsoft.WindowsAppSDK": {
+      "Microsoft.UI.Xaml": {
         "type": "Direct",
-        "requested": "[1.5.230906000-experimental, )",
-        "resolved": "1.5.230906000-experimental",
-        "contentHash": "szebQTWX92tV7zVfEYRbrlSYfmvY+8yGGxW5DO2YztM0zONG1OYnQbT+Ata4j89xfLOSB/dXSlwQFIM3nVZpjw==",
-        "dependencies": {
-          "Microsoft.Windows.SDK.BuildTools": "10.0.22621.1"
-        }
+        "requested": "[2.7.0-prerelease.210913003, )",
+        "resolved": "2.7.0-prerelease.210913003",
+        "contentHash": "eLUEu31PenwzXowSTm/HPRaaEClPd0FKPLirfHLM84wH3nPDHX18l/ngHm1Ny2rnwVyc1cYngPjYEv6DOQmw1A=="
       }
     },
     "native,Version=v0.0/win10-x86": {
-      "Microsoft.WindowsAppSDK": {
+      "Microsoft.UI.Xaml": {
         "type": "Direct",
-        "requested": "[1.5.230906000-experimental, )",
-        "resolved": "1.5.230906000-experimental",
-        "contentHash": "szebQTWX92tV7zVfEYRbrlSYfmvY+8yGGxW5DO2YztM0zONG1OYnQbT+Ata4j89xfLOSB/dXSlwQFIM3nVZpjw==",
-        "dependencies": {
-          "Microsoft.Windows.SDK.BuildTools": "10.0.22621.1"
-        }
+        "requested": "[2.7.0-prerelease.210913003, )",
+        "resolved": "2.7.0-prerelease.210913003",
+        "contentHash": "eLUEu31PenwzXowSTm/HPRaaEClPd0FKPLirfHLM84wH3nPDHX18l/ngHm1Ny2rnwVyc1cYngPjYEv6DOQmw1A=="
       }
     },
     "native,Version=v0.0/win10-x86-aot": {
-      "Microsoft.WindowsAppSDK": {
+      "Microsoft.UI.Xaml": {
         "type": "Direct",
-        "requested": "[1.5.230906000-experimental, )",
-        "resolved": "1.5.230906000-experimental",
-        "contentHash": "szebQTWX92tV7zVfEYRbrlSYfmvY+8yGGxW5DO2YztM0zONG1OYnQbT+Ata4j89xfLOSB/dXSlwQFIM3nVZpjw==",
-        "dependencies": {
-          "Microsoft.Windows.SDK.BuildTools": "10.0.22621.1"
-        }
+        "requested": "[2.7.0-prerelease.210913003, )",
+        "resolved": "2.7.0-prerelease.210913003",
+        "contentHash": "eLUEu31PenwzXowSTm/HPRaaEClPd0FKPLirfHLM84wH3nPDHX18l/ngHm1Ny2rnwVyc1cYngPjYEv6DOQmw1A=="
       }
     }
   }

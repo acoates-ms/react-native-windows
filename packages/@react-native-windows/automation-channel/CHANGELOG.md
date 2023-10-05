@@ -1,8 +1,74 @@
 # Change Log - @react-native-windows/automation-channel
 
-This log was last generated on Tue, 19 Sep 2023 05:13:03 GMT and should not be manually modified.
+This log was last generated on Wed, 04 Oct 2023 05:12:46 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.12.52
+
+Wed, 04 Oct 2023 05:12:46 GMT
+
+### Patches
+
+- Bump react-native-windows to v0.0.0-canary.713
+
+## 0.12.51
+
+Tue, 03 Oct 2023 05:13:16 GMT
+
+### Patches
+
+- Bump react-native-windows to v0.0.0-canary.712
+
+## 0.12.50
+
+Thu, 28 Sep 2023 05:13:18 GMT
+
+### Patches
+
+- Bump react-native-windows to v0.0.0-canary.711
+
+## 0.12.49
+
+Wed, 27 Sep 2023 06:10:53 GMT
+
+### Patches
+
+- Bump react-native-windows to v0.0.0-canary.710
+
+## 0.12.48
+
+Tue, 26 Sep 2023 05:13:15 GMT
+
+### Patches
+
+- Bump react-native-windows to v0.0.0-canary.709
+
+## 0.12.47
+
+Fri, 22 Sep 2023 05:13:33 GMT
+
+### Patches
+
+- Bump react-native-windows to v0.0.0-canary.708
+
+## 0.12.46
+
+Thu, 21 Sep 2023 05:13:50 GMT
+
+### Patches
+
+- Bump react-native-windows to v0.0.0-canary.707
+
+## 0.12.45
+
+Wed, 20 Sep 2023 05:17:49 GMT
+
+### Patches
+
+- Integrate 8/11 (34109996+chiaramooney@users.noreply.github.com)
+- Bump @rnw-scripts/just-task to v2.3.16
+- Bump react-native-windows to v0.0.0-canary.706
 
 ## 0.12.44
 

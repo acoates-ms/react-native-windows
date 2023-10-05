@@ -1,8 +1,88 @@
 # Change Log - react-native-windows
 
-This log was last generated on Tue, 19 Sep 2023 05:13:03 GMT and should not be manually modified.
+This log was last generated on Wed, 04 Oct 2023 05:12:45 GMT and should not be manually modified.
 
 <!-- Start content -->
+
+## 0.0.0-canary.713
+
+Wed, 04 Oct 2023 05:12:45 GMT
+
+### Changes
+
+- Allow usage of WinAppSDK in fabric (30809111+acoates-ms@users.noreply.github.com)
+- [Fabric] Add keyboard handlers to ScrollView (30809111+acoates-ms@users.noreply.github.com)
+
+## 0.0.0-canary.712
+
+Tue, 03 Oct 2023 05:13:16 GMT
+
+### Changes
+
+- Have RCTNetworking.win32 fork RCTNetworking.ios (julio.rocha@microsoft.com)
+
+## 0.0.0-canary.711
+
+Thu, 28 Sep 2023 05:13:18 GMT
+
+### Changes
+
+- Use glob to look through folders recursively (jthysell@microsoft.com)
+- Set UIA Name and HelpText properties on TextInput to match placeholder prop value (yajurgrover24@gmail.com)
+- Bump @react-native-windows/cli to v0.0.0-canary.190
+
+## 0.0.0-canary.710
+
+Wed, 27 Sep 2023 06:10:53 GMT
+
+### Changes
+
+- fix fabric textinput's caret on focus lost (tatianakapos@microsoft.com)
+
+## 0.0.0-canary.709
+
+Tue, 26 Sep 2023 05:13:15 GMT
+
+### Changes
+
+- Enable fabric usage against lifted comp, or system comp (30809111+acoates-ms@users.noreply.github.com)
+- Add new architecture `cpp-app` template for `init-windows` (jthysell@microsoft.com)
+- Bump @react-native-windows/cli to v0.0.0-canary.189
+
+## 0.0.0-canary.708
+
+Fri, 22 Sep 2023 05:13:32 GMT
+
+### Changes
+
+- [Fabric] Add support for native key event handling (30809111+acoates-ms@users.noreply.github.com)
+- add fabric textinput's cursorColor (tatianakapos@microsoft.com)
+- Create new CLI init-windows command (jthysell@microsoft.com)
+- Bump @react-native-windows/cli to v0.0.0-canary.188
+- Bump @react-native-windows/codegen to v0.0.0-canary.70
+
+## 0.0.0-canary.707
+
+Thu, 21 Sep 2023 05:13:49 GMT
+
+### Changes
+
+- [Fabric] Replace overrides in BaseViewEventEmitter (email not defined)
+- Test disabling HTTP caching (julio.rocha@microsoft.com)
+- [Fabric] Eliminate forks needed for onMouseEnter/Leave (erozell@outlook.com)
+- [Fabric] Cleans up overrides for HostPlatformViewProps (email not defined)
+
+## 0.0.0-canary.706
+
+Wed, 20 Sep 2023 05:17:49 GMT
+
+### Changes
+
+- Integrate 8/11 (34109996+chiaramooney@users.noreply.github.com)
+- Bump @react-native-windows/cli to v0.0.0-canary.187
+- Bump @react-native-windows/codegen to v0.0.0-canary.69
+- Bump @rnw-scripts/just-task to v2.3.16
+- Bump react-native-platform-override to v1.9.15
 
 ## 0.0.0-canary.705
 

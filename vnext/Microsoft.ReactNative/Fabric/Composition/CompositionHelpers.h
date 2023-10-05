@@ -35,6 +35,7 @@ struct IWindowsCompositionDrawingSurfaceInner : public IUnknown {
   virtual winrt::Windows::UI::Composition::ICompositionSurface Inner() const noexcept = 0;
 };
 
+#ifdef USE_WINUI3
 // Microsoft composition specific interface to extract the inner composition object
 MSO_STRUCT_GUID(IMicrosoftCompositionVisual, "FF8731D8-8AFA-4F6F-9E76-7F538F3C1157")
 struct IMicrosoftCompositionVisual : public IUnknown {
@@ -58,6 +59,7 @@ MSO_STRUCT_GUID(IMicrosoftCompositionDrawingSurfaceInner, "4ADDC62F-51D0-4C71-8B
 struct IMicrosoftCompositionDrawingSurfaceInner : public IUnknown {
   virtual winrt::Microsoft::UI::Composition::ICompositionSurface Inner() const noexcept = 0;
 };
+#endif
 
 } // namespace Composition
 

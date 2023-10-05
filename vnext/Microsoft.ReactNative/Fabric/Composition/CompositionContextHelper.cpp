@@ -4,8 +4,10 @@
 #if __has_include("Composition.WindowsCompositionContextHelper.g.cpp")
 #include "Composition.WindowsCompositionContextHelper.g.cpp"
 #endif
+#ifdef USE_WINUI3
 #if __has_include("Composition.MicrosoftCompositionContextHelper.g.cpp")
 #include "Composition.MicrosoftCompositionContextHelper.g.cpp"
+#endif
 #endif
 
 #include <Windows.Graphics.Interop.h>
@@ -16,9 +18,9 @@
 #include "CompositionHelpers.h"
 
 #ifdef USE_WINUI3
-#include <microsoft.ui.composition.interop.h>
 #include <winrt/Microsoft.UI.Composition.h>
 #include <winrt/Microsoft.UI.Composition.interactions.h>
+#include <winrt/Microsoft.UI.Composition.interop.h>
 #endif
 
 namespace Microsoft::ReactNative::Composition {
@@ -32,6 +34,7 @@ struct CompositionTypeTraits<WindowsTypeTag> {
   using AnimationDelayBehavior = winrt::Windows::UI::Composition::AnimationDelayBehavior;
   using AnimationDirection = winrt::Windows::UI::Composition::AnimationDirection;
   using AnimationIterationBehavior = winrt::Windows::UI::Composition::AnimationIterationBehavior;
+  using CompositionAnimation = winrt::Windows::UI::Composition::CompositionAnimation;
   using CompositionBackfaceVisibility = winrt::Windows::UI::Composition::CompositionBackfaceVisibility;
   using CompositionBrush = winrt::Windows::UI::Composition::CompositionBrush;
   using CompositionDrawingSurface = winrt::Windows::UI::Composition::CompositionDrawingSurface;
@@ -70,7 +73,6 @@ struct CompositionTypeTraits<WindowsTypeTag> {
 
   using ICompositionDrawingSurfaceInterop = ABI::Windows::UI::Composition::ICompositionDrawingSurfaceInterop;
   using ICompositorInterop = ABI::Windows::UI::Composition::ICompositorInterop;
-  using ICompositionGraphicsDevice = ABI::Windows::UI::Composition::ICompositionGraphicsDevice;
 
   using IInnerCompositionDropShadow = IWindowsCompositionDropShadow;
   using IInnerCompositionVisual = IWindowsCompositionVisual;
@@ -87,6 +89,7 @@ struct CompositionTypeTraits<MicrosoftTypeTag> {
   using AnimationDelayBehavior = winrt::Microsoft::UI::Composition::AnimationDelayBehavior;
   using AnimationDirection = winrt::Microsoft::UI::Composition::AnimationDirection;
   using AnimationIterationBehavior = winrt::Microsoft::UI::Composition::AnimationIterationBehavior;
+  using CompositionAnimation = winrt::Microsoft::UI::Composition::CompositionAnimation;
   using CompositionBackfaceVisibility = winrt::Microsoft::UI::Composition::CompositionBackfaceVisibility;
   using CompositionBrush = winrt::Microsoft::UI::Composition::CompositionBrush;
   using CompositionDrawingSurface = winrt::Microsoft::UI::Composition::CompositionDrawingSurface;
@@ -123,9 +126,8 @@ struct CompositionTypeTraits<MicrosoftTypeTag> {
       winrt::Microsoft::UI::Composition::Interactions::VisualInteractionSourceRedirectionMode;
   using CompositionGraphicsDevice = winrt::Microsoft::UI::Composition::CompositionGraphicsDevice;
 
-  using ICompositionDrawingSurfaceInterop = ABI::Microsoft::UI::Composition::ICompositionDrawingSurfaceInterop;
-  using ICompositorInterop = ABI::Microsoft::UI::Composition::ICompositorInterop;
-  using ICompositionGraphicsDevice = ABI::Microsoft::UI::Composition::ICompositionGraphicsDevice;
+  using ICompositionDrawingSurfaceInterop = winrt::Microsoft::UI::Composition::ICompositionDrawingSurfaceInterop;
+  using ICompositorInterop = winrt::Microsoft::UI::Composition::ICompositorInterop;
 
   using IInnerCompositionDropShadow = IMicrosoftCompositionDropShadow;
   using IInnerCompositionVisual = IMicrosoftCompositionVisual;
@@ -534,13 +536,22 @@ struct CompScrollerVisual : winrt::implements<
 
     void CustomAnimationStateEntered(
         typename TTypeRedirects::InteractionTracker sender,
-        typename TTypeRedirects::InteractionTrackerCustomAnimationStateEnteredArgs args) noexcept {}
+        typename TTypeRedirects::InteractionTrackerCustomAnimationStateEnteredArgs args) noexcept {
+      m_outer->m_custom = true;
+      m_outer->m_inertia = false;
+    }
     void IdleStateEntered(
         typename TTypeRedirects::InteractionTracker sender,
-        typename TTypeRedirects::InteractionTrackerIdleStateEnteredArgs args) noexcept {}
+        typename TTypeRedirects::InteractionTrackerIdleStateEnteredArgs args) noexcept {
+      m_outer->m_custom = false;
+      m_outer->m_inertia = false;
+    }
     void InertiaStateEntered(
         typename TTypeRedirects::InteractionTracker sender,
-        typename TTypeRedirects::InteractionTrackerInertiaStateEnteredArgs args) noexcept {}
+        typename TTypeRedirects::InteractionTrackerInertiaStateEnteredArgs args) noexcept {
+      m_outer->m_custom = false;
+      m_outer->m_inertia = true;
+    }
     void InteractingStateEntered(
         typename TTypeRedirects::InteractionTracker sender,
         typename TTypeRedirects::InteractionTrackerInteractingStateEnteredArgs args) noexcept {}
@@ -550,6 +561,7 @@ struct CompScrollerVisual : winrt::implements<
     void ValuesChanged(
         typename TTypeRedirects::InteractionTracker sender,
         typename TTypeRedirects::InteractionTrackerValuesChangedArgs args) noexcept {
+      m_outer->m_currentPosition = args.Position();
       m_outer->FireScrollPositionChanged({args.Position().x, args.Position().y});
     }
 
@@ -713,20 +725,54 @@ struct CompScrollerVisual : winrt::implements<
     return m_interactionTracker.Position();
   }
 
-  void ScrollBy(winrt::Windows::Foundation::Numerics::float3 const &offset) noexcept {
-    m_interactionTracker.TryUpdatePositionBy(offset);
+  // ChangeOffsets scrolling constants
+  static constexpr int64_t s_offsetsChangeMsPerUnit{5};
+  static constexpr int64_t s_offsetsChangeMinMs{50};
+  static constexpr int64_t s_offsetsChangeMaxMs{1000};
+
+  typename TTypeRedirects::CompositionAnimation GetPositionAnimation(float x, float y) {
+    const int64_t distance =
+        static_cast<int64_t>(std::sqrt(std::pow(x - m_currentPosition.x, 2.0f) + pow(y - m_currentPosition.y, 2.0f)));
+    auto compositor = m_visual.Compositor();
+    auto positionAnimation = compositor.CreateVector3KeyFrameAnimation();
+
+    positionAnimation.InsertKeyFrame(1.0f, {x, y, 0.0f});
+    positionAnimation.Duration(std::chrono::milliseconds(
+        std::clamp(distance * s_offsetsChangeMsPerUnit, s_offsetsChangeMinMs, s_offsetsChangeMaxMs)));
+
+    return positionAnimation;
+  }
+
+  void ScrollBy(winrt::Windows::Foundation::Numerics::float3 const &offset, bool animate) noexcept {
+    auto restingPosition = m_inertia ? m_interactionTracker.NaturalRestingPosition() : m_interactionTracker.Position();
+    if (m_custom) {
+      restingPosition = m_targetPosition;
+    }
+    if (animate) {
+      auto maxPosition = m_interactionTracker.MaxPosition();
+      m_custom = true;
+      m_targetPosition = {
+          std::clamp(restingPosition.x + offset.x, 0.0f, maxPosition.x),
+          std::clamp(restingPosition.y + offset.y, 0.0f, maxPosition.y),
+          std::clamp(restingPosition.z + offset.z, 0.0f, maxPosition.z)};
+
+      auto kfa = GetPositionAnimation(m_targetPosition.x, m_targetPosition.y);
+      m_interactionTracker.TryUpdatePositionWithAnimation(kfa);
+    } else {
+      m_interactionTracker.TryUpdatePositionBy(offset);
+    }
   };
 
   void TryUpdatePosition(winrt::Windows::Foundation::Numerics::float3 const &position, bool animate) noexcept {
+    auto maxPosition = m_interactionTracker.MaxPosition();
     if (animate) {
-      auto compositor = m_visual.Compositor();
-      auto cubicBezier = compositor.CreateCubicBezierEasingFunction({0.17f, 0.67f}, {1.0f, 1.0f});
-      auto kfa = compositor.CreateVector3KeyFrameAnimation();
-      kfa.Duration(std::chrono::seconds{1});
-      kfa.InsertKeyFrame(1.0f, position, cubicBezier);
+      auto kfa = GetPositionAnimation(std::min(maxPosition.x, position.x), std::min(maxPosition.y, position.y));
       m_interactionTracker.TryUpdatePositionWithAnimation(kfa);
     } else {
-      m_interactionTracker.TryUpdatePosition(position);
+      m_interactionTracker.TryUpdatePosition(
+          {std::min(maxPosition.x, position.x),
+           std::min(maxPosition.y, position.y),
+           std::min(maxPosition.z, position.z)});
     }
   }
 
@@ -742,6 +788,10 @@ struct CompScrollerVisual : winrt::implements<
          0});
   }
 
+  bool m_inertia{false};
+  bool m_custom{false};
+  winrt::Windows::Foundation::Numerics::float3 m_targetPosition;
+  winrt::Windows::Foundation::Numerics::float3 m_currentPosition;
   winrt::Windows::Foundation::Numerics::float2 m_contentSize{0};
   winrt::Windows::Foundation::Numerics::float2 m_visualSize{0};
   winrt::event<
@@ -775,7 +825,7 @@ struct CompActivityVisual : winrt::implements<
     }
   }
 
-  void updateColor(winrt::Windows::UI::Color color) noexcept {
+  void Color(winrt::Windows::UI::Color color) noexcept {
     // Change the color of each SpriteVisual
     for (auto &spriteVisual : m_spriteVisuals) {
       auto colorBrush = m_visual.Compositor().CreateColorBrush(color);
@@ -980,6 +1030,10 @@ struct CompCaretVisual
     return m_visual;
   }
 
+  void Color(winrt::Windows::UI::Color color) noexcept {
+    m_compVisual.Brush(m_compositor.CreateColorBrush(color));
+  }
+
   void Size(winrt::Windows::Foundation::Numerics::float2 size) noexcept {
     m_compVisual.Size(size);
   }
@@ -997,6 +1051,7 @@ struct CompCaretVisual
       m_compVisual.StartAnimation(L"opacity", m_opacityAnimation);
     } else {
       m_compVisual.StopAnimation(L"opacity");
+      m_compVisual.Opacity(0.0f);
     }
   }
 
@@ -1181,22 +1236,7 @@ struct CompContext : winrt::implements<
 
   winrt::Microsoft::ReactNative::Composition::IFocusVisual CreateFocusVisual() noexcept;
 
-  typename TTypeRedirects::CompositionGraphicsDevice CompositionGraphicsDevice() noexcept {
-    if (!m_compositionGraphicsDevice) {
-      // To create a composition graphics device, we need to QI for another interface
-
-      winrt::com_ptr<typename TTypeRedirects::ICompositorInterop> compositorInterop{
-          m_compositor.as<typename TTypeRedirects::ICompositorInterop>()};
-
-      // Create a graphics device backed by our D3D device
-      winrt::com_ptr<typename TTypeRedirects::ICompositionGraphicsDevice> compositionGraphicsDeviceIface;
-      winrt::check_hresult(
-          compositorInterop->CreateGraphicsDevice(D2DDevice().get(), compositionGraphicsDeviceIface.put()));
-
-      compositionGraphicsDeviceIface.as(m_compositionGraphicsDevice);
-    }
-    return m_compositionGraphicsDevice;
-  }
+  typename TTypeRedirects::CompositionGraphicsDevice CompositionGraphicsDevice() noexcept;
 
   typename TTypeRedirects::Compositor InnerCompositor() noexcept {
     return m_compositor;
@@ -1254,6 +1294,25 @@ CompContext<WindowsTypeRedirects>::CreateFocusVisual() noexcept {
   return winrt::make<Composition::WindowsCompFocusVisual>(m_compositor);
 }
 
+template <>
+winrt::Windows::UI::Composition::CompositionGraphicsDevice
+CompContext<WindowsTypeRedirects>::CompositionGraphicsDevice() noexcept {
+  if (!m_compositionGraphicsDevice) {
+    // To create a composition graphics device, we need to QI for another interface
+
+    winrt::com_ptr<ABI::Windows::UI::Composition::ICompositorInterop> compositorInterop{
+        m_compositor.as<ABI::Windows::UI::Composition::ICompositorInterop>()};
+
+    // Create a graphics device backed by our D3D device
+    winrt::com_ptr<ABI::Windows::UI::Composition::ICompositionGraphicsDevice> compositionGraphicsDeviceIface;
+    winrt::check_hresult(
+        compositorInterop->CreateGraphicsDevice(D2DDevice().get(), compositionGraphicsDeviceIface.put()));
+
+    compositionGraphicsDeviceIface.as(m_compositionGraphicsDevice);
+  }
+  return m_compositionGraphicsDevice;
+}
+
 using WindowsCompContext = CompContext<WindowsTypeRedirects>;
 
 #ifdef USE_WINUI3
@@ -1304,6 +1363,17 @@ winrt::Microsoft::ReactNative::Composition::IFocusVisual
 CompContext<MicrosoftTypeRedirects>::CreateFocusVisual() noexcept {
   return winrt::make<Composition::MicrosoftCompFocusVisual>(m_compositor);
 }
+
+template <>
+winrt::Microsoft::UI::Composition::CompositionGraphicsDevice
+CompContext<MicrosoftTypeRedirects>::CompositionGraphicsDevice() noexcept {
+  if (!m_compositionGraphicsDevice) {
+    winrt::check_hresult(m_compositor.as<winrt::Microsoft::UI::Composition::ICompositorInterop>()->CreateGraphicsDevice(
+        D2DDevice().get(), &m_compositionGraphicsDevice));
+  }
+  return m_compositionGraphicsDevice;
+}
+
 using MicrosoftCompContext = CompContext<MicrosoftTypeRedirects>;
 #endif
 
@@ -1355,6 +1425,7 @@ winrt::Windows::UI::Composition::ICompositionSurface WindowsCompositionContextHe
   return s ? s->Inner() : nullptr;
 }
 
+#ifdef USE_WINUI3
 ICompositionContext MicrosoftCompositionContextHelper::CreateContext(
     winrt::Microsoft::UI::Composition::Compositor const &compositor) noexcept {
   return winrt::make<::Microsoft::ReactNative::Composition::MicrosoftCompContext>(compositor);
@@ -1400,5 +1471,6 @@ winrt::Microsoft::UI::Composition::ICompositionSurface MicrosoftCompositionConte
   surface.as(s);
   return s ? s->Inner() : nullptr;
 }
+#endif
 
 } // namespace winrt::Microsoft::ReactNative::Composition::implementation
