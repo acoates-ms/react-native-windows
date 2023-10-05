@@ -1386,45 +1386,6 @@ facebook::react::Tag CompositionViewComponentView::hitTest(
   return -1;
 }
 
-void CompositionViewComponentView::onKeyDown(
-    const winrt::Microsoft::ReactNative::Composition::Input::KeyboardSource &source,
-    const winrt::Microsoft::ReactNative::Composition::Input::KeyRoutedEventArgs &args) noexcept {
-  auto eventCode = CodeFromVirtualKey(args.Key());
-  bool fShift = source.GetKeyState(winrt::Windows::System::VirtualKey::Shift) !=
-      winrt::Windows::UI::Core::CoreVirtualKeyStates::None;
-  bool fAlt = source.GetKeyState(winrt::Windows::System::VirtualKey::Menu) !=
-      winrt::Windows::UI::Core::CoreVirtualKeyStates::None;
-  bool fCtrl = source.GetKeyState(winrt::Windows::System::VirtualKey::Control) !=
-      winrt::Windows::UI::Core::CoreVirtualKeyStates::None;
-  bool fMeta = (source.GetKeyState(winrt::Windows::System::VirtualKey::LeftWindows) !=
-                winrt::Windows::UI::Core::CoreVirtualKeyStates::None) ||
-      (source.GetKeyState(winrt::Windows::System::VirtualKey::RightWindows) !=
-       winrt::Windows::UI::Core::CoreVirtualKeyStates::None);
-
-  if (args.OriginalSource() == tag()) {
-    facebook::react::KeyEvent event;
-    event.shiftKey = fShift;
-    event.ctrlKey = fCtrl;
-    event.altKey = fAlt;
-    event.metaKey = fMeta;
-
-    event.key = FromVirtualKey(args.Key(), event.shiftKey, !!(GetKeyState(VK_CAPITAL) & 1));
-    event.code = eventCode;
-    m_eventEmitter->onKeyDown(event);
-  }
-
-  for (const auto &handledKey : m_props->keyDownEvents) {
-    if (handledKey.code == eventCode && handledKey.altKey == fAlt && handledKey.ctrlKey == fCtrl &&
-        handledKey.metaKey == fMeta && handledKey.shiftKey == fShift &&
-        handledKey.handledEventPhase == facebook::react::HandledEventPhase::Bubbling) {
-      // Stop bubbling event if marked as handled from JS
-      args.Handled(true);
-    }
-  }
-
-  Super::onKeyDown(source, args);
-}
-
 void CompositionViewComponentView::onKeyUp(
     const winrt::Microsoft::ReactNative::Composition::Input::KeyboardSource &source,
     const winrt::Microsoft::ReactNative::Composition::Input::KeyRoutedEventArgs &args) noexcept {
@@ -1480,7 +1441,7 @@ void CompositionViewComponentView::onKeyDown(
        winrt::Windows::UI::Core::CoreVirtualKeyStates::None);
 
   if (args.OriginalSource() == tag()) {
-    facebook::react::KeyboardEvent event;
+    facebook::react::KeyEvent event;
     event.shiftKey = fShift;
     event.ctrlKey = fCtrl;
     event.altKey = fAlt;
@@ -1494,52 +1455,13 @@ void CompositionViewComponentView::onKeyDown(
   for (const auto &handledKey : m_props->keyDownEvents) {
     if (handledKey.code == eventCode && handledKey.altKey == fAlt && handledKey.ctrlKey == fCtrl &&
         handledKey.metaKey == fMeta && handledKey.shiftKey == fShift &&
-        handledKey.eventPhase == facebook::react::HandledKeyEvent ::EventPhase::Bubbling) {
+        handledKey.handledEventPhase == facebook::react::HandledEventPhase::Bubbling) {
       // Stop bubbling event if marked as handled from JS
       args.Handled(true);
     }
   }
 
   Super::onKeyDown(source, args);
-}
-
-void CompositionViewComponentView::onKeyUp(
-    const winrt::Microsoft::ReactNative::Composition::Input::KeyboardSource &source,
-    const winrt::Microsoft::ReactNative::Composition::Input::KeyRoutedEventArgs &args) noexcept {
-  auto eventCode = CodeFromVirtualKey(args.Key());
-  bool fShift = source.GetKeyState(winrt::Windows::System::VirtualKey::LeftShift) !=
-      winrt::Windows::UI::Core::CoreVirtualKeyStates::None;
-  bool fAlt = source.GetKeyState(winrt::Windows::System::VirtualKey::LeftMenu) !=
-      winrt::Windows::UI::Core::CoreVirtualKeyStates::None;
-  bool fCtrl = source.GetKeyState(winrt::Windows::System::VirtualKey::LeftControl) !=
-      winrt::Windows::UI::Core::CoreVirtualKeyStates::None;
-  bool fMeta = (source.GetKeyState(winrt::Windows::System::VirtualKey::LeftWindows) !=
-                winrt::Windows::UI::Core::CoreVirtualKeyStates::None) ||
-      (source.GetKeyState(winrt::Windows::System::VirtualKey::RightWindows) !=
-       winrt::Windows::UI::Core::CoreVirtualKeyStates::None);
-
-  if (args.OriginalSource() == tag()) {
-    facebook::react::KeyboardEvent event;
-    event.shiftKey = fShift;
-    event.ctrlKey = fCtrl;
-    event.altKey = fAlt;
-    event.metaKey = fMeta;
-
-    event.key = FromVirtualKey(args.Key(), event.shiftKey, !!(GetKeyState(VK_CAPITAL) & 1));
-    event.code = eventCode;
-    m_eventEmitter->onKeyUp(event);
-  }
-
-  for (const auto &handledKey : m_props->keyUpEvents) {
-    if (handledKey.code == eventCode && handledKey.altKey == fAlt && handledKey.ctrlKey == fCtrl &&
-        handledKey.metaKey == fMeta && handledKey.shiftKey == fShift &&
-        handledKey.eventPhase == facebook::react::HandledKeyEvent ::EventPhase::Bubbling) {
-      // Stop bubbling event if marked as handled from JS
-      args.Handled(true);
-    }
-  }
-
-  Super::onKeyUp(source, args);
 }
 
 void CompositionViewComponentView::updateState(
