@@ -7,7 +7,6 @@ import "CompositionSwitcher.idl";
 import "IJSValueReader.idl";
 import "IReactContext.idl";
 import "ViewProps.idl";
-import "Composition.Input.idl";
 
 namespace Microsoft.ReactNative.Composition
 {
@@ -88,6 +87,7 @@ namespace Microsoft.ReactNative.Composition
 
     DOC_STRING("Used to handle key down events when this component is focused, or if a child component did not handle the key down")
     void SetKeyDownHandler(KeyHandler impl);
+
     DOC_STRING("Used to handle key up events when this component is focused, or if a child component did not handle the key up")
     void SetKeyUpHandler(KeyHandler impl);
   };
