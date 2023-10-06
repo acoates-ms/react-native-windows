@@ -29,8 +29,10 @@
 #include <winrt/Microsoft.UI.Windowing.h>
 #include <winrt/microsoft.ui.interop.h>
 
+#if USE_WINUI3
 winrt::Microsoft::UI::Dispatching::DispatcherQueueController g_liftedDispatcherQueueController{nullptr};
 winrt::Microsoft::UI::Composition::Compositor g_liftedCompositor{nullptr};
+#endif
 HWND g_hwndTopLevel;
 
 /*
