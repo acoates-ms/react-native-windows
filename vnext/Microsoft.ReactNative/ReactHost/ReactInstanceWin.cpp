@@ -89,7 +89,6 @@
 #include <CreateModules.h>
 #include <Utils/Helpers.h>
 #include <react/renderer/runtimescheduler/RuntimeScheduler.h>
-#include <react/renderer/runtimescheduler/RuntimeSchedulerBinding.h>
 #include "CrashManager.h"
 #include "JsiApi.h"
 #include "ReactCoreInjection.h"
@@ -564,11 +563,15 @@ void ReactInstanceWin::Initialize() noexcept {
             devSettings->useWebSocketTurboModule = winrt::unbox_value_or(useWebSocketTurboModulePropValue, false);
             auto bundleRootPath = devSettings->bundleRootPath;
             auto jsiRuntimeHolder = devSettings->jsiRuntimeHolder;
+            auto instance = strongThis->m_instance.Load();
+            const auto runtimeExecutor = instance->getRuntimeExecutor();
+            const auto runtimeScheduler = std::make_shared<facebook::react::RuntimeScheduler>(runtimeExecutor);
             auto instanceWrapper = facebook::react::CreateReactInstance(
-                std::shared_ptr<facebook::react::Instance>(strongThis->m_instance.Load()),
+                std::move(instance),
                 std::move(bundleRootPath), // bundleRootPath
                 std::move(cxxModules),
                 m_options.TurboModuleProvider,
+                runtimeScheduler,
                 m_options.TurboModuleProvider->LongLivedObjectCollection(),
                 std::make_unique<BridgeUIBatchInstanceCallback>(weakThis),
                 m_jsMessageThread.Load(),
@@ -586,6 +589,7 @@ void ReactInstanceWin::Initialize() noexcept {
                                                   instanceWrapper = m_instanceWrapper.Load(),
                                                   instance = m_instance.Load(),
                                                   turboModuleProvider = m_options.TurboModuleProvider,
+                                                  runtimeScheduler = std::move(runtimeScheduler),
                                                   useWebDebugger = m_options.UseWebDebugger()]() noexcept {
               if (!useWebDebugger) {
 #ifdef USE_FABRIC
@@ -596,12 +600,6 @@ void ReactInstanceWin::Initialize() noexcept {
 
                 if (winrt::Microsoft::ReactNative::implementation::QuirkSettings::GetUseRuntimeScheduler(
                         winrt::Microsoft::ReactNative::ReactPropertyBag(reactContext->Properties()))) {
-                  std::shared_ptr<facebook::react::RuntimeScheduler> runtimeScheduler =
-                      std::make_shared<facebook::react::RuntimeScheduler>(
-                          instanceWrapper->GetInstance()->getRuntimeExecutor());
-
-                  facebook::react::RuntimeSchedulerBinding::createAndInstallIfNeeded(
-                      *jsiRuntimeHolder->getRuntime().get(), runtimeScheduler);
                   Microsoft::ReactNative::SchedulerSettings::SetRuntimeScheduler(
                       ReactPropertyBag(reactContext->Properties()), runtimeScheduler);
                 }
