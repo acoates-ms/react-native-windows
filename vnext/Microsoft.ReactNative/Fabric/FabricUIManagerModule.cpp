@@ -108,7 +108,15 @@ void FabricUIManager::installFabricUIManager() noexcept {
             facebook::react::ComponentDescriptorParameters{eventDispatcher, contextContainer, nullptr}));
     return registry;
   };
-  toolbox.runtimeExecutor = runtimeExecutor;
+
+  if (auto runtimeScheduler = SchedulerSettings::RuntimeSchedulerFromProperties(m_context.Properties())) {
+    toolbox.runtimeExecutor = [runtimeScheduler](std::function<void(facebook::jsi::Runtime & runtime)> &&callback) {
+      runtimeScheduler->scheduleWork(std::move(callback));
+    };
+  } else {
+    toolbox.runtimeExecutor = runtimeExecutor;
+  }
+
   toolbox.asynchronousEventBeatFactory = asynchronousBeatFactory;
   toolbox.backgroundExecutor = [context = m_context,
                                 dispatcher = Mso::DispatchQueue::MakeLooperQueue()](std::function<void()> &&callback) {
