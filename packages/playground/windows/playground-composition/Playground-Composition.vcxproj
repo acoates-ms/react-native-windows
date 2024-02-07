@@ -134,13 +134,13 @@
     <!-- Island-support: Needed to run Markup Compiler on App.xaml and make the generated files -->
     <ApplicationDefinition Include="App.xaml" />
   </ItemGroup>
-    <ItemGroup>
+  <ItemGroup>
     <Midl Include="App.idl">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Midl>
-    <Midl Include="CustomComponent.idl"/>
-    <Midl Include="YogaXamlPanel.idl"/>
+    <Midl Include="CustomComponent.idl" />
+    <Midl Include="YogaXamlPanel.idl" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="$(ReactNativeWindowsDir)Folly\Folly.natvis" />

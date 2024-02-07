@@ -47,3 +47,27 @@ To debug the javascript code:
 1. Ensure `localhost:9229` is in the list of network targets within the "Discover Network Targets" configuration.
 1. A remote target for "Hermes" should show up.  Click on "inspect"
 1. In the Microsoft Edge Devtools window that pops up, you can hit Ctrl+p and type the name of a file to set a break point in.
+
+
+## Change version of WinAppSDK:
+
+To revert back to using WinAppSDK 1.4, change the value of `UseExperimentalWinUI3` in `packages\playground\windows\ExperimentalFeatures.props` to false.
+To switch to another experimental version, in `vnext\PropertySheets\WinUI.props` change the value of `WinUI3Version` that is set when `UseExperimentalWinUI3` is true.  If the version is not published on Nuget.org, you will also need to update `NuGet.Config` in the root of the repo to point to the Nuget feed that does contain that version.
+
+## Debug the creation of the XamlIsland
+
+In `packages\playground\windows\playground-composition\CustomComponent.cpp`
+
+We create the XamlIsland in `CustomComponent::CreateVisual`
+The layout position / size information is provided to the component through `CustomComponent::UpdateLayoutMetrics`
+On initial load, and if the JS render of the component changes with new properties being set that will trigger an additional call to `CustomComponent::UpdateProps`
+
+## Debug creation of the ReactNative compositor
+
+In `packages\playground\windows\playground-composition\Playground-Composition.cpp`
+
+`m_useLiftedComposition` is the flag controlled by the checkbox in the settings dialog, which controls if the app will run with lifted composition, or system composition.
+
+`WindowData::OnCommand` IDM_OPENJSFILE will create and load RN.  After some configuration of the RNW host, it will create a ICompositionContext which provides access to the compositor to RNW.  There are two public implementations of ICompositionContext.  `MicrosoftCompositionContextHelper`, which wraps an instance of a lift composition, and `WindowsCompositionContextHelper` which wraps an instance of a system compositor.  Depending on the value of `m_useLiftedComposition`, playground will create one or the other.
+
+`host.PackageProviders().Append(winrt::make<CompReactPackageProvider>());`  -- This code registers the custom components provided by Playground CustomComponent.cpp, which include the XamlIslands.  Note we only currently call this function when not running against lifted composition, since XamlIslands do not currently work within a lifted composition tree.
