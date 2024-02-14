@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "UseViewManager.h"
 #include "UseViewManager.g.cpp"
+#include "UseViewManager.h"
 
 using namespace winrt;
 using namespace Microsoft::ReactNative;

@@ -12,46 +12,47 @@ using namespace Microsoft::ReactNative;
 
 namespace winrt::RNSVG::implementation {
 
+RectProps::RectProps(const winrt::Microsoft::ReactNative::ViewProps &props) : base_type(props) {}
 
-    RectProps::RectProps(const winrt::Microsoft::ReactNative::ViewProps& props) : base_type(props)
-    {
-    }
+void RectProps::SetProp(
+    uint32_t hash,
+    winrt::hstring propName,
+    winrt::Microsoft::ReactNative::IJSValueReader value) noexcept {
+  winrt::Microsoft::ReactNative::ReadProp(hash, propName, value, *this);
+}
 
-    void RectProps::SetProp(uint32_t hash, winrt::hstring propName, winrt::Microsoft::ReactNative::IJSValueReader value) noexcept
-    {
-        winrt::Microsoft::ReactNative::ReadProp(hash, propName, value, *this);
-    }
+RectView::RectView(const winrt::Microsoft::ReactNative::CreateComponentViewArgs &args) : base_type(args) {}
 
+void RectView::UpdateProperties(
+    const winrt::Microsoft::ReactNative::IComponentProps &props,
+    const winrt::Microsoft::ReactNative::IComponentProps &oldProps,
+    bool forceUpdate,
+    bool invalidate) noexcept {
+  m_props = props.as<RectProps>();
 
-RectView::RectView(const winrt::Microsoft::ReactNative::CreateComponentViewArgs& args) : base_type(args) {}
+  /*
+const JSValueObject &propertyMap{JSValue::ReadObjectFrom(reader)};
 
-void RectView::UpdateProperties(const winrt::Microsoft::ReactNative::IComponentProps& props, const winrt::Microsoft::ReactNative::IComponentProps& oldProps, bool forceUpdate, bool invalidate) noexcept
-{
-    m_props = props.as<RectProps>();
+for (auto const &pair : propertyMap) {
+  auto const &propertyName{pair.first};
+  auto const &propertyValue{pair.second};
 
-    /*
-  const JSValueObject &propertyMap{JSValue::ReadObjectFrom(reader)};
-
-  for (auto const &pair : propertyMap) {
-    auto const &propertyName{pair.first};
-    auto const &propertyValue{pair.second};
-
-    assert(false);
-    if (propertyName == "width") {
-      m_width = SVGLength::From(propertyValue);
-    } else if (propertyName == "height") {
-      m_height = SVGLength::From(propertyValue);
-    } else if (propertyName == "x") {
-      m_x = SVGLength::From(propertyValue);
-    } else if (propertyName == "y") {
-      m_y = SVGLength::From(propertyValue);
-    } else if (propertyName == "rx") {
-      m_rx = SVGLength::From(propertyValue);
-    } else if (propertyName == "ry") {
-      m_ry = SVGLength::From(propertyValue);
-    }
+  assert(false);
+  if (propertyName == "width") {
+    m_width = SVGLength::From(propertyValue);
+  } else if (propertyName == "height") {
+    m_height = SVGLength::From(propertyValue);
+  } else if (propertyName == "x") {
+    m_x = SVGLength::From(propertyValue);
+  } else if (propertyName == "y") {
+    m_y = SVGLength::From(propertyValue);
+  } else if (propertyName == "rx") {
+    m_rx = SVGLength::From(propertyValue);
+  } else if (propertyName == "ry") {
+    m_ry = SVGLength::From(propertyValue);
   }
-  */
+}
+*/
   base_type::UpdateProperties(props, oldProps, forceUpdate, invalidate);
 }
 
@@ -80,23 +81,16 @@ void RectView::CreateGeometry() {
   Geometry(make<RNSVG::implementation::D2DGeometry>(geometry.as<ID2D1Geometry>()));
 }
 
-
-void RectView::RegisterComponent(const winrt::Microsoft::ReactNative::IReactPackageBuilderFabric& builder) noexcept
-{
-    builder.AddViewComponent(
-        L"RNSVGRect",
-        [](winrt::Microsoft::ReactNative::IReactViewComponentBuilder const& builder) noexcept
-    {
-        builder.SetCreateProps([](winrt::Microsoft::ReactNative::ViewProps props) noexcept
-        {
-            return winrt::make<winrt::RNSVG::implementation::RectProps>(props);
+void RectView::RegisterComponent(const winrt::Microsoft::ReactNative::IReactPackageBuilderFabric &builder) noexcept {
+  builder.AddViewComponent(
+      L"RNSVGRect", [](winrt::Microsoft::ReactNative::IReactViewComponentBuilder const &builder) noexcept {
+        builder.SetCreateProps([](winrt::Microsoft::ReactNative::ViewProps props) noexcept {
+          return winrt::make<winrt::RNSVG::implementation::RectProps>(props);
         });
-        builder.SetCreateComponentView(
-            [](const winrt::Microsoft::ReactNative::CreateComponentViewArgs& args) noexcept
-        {
-            return winrt::make<winrt::RNSVG::implementation::RectView>(args);
+        builder.SetCreateComponentView([](const winrt::Microsoft::ReactNative::CreateComponentViewArgs &args) noexcept {
+          return winrt::make<winrt::RNSVG::implementation::RectView>(args);
         });
-    });
+      });
 }
 
 } // namespace winrt::RNSVG::implementation

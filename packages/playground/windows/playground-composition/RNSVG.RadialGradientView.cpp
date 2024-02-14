@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "RadialGradientView.h"
 #include "RadialGradientView.g.cpp"
+#include "RadialGradientView.h"
 
 #include "Utils.h"
 
@@ -35,7 +35,7 @@ void RadialGradientView::UpdateProperties(IJSValueReader const &reader, bool for
       m_transform = Utils::JSValueAsD2DTransform(propertyValue);
 
       if (propertyValue.IsNull()) {
-       m_transform = D2D1::Matrix3x2F::Identity();
+        m_transform = D2D1::Matrix3x2F::Identity();
       }
     }
   }
@@ -56,7 +56,8 @@ void RadialGradientView::CreateBrush() {
   com_ptr<ID2D1DeviceContext> deviceContext{get_self<D2DDeviceContext>(root.DeviceContext())->Get()};
 
   winrt::com_ptr<ID2D1GradientStopCollection> stopCollection;
-  winrt::check_hresult(deviceContext->CreateGradientStopCollection(&m_stops[0], static_cast<uint32_t>(m_stops.size()), stopCollection.put()));
+  winrt::check_hresult(deviceContext->CreateGradientStopCollection(
+      &m_stops[0], static_cast<uint32_t>(m_stops.size()), stopCollection.put()));
 
   D2D1_RADIAL_GRADIENT_BRUSH_PROPERTIES brushProperties{};
   winrt::com_ptr<ID2D1RadialGradientBrush> radialBrush;

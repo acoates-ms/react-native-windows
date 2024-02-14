@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "LinearGradientView.h"
 #include "LinearGradientView.g.cpp"
+#include "LinearGradientView.h"
 
 #include "Utils.h"
 
@@ -52,7 +52,8 @@ void LinearGradientView::CreateBrush() {
   com_ptr<ID2D1DeviceContext> deviceContext{get_self<D2DDeviceContext>(root.DeviceContext())->Get()};
 
   winrt::com_ptr<ID2D1GradientStopCollection> stopCollection;
-  winrt::check_hresult(deviceContext->CreateGradientStopCollection(&m_stops[0], static_cast<uint32_t>(m_stops.size()), stopCollection.put()));
+  winrt::check_hresult(deviceContext->CreateGradientStopCollection(
+      &m_stops[0], static_cast<uint32_t>(m_stops.size()), stopCollection.put()));
 
   Size size{static_cast<float>(root.ActualWidth()), static_cast<float>(root.ActualHeight())};
 
@@ -61,7 +62,8 @@ void LinearGradientView::CreateBrush() {
   brushProperties.endPoint = {size.Width, size.Height};
 
   winrt::com_ptr<ID2D1LinearGradientBrush> linearBrush;
-  winrt::check_hresult(deviceContext->CreateLinearGradientBrush(brushProperties, stopCollection.get(), linearBrush.put()));
+  winrt::check_hresult(
+      deviceContext->CreateLinearGradientBrush(brushProperties, stopCollection.get(), linearBrush.put()));
 
   SetPoints(linearBrush.get(), {0, 0, size.Width, size.Height});
 
@@ -77,7 +79,7 @@ void LinearGradientView::UpdateBounds() {
   }
 }
 
-void LinearGradientView::SetPoints(ID2D1LinearGradientBrush * brush, D2D1_RECT_F bounds) {
+void LinearGradientView::SetPoints(ID2D1LinearGradientBrush *brush, D2D1_RECT_F bounds) {
   float width{D2DHelpers::WidthFromD2DRect(bounds)};
   float height{D2DHelpers::HeightFromD2DRect(bounds)};
 

@@ -38,11 +38,11 @@ namespace Microsoft::ReactNative {
 extern const char AbiComponentName[];
 
 class AbiShadowNode final : public facebook::react::ConcreteShadowNode<
-                                    AbiComponentName,
-                                    facebook::react::ShadowNode,
-                                    AbiViewProps, // TODO make non-view props object
-                                    facebook::react::EventEmitter,
-                                    Microsoft::ReactNative::AbiStateData> {
+                                AbiComponentName,
+                                facebook::react::ShadowNode,
+                                AbiViewProps, // TODO make non-view props object
+                                facebook::react::EventEmitter,
+                                Microsoft::ReactNative::AbiStateData> {
  public:
   using ConcreteShadowNode::ConcreteShadowNode;
 

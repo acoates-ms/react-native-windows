@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "CircleView.h"
 #include "CircleView.g.cpp"
+#include "CircleView.h"
 
 #include "JSValueXaml.h"
 #include "Utils.h"
@@ -30,7 +30,7 @@ void CircleView::UpdateProperties(IJSValueReader const &reader, bool forceUpdate
 
 void CircleView::CreateGeometry() {
   auto const root{SvgRoot()};
-  
+
   float cx{Utils::GetAbsoluteLength(m_cx, root.ActualWidth())};
   float cy{Utils::GetAbsoluteLength(m_cy, root.ActualHeight())};
   float r{Utils::GetAbsoluteLength(m_r, Utils::GetCanvasDiagonal(root.ActualSize()))};

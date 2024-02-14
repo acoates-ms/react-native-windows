@@ -34,7 +34,7 @@ struct PatternView : PatternViewT<PatternView, RNSVG::implementation::BrushView>
   // Helpers
   void CreateBrush(D2D1_RECT_F rect);
   D2D1_RECT_F GetAdjustedRect(D2D1_RECT_F bounds);
-  winrt::com_ptr<ID2D1CommandList> GetCommandList(ID2D1Device* device, D2D1_RECT_F elRect);
+  winrt::com_ptr<ID2D1CommandList> GetCommandList(ID2D1Device *device, D2D1_RECT_F elRect);
 };
 } // namespace winrt::RNSVG::implementation
 

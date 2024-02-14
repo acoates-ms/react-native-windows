@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "ClipPathViewManager.h"
 #include "ClipPathViewManager.g.cpp"
+#include "ClipPathViewManager.h"
 
 using namespace winrt;
 using namespace Microsoft::ReactNative;

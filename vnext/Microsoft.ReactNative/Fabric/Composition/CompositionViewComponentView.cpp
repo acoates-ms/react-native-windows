@@ -1687,7 +1687,7 @@ void ViewComponentView::updateLayoutMetrics(
   base_type::updateLayoutMetrics(layoutMetrics, oldLayoutMetrics);
 }
 
-void ViewComponentView::UpdateLayoutMetrics(const LayoutMetrics& metrics, const LayoutMetrics& oldMetrics) noexcept {
+void ViewComponentView::UpdateLayoutMetrics(const LayoutMetrics &metrics, const LayoutMetrics &oldMetrics) noexcept {
   m_visual.Size({metrics.Frame.Width * metrics.PointScaleFactor, metrics.Frame.Height * metrics.PointScaleFactor});
 }
 

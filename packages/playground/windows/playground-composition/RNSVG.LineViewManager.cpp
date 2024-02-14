@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "LineViewManager.h"
 #include "LineViewManager.g.cpp"
+#include "LineViewManager.h"
 
 using namespace winrt;
 using namespace Microsoft::ReactNative;

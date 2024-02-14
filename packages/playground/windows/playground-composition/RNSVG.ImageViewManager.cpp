@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "ImageViewManager.h"
 #include "ImageViewManager.g.cpp"
+#include "ImageViewManager.h"
 
 using namespace winrt;
 using namespace Microsoft::ReactNative;
@@ -31,4 +31,4 @@ IMapView<hstring, ViewManagerPropertyType> ImageViewManager::NativeProps() {
 
   return nativeProps.GetView();
 }
-}
+} // namespace winrt::RNSVG::implementation

@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "TSpanView.h"
 #include "TSpanView.g.cpp"
+#include "TSpanView.h"
 
 #include <codecvt>
 
@@ -43,9 +43,7 @@ void TSpanView::Draw(RNSVG::D2DDeviceContext const &context, Size const &size) {
 
   com_ptr<IDWriteFactory> dwriteFactory;
   check_hresult(DWriteCreateFactory(
-      DWRITE_FACTORY_TYPE_SHARED,
-      __uuidof(IDWriteFactory),
-      reinterpret_cast<::IUnknown **>(dwriteFactory.put_void())));
+      DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<::IUnknown **>(dwriteFactory.put_void())));
 
   com_ptr<IDWriteTextFormat> textFormat;
   check_hresult(dwriteFactory->CreateTextFormat(

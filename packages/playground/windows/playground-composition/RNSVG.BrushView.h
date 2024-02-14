@@ -1,16 +1,18 @@
 #pragma once
 #include "RNSVG.BrushView.g.h"
-#include "RNSVG.GroupView.h"
 #include "RNSVG.D2DBrush.h"
+#include "RNSVG.GroupView.h"
 
 namespace winrt::RNSVG::implementation {
 struct BrushView : BrushViewT<BrushView, RNSVG::implementation::GroupView> {
  public:
-  BrushView(const winrt::Microsoft::ReactNative::CreateComponentViewArgs& args);
+  BrushView(const winrt::Microsoft::ReactNative::CreateComponentViewArgs &args);
 
   void SaveDefinition();
 
-  RNSVG::D2DBrush Brush() { return m_brush; }
+  RNSVG::D2DBrush Brush() {
+    return m_brush;
+  }
   virtual void CreateBrush() {}
   virtual void Unload();
   void SetBounds(Windows::Foundation::Rect const &rect);

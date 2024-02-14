@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "CircleViewManager.h"
 #include "CircleViewManager.g.cpp"
+#include "CircleViewManager.h"
 
 using namespace winrt;
 using namespace Microsoft::ReactNative;

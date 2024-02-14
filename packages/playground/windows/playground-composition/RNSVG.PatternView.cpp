@@ -1,9 +1,9 @@
 #include "pch.h"
-#include "PatternView.h"
 #include "PatternView.g.cpp"
+#include "PatternView.h"
 
-#include "Utils.h"
 #include "D2DDevice.h"
+#include "Utils.h"
 
 using namespace winrt;
 using namespace Microsoft::ReactNative;
@@ -70,7 +70,8 @@ void PatternView::UpdateBounds() {
 void PatternView::CreateBrush() {
   auto const root{SvgRoot()};
 
-  D2D1_RECT_F elRect{GetAdjustedRect({0, 0, static_cast<float>(root.ActualWidth()), static_cast<float>(root.ActualHeight())})};
+  D2D1_RECT_F elRect{
+      GetAdjustedRect({0, 0, static_cast<float>(root.ActualWidth()), static_cast<float>(root.ActualHeight())})};
   CreateBrush(elRect);
 }
 
@@ -108,7 +109,7 @@ D2D1_RECT_F PatternView::GetAdjustedRect(D2D1_RECT_F bounds) {
   return {x, y, adjWidth + x, adjHeight + y};
 }
 
-com_ptr<ID2D1CommandList> PatternView::GetCommandList(ID2D1Device* device, D2D1_RECT_F rect) {
+com_ptr<ID2D1CommandList> PatternView::GetCommandList(ID2D1Device *device, D2D1_RECT_F rect) {
   com_ptr<ID2D1DeviceContext> deviceContext;
   check_hresult(device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, deviceContext.put()));
 
@@ -123,17 +124,9 @@ com_ptr<ID2D1CommandList> PatternView::GetCommandList(ID2D1Device* device, D2D1_
   auto transform{D2D1::Matrix3x2F::Identity()};
 
   if (m_align != "") {
-    Rect vbRect{
-        m_minX,
-        m_minY,
-        (m_vbWidth + m_minX),
-        (m_vbHeight + m_minY)};
+    Rect vbRect{m_minX, m_minY, (m_vbWidth + m_minX), (m_vbHeight + m_minY)};
 
-    auto viewboxTransform{Utils::GetViewBoxTransform(
-        vbRect,
-        D2DHelpers::FromD2DRect(rect),
-        m_align,
-        m_meetOrSlice)};
+    auto viewboxTransform{Utils::GetViewBoxTransform(vbRect, D2DHelpers::FromD2DRect(rect), m_align, m_meetOrSlice)};
 
     transform = D2DHelpers::AsD2DTransform(viewboxTransform) * transform;
   }
@@ -151,7 +144,5 @@ com_ptr<ID2D1CommandList> PatternView::GetCommandList(ID2D1Device* device, D2D1_
 
   return cmdList;
 }
-
-
 
 } // namespace winrt::RNSVG::implementation

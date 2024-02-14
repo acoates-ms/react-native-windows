@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "TSpanViewManager.h"
 #include "TSpanViewManager.g.cpp"
+#include "TSpanViewManager.h"
 
 using namespace winrt;
 using namespace Microsoft::ReactNative;
@@ -23,4 +23,4 @@ Windows::Foundation::Collections::IMapView<hstring, ViewManagerPropertyType> TSp
 
   return nativeProps.GetView();
 }
-}
+} // namespace winrt::RNSVG::implementation

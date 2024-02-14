@@ -4,8 +4,8 @@
 #include "PathView.g.cpp"
 #endif
 
-#include "d2d1svg.h"
 #include <cctype>
+#include "d2d1svg.h"
 
 #include "JSValueXaml.h"
 #include "Utils.h"
@@ -28,11 +28,10 @@ void PathView::UpdateProperties(IJSValueReader const &reader, bool forceUpdate, 
       if (propertyValue.IsNull()) {
         m_d.clear();
       } else {
-
         m_d = propertyValue.AsString();
         ParsePath();
       }
-    } 
+    }
   }
 
   __super::UpdateProperties(reader, forceUpdate, invalidate);
@@ -42,7 +41,8 @@ void PathView::CreateGeometry() {
   auto const &root{SvgRoot()};
 
   com_ptr<ID2D1SvgDocument> doc;
-  com_ptr<ID2D1DeviceContext5> deviceContext{get_self<D2DDeviceContext>(root.DeviceContext())->Get().as<ID2D1DeviceContext5>()};
+  com_ptr<ID2D1DeviceContext5> deviceContext{
+      get_self<D2DDeviceContext>(root.DeviceContext())->Get().as<ID2D1DeviceContext5>()};
 
   check_hresult(deviceContext->CreateSvgDocument(
       nullptr,
@@ -186,13 +186,13 @@ void PathView::SkipSpaces(size_t &index) {
   }
 }
 
-void PathView::SkipDigits(size_t& index) {
+void PathView::SkipDigits(size_t &index) {
   while (index < m_d.length() && IsDigit(m_d.at(index))) {
     ++index;
   }
 }
 
-void PathView::SkipListSeparator(size_t& index) {
+void PathView::SkipListSeparator(size_t &index) {
   if (index < m_d.length() && m_d.at(index) == ',') {
     ++index;
   }
@@ -202,7 +202,7 @@ bool PathView::IsCommand(char const &cmd) {
   return m_cmds.find(cmd) != m_cmds.end();
 }
 
-bool PathView::IsNumberStart(char const& c) {
+bool PathView::IsNumberStart(char const &c) {
   return IsDigit(c) || c == '.' || c == '-' || c == '+';
 }
 
@@ -214,7 +214,7 @@ bool PathView::IsUpper(char const &c) {
   return std::isupper(static_cast<unsigned char>(c));
 }
 
-bool PathView::IsSpace(char const& c) {
+bool PathView::IsSpace(char const &c) {
   return std::isspace(static_cast<unsigned char>(c));
 }
 
@@ -293,7 +293,7 @@ float PathView::ParseNumber(size_t &index) {
   return result;
 }
 
-float PathView::ParseFlag(size_t& index) {
+float PathView::ParseFlag(size_t &index) {
   SkipSpaces(index);
 
   char c = m_d.at(index);

@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "LinearGradientViewManager.h"
 #include "LinearGradientViewManager.g.cpp"
+#include "LinearGradientViewManager.h"
 
 using namespace winrt;
 using namespace Microsoft::ReactNative;
@@ -12,7 +12,7 @@ LinearGradientViewManager::LinearGradientViewManager() {
 }
 
 IMapView<hstring, ViewManagerPropertyType> LinearGradientViewManager::NativeProps() {
-  auto const& parentProps{__super::NativeProps()};
+  auto const &parentProps{__super::NativeProps()};
   auto const &nativeProps{winrt::single_threaded_map<hstring, ViewManagerPropertyType>()};
 
   for (auto const &prop : parentProps) {

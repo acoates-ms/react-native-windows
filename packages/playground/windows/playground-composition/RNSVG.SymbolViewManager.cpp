@@ -1,12 +1,11 @@
 #include "pch.h"
-#include "SymbolViewManager.h"
 #include "SymbolViewManager.g.cpp"
+#include "SymbolViewManager.h"
 
 using namespace winrt;
 using namespace Microsoft::ReactNative;
 
-namespace winrt::RNSVG::implementation
-{
+namespace winrt::RNSVG::implementation {
 SymbolViewManager::SymbolViewManager() {
   m_class = RNSVG::SVGClass::RNSVGSymbol;
   m_name = L"RNSVGSymbol";
@@ -29,4 +28,4 @@ IMapView<hstring, ViewManagerPropertyType> SymbolViewManager::NativeProps() {
 
   return nativeProps.GetView();
 }
-}
+} // namespace winrt::RNSVG::implementation

@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "SymbolView.h"
 #include "SymbolView.g.cpp"
+#include "SymbolView.h"
 
 #include "Utils.h"
 

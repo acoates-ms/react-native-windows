@@ -51,7 +51,8 @@ void ReactCompositionViewComponentBuilder::SetCreateComponentView(ComponentViewF
   assert(!m_createView); // Only SetCreateComponentView OR SetCreateViewComponentView should be called
 }
 
-void ReactCompositionViewComponentBuilder::SetCreateViewComponentView(CompositionViewComponentViewFactory impl) noexcept {
+void ReactCompositionViewComponentBuilder::SetCreateViewComponentView(
+    CompositionViewComponentViewFactory impl) noexcept {
   m_createView = impl;
   assert(!m_createComponentView); // Only SetCreateComponentView OR SetCreateViewComponentView should be called
 }
@@ -96,14 +97,13 @@ winrt::Microsoft::ReactNative::ComponentView ReactCompositionViewComponentBuilde
     const IReactContext &reactContext,
     int32_t tag,
     const ICompositionContext &context) noexcept {
-
   if (m_createView) {
-  auto args = winrt::make<implementation::CreateCompositionComponentViewArgs>(reactContext, tag, context);
-  return m_createView(args);
+    auto args = winrt::make<implementation::CreateCompositionComponentViewArgs>(reactContext, tag, context);
+    return m_createView(args);
   } else {
     assert(m_createComponentView);
-  auto args = winrt::make<winrt::Microsoft::ReactNative::implementation::CreateComponentViewArgs>(reactContext, tag);
-  return m_createComponentView(args);
+    auto args = winrt::make<winrt::Microsoft::ReactNative::implementation::CreateComponentViewArgs>(reactContext, tag);
+    return m_createComponentView(args);
   }
 }
 

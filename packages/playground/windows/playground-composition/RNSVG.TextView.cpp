@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "TextView.h"
 #include "TextView.g.cpp"
+#include "TextView.h"
 
 #include "D2DHelpers.h"
 
@@ -55,7 +55,7 @@ void TextView::DrawGroup(RNSVG::D2DDeviceContext const &context, Size const &siz
   if (translateXY) {
     float x{X().Size() > 0 ? X().GetAt(0).Value() : 0};
     float y{Y().Size() > 0 ? Y().GetAt(0).Value() : 0};
-    deviceContext->SetTransform(D2D1::Matrix3x2F::Translation({x,y}) * transform);
+    deviceContext->SetTransform(D2D1::Matrix3x2F::Translation({x, y}) * transform);
   }
   __super::DrawGroup(context, size);
   if (translateXY) {

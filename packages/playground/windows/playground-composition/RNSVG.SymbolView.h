@@ -7,12 +7,24 @@ struct SymbolView : SymbolViewT<SymbolView, RNSVG::implementation::GroupView> {
  public:
   SymbolView() = default;
 
-  float MinX() { return m_minX; }
-  float MinY() { return m_minY; }
-  float VbWidth() { return m_vbWidth; }
-  float VbHeight() { return m_vbHeight; }
-  hstring Align() { return to_hstring(m_align); }
-  RNSVG::MeetOrSlice MeetOrSlice() { return m_meetOrSlice; }
+  float MinX() {
+    return m_minX;
+  }
+  float MinY() {
+    return m_minY;
+  }
+  float VbWidth() {
+    return m_vbWidth;
+  }
+  float VbHeight() {
+    return m_vbHeight;
+  }
+  hstring Align() {
+    return to_hstring(m_align);
+  }
+  RNSVG::MeetOrSlice MeetOrSlice() {
+    return m_meetOrSlice;
+  }
 
   // RenderableView
   void UpdateProperties(Microsoft::ReactNative::IJSValueReader const &reader, bool forceUpdate, bool invalidate);

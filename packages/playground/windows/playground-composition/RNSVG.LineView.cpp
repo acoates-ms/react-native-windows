@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "LineView.h"
 #include "LineView.g.cpp"
+#include "LineView.h"
 
 #include "JSValueXaml.h"
 #include "Utils.h"

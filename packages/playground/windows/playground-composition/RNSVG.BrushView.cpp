@@ -7,7 +7,7 @@
 #include "RNSVG.D2DHelpers.h"
 
 namespace winrt::RNSVG::implementation {
-BrushView::BrushView(const winrt::Microsoft::ReactNative::CreateComponentViewArgs& args) : base_type(args) { }
+BrushView::BrushView(const winrt::Microsoft::ReactNative::CreateComponentViewArgs &args) : base_type(args) {}
 
 void BrushView::SaveDefinition() {
   if (auto const &root{SvgRoot()}) {
@@ -25,7 +25,7 @@ void BrushView::Unload() {
   if (m_brush) {
     m_brush = nullptr;
   }
-  
+
   __super::Unload();
 }
 } // namespace winrt::RNSVG::implementation

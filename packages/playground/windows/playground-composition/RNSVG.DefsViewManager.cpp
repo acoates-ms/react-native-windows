@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "DefsViewManager.h"
 #include "DefsViewManager.g.cpp"
+#include "DefsViewManager.h"
 
 namespace winrt::RNSVG::implementation {
 DefsViewManager::DefsViewManager() {

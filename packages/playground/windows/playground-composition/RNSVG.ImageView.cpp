@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "ImageView.h"
 #include "ImageView.g.cpp"
+#include "ImageView.h"
 
 #include <winrt/Windows.Security.Cryptography.h>
 #include <winrt/Windows.Storage.Streams.h>
@@ -54,7 +54,8 @@ void ImageView::UpdateProperties(IJSValueReader const &reader, bool forceUpdate,
         } else if (key == "headers") {
           m_source.headers.clear();
           for (auto const &header : value.AsObject()) {
-            m_source.headers.push_back(std::make_pair(to_hstring(header.first), to_hstring(Utils::JSValueAsString(header.second))));
+            m_source.headers.push_back(
+                std::make_pair(to_hstring(header.first), to_hstring(Utils::JSValueAsString(header.second))));
           }
         } else if (key == "__packager_asset") {
           m_source.packagerAsset = value.AsBoolean();
@@ -214,8 +215,7 @@ IAsyncAction ImageView::LoadImageSourceAsync(bool invalidate) {
   }
 }
 
-IAsyncOperation<InMemoryRandomAccessStream> ImageView::GetImageMemoryStreamAsync(
-    ImageSource source) {
+IAsyncOperation<InMemoryRandomAccessStream> ImageView::GetImageMemoryStreamAsync(ImageSource source) {
   switch (source.type) {
     case ImageSourceType::Download:
       co_return co_await GetImageStreamAsync(source);
@@ -226,8 +226,7 @@ IAsyncOperation<InMemoryRandomAccessStream> ImageView::GetImageMemoryStreamAsync
   }
 }
 
-IAsyncOperation<InMemoryRandomAccessStream> ImageView::GetImageStreamAsync(
-    ImageSource source) {
+IAsyncOperation<InMemoryRandomAccessStream> ImageView::GetImageStreamAsync(ImageSource source) {
   try {
     co_await resume_background();
 
@@ -263,8 +262,7 @@ IAsyncOperation<InMemoryRandomAccessStream> ImageView::GetImageStreamAsync(
   co_return nullptr;
 }
 
-IAsyncOperation<InMemoryRandomAccessStream> ImageView::GetImageInlineDataAsync(
-    ImageSource source) {
+IAsyncOperation<InMemoryRandomAccessStream> ImageView::GetImageInlineDataAsync(ImageSource source) {
   std::string uri{to_string(source.uri)};
 
   size_t start = uri.find(',');
@@ -296,10 +294,12 @@ com_ptr<IWICBitmapSource> ImageView::wicBitmapSourceFromStream(InMemoryRandomAcc
   }
 
   com_ptr<IWICImagingFactory> imagingFactory;
-  check_hresult(CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(imagingFactory.put())));
+  check_hresult(
+      CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(imagingFactory.put())));
 
   com_ptr<IStream> istream;
-  check_hresult(CreateStreamOverRandomAccessStream(results.as<::IUnknown>().get(), __uuidof(IStream), istream.put_void()));
+  check_hresult(
+      CreateStreamOverRandomAccessStream(results.as<::IUnknown>().get(), __uuidof(IStream), istream.put_void()));
 
   com_ptr<IWICBitmapDecoder> bitmapDecoder;
   if (imagingFactory->CreateDecoderFromStream(
@@ -333,7 +333,6 @@ void ImageView::generateBitmap(InMemoryRandomAccessStream const &results) {
       0.0f,
       WICBitmapPaletteTypeMedianCut));
 
-  check_hresult(
-      imagingFactory->CreateBitmapFromSource(converter.get(), WICBitmapCacheOnLoad, m_wicbitmap.put()));
+  check_hresult(imagingFactory->CreateBitmapFromSource(converter.get(), WICBitmapCacheOnLoad, m_wicbitmap.put()));
 }
 } // namespace winrt::RNSVG::implementation

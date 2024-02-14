@@ -4,7 +4,7 @@
 
 namespace winrt::RNSVG::implementation {
 struct CircleView : CircleViewT<CircleView, RNSVG::implementation::RenderableView> {
- public: 
+ public:
   CircleView() = default;
   void UpdateProperties(Microsoft::ReactNative::IJSValueReader const &reader, bool forceUpdate, bool invalidate);
   void CreateGeometry();

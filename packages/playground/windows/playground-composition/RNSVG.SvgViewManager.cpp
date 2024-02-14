@@ -110,11 +110,11 @@ void SvgViewManager::ReplaceChild(
   }
 }
 
-void SvgViewManager::OnPointerEvent(IInspectable const& view, ReactPointerEventArgs const& args) {
+void SvgViewManager::OnPointerEvent(IInspectable const &view, ReactPointerEventArgs const &args) {
   if (auto const &svgView{view.try_as<RNSVG::SvgView>()}) {
     auto const &group{svgView.Group()};
     if (group.IsResponsible()) {
-      auto const& point{args.Args().GetCurrentPoint(svgView).Position()};
+      auto const &point{args.Args().GetCurrentPoint(svgView).Position()};
       for (auto const &child : group.Children()) {
         if (auto const &target{child.HitTest(point)}) {
           args.Target(target);

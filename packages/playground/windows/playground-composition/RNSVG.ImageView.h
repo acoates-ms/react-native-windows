@@ -40,16 +40,15 @@ struct ImageView : ImageViewT<ImageView, RNSVG::implementation::RenderableView> 
   com_ptr<IWICBitmap> m_wicbitmap;
 
   Windows::Foundation::IAsyncAction LoadImageSourceAsync(bool invalidate);
-  Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::InMemoryRandomAccessStream>
-  GetImageMemoryStreamAsync(ImageSource source);
-  Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::InMemoryRandomAccessStream>
-  GetImageStreamAsync(ImageSource source);
-  Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::InMemoryRandomAccessStream>
-  GetImageInlineDataAsync(ImageSource source);
+  Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::InMemoryRandomAccessStream> GetImageMemoryStreamAsync(
+      ImageSource source);
+  Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::InMemoryRandomAccessStream> GetImageStreamAsync(
+      ImageSource source);
+  Windows::Foundation::IAsyncOperation<Windows::Storage::Streams::InMemoryRandomAccessStream> GetImageInlineDataAsync(
+      ImageSource source);
   com_ptr<IWICBitmapSource> ImageView::wicBitmapSourceFromStream(
       Windows::Storage::Streams::InMemoryRandomAccessStream const &stream);
-  void generateBitmap(
-      Windows::Storage::Streams::InMemoryRandomAccessStream const &results);
+  void generateBitmap(Windows::Storage::Streams::InMemoryRandomAccessStream const &results);
 };
 } // namespace winrt::RNSVG::implementation
 

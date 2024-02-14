@@ -15,7 +15,6 @@ struct ReactCompositionViewComponentBuilder : winrt::implements<
   ReactCompositionViewComponentBuilder() noexcept;
 
  public: // IReactViewComponentBuilder
-
   void SetCreateComponentView(ComponentViewFactory impl) noexcept;
   void SetCreateProps(ViewPropsFactory impl) noexcept;
 

@@ -4,7 +4,7 @@
 
 namespace winrt::RNSVG::implementation {
 struct TSpanView : TSpanViewT<TSpanView, RNSVG::implementation::TextView> {
-public:
+ public:
   TSpanView() = default;
 
   void UpdateProperties(Microsoft::ReactNative::IJSValueReader const &reader, bool forceUpdate, bool invalidate);

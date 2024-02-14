@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "EllipseViewManager.h"
 #include "EllipseViewManager.g.cpp"
+#include "EllipseViewManager.h"
 
 using namespace winrt;
 using namespace Microsoft::ReactNative;

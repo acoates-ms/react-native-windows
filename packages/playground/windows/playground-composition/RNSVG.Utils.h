@@ -5,9 +5,9 @@
 #include <winrt/Windows.Foundation.Numerics.h>
 #include <winrt/Windows.UI.Text.h>
 #include "JSValueReader.h"
-#include "RNSVG.D2DHelpers.h"
 #include "RNSVG.D2DBrush.h"
 #include "RNSVG.D2DDeviceContext.h"
+#include "RNSVG.D2DHelpers.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -17,7 +17,8 @@ using namespace winrt::Microsoft::ReactNative;
 namespace winrt::RNSVG {
 struct Utils {
  public:
-  static std::vector<float> GetAdjustedStrokeArray(IVector<SVGLength> const &value, float strokeWidth, float canvasDiagonal) {
+  static std::vector<float>
+  GetAdjustedStrokeArray(IVector<SVGLength> const &value, float strokeWidth, float canvasDiagonal) {
     std::vector<float> result;
 
     for (auto const item : value) {
@@ -39,7 +40,7 @@ struct Utils {
     return std::sqrtf(powX + powY) * static_cast<float>(M_SQRT1_2);
   }
 
-  static float GetAbsoluteLength(SVGLength const& length, double relativeTo) {
+  static float GetAbsoluteLength(SVGLength const &length, double relativeTo) {
     return GetAbsoluteLength(length, static_cast<float>(relativeTo));
   }
 
@@ -80,7 +81,11 @@ struct Utils {
     return Numerics::make_float3x2_rotation(radians);
   }
 
-  static Numerics::float3x2 GetViewBoxTransform(Rect const &vbRect, Rect const &elRect, std::string align, RNSVG::MeetOrSlice const &meetOrSlice) {
+  static Numerics::float3x2 GetViewBoxTransform(
+      Rect const &vbRect,
+      Rect const &elRect,
+      std::string align,
+      RNSVG::MeetOrSlice const &meetOrSlice) {
     // based on https://svgwg.org/svg2-draft/coords.html#ComputingAViewportsTransform
 
     // Let vb-x, vb-y, vb-width, vb-height be the min-x, min-y, width and height values of the viewBox attribute
@@ -145,7 +150,11 @@ struct Utils {
     return scale * translate;
   }
 
-  static D2D1_MATRIX_3X2_F GetViewBoxTransformD2D(Rect const &vbRect, Rect const &elRect, std::string align, RNSVG::MeetOrSlice const &meetOrSlice) {
+  static D2D1_MATRIX_3X2_F GetViewBoxTransformD2D(
+      Rect const &vbRect,
+      Rect const &elRect,
+      std::string align,
+      RNSVG::MeetOrSlice const &meetOrSlice) {
     return D2DHelpers::AsD2DTransform(GetViewBoxTransform(vbRect, elRect, align, meetOrSlice));
   }
 
@@ -195,8 +204,9 @@ struct Utils {
     }
   }
 
-  static winrt::Windows::UI::Color JSValueAsColor(JSValue const& value, winrt::Windows::UI::Color const& defaultValue = winrt::Windows::UI::Color { 0,0,0,0 })
-  {
+  static winrt::Windows::UI::Color JSValueAsColor(
+      JSValue const &value,
+      winrt::Windows::UI::Color const &defaultValue = winrt::Windows::UI::Color{0, 0, 0, 0}) {
     if (value.IsNull()) {
       return defaultValue;
     }
@@ -229,7 +239,7 @@ struct Utils {
     }
   }
 
-  static D2D1::Matrix3x2F JSValueAsD2DTransform(JSValue const& value, D2D1::Matrix3x2F const defaultValue = {}) {
+  static D2D1::Matrix3x2F JSValueAsD2DTransform(JSValue const &value, D2D1::Matrix3x2F const defaultValue = {}) {
     if (value.IsNull()) {
       return defaultValue;
     } else {
@@ -268,15 +278,16 @@ struct Utils {
       winrt::Microsoft::ReactNative::Color const &color,
       RNSVG::SvgView const &root,
       com_ptr<ID2D1Geometry> const &geometry) {
-
     com_ptr<ID2D1Brush> brush;
-    com_ptr<ID2D1DeviceContext> deviceContext{get_self<RNSVG::implementation::D2DDeviceContext>(root.DeviceContext())->Get()};
+    com_ptr<ID2D1DeviceContext> deviceContext{
+        get_self<RNSVG::implementation::D2DDeviceContext>(root.DeviceContext())->Get()};
 
     if (root && brushId != L"") {
       if (brushId == L"currentColor") {
         com_ptr<ID2D1SolidColorBrush> scb;
         assert(false); // need to provide theme to AsWindowsColor
-        deviceContext->CreateSolidColorBrush(D2DHelpers::AsD2DColor(root.CurrentColor().AsWindowsColor(nullptr)), scb.put());
+        deviceContext->CreateSolidColorBrush(
+            D2DHelpers::AsD2DColor(root.CurrentColor().AsWindowsColor(nullptr)), scb.put());
         brush = scb.as<ID2D1Brush>();
       } else if (auto const &brushView{root.Brushes().TryLookup(brushId)}) {
         brushView.CreateBrush();

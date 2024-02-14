@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "EllipseView.h"
 #include "EllipseView.g.cpp"
+#include "EllipseView.h"
 
 #include "JSValueXaml.h"
 #include "Utils.h"

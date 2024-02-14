@@ -15,121 +15,106 @@ using namespace Microsoft::ReactNative;
 
 namespace winrt::RNSVG::implementation {
 
+SvgGroupCommonProps::SvgGroupCommonProps(const winrt::Microsoft::ReactNative::ViewProps &props) : base_type(props) {}
 
-    SvgGroupCommonProps::SvgGroupCommonProps(const winrt::Microsoft::ReactNative::ViewProps& props) : base_type(props)
-    {
-    }
+void SvgGroupCommonProps::SetProp(
+    uint32_t hash,
+    winrt::hstring propName,
+    winrt::Microsoft::ReactNative::IJSValueReader value) noexcept {
+  winrt::Microsoft::ReactNative::ReadProp(hash, propName, value, *this);
+}
 
-    void SvgGroupCommonProps::SetProp(uint32_t hash, winrt::hstring propName, winrt::Microsoft::ReactNative::IJSValueReader value) noexcept
-    {
-        winrt::Microsoft::ReactNative::ReadProp(hash, propName, value, *this);
-    }
-
-
-GroupView::GroupView(const winrt::Microsoft::ReactNative::CreateComponentViewArgs& args) : base_type(args), m_reactContext(args.ReactContext()) { }
-
+GroupView::GroupView(const winrt::Microsoft::ReactNative::CreateComponentViewArgs &args)
+    : base_type(args), m_reactContext(args.ReactContext()) {}
 
 void GroupView::MountChildComponentView(
-    const winrt::Microsoft::ReactNative::ComponentView& childComponentView,
-    uint32_t index) noexcept
-{
-    RenderableView::MountChildComponentView(childComponentView, index);
+    const winrt::Microsoft::ReactNative::ComponentView &childComponentView,
+    uint32_t index) noexcept {
+  RenderableView::MountChildComponentView(childComponentView, index);
 
-    if (auto const& childView { childComponentView.try_as<IRenderable>() })
-    {
-        childView.MergeProperties(*this);
+  if (auto const &childView{childComponentView.try_as<IRenderable>()}) {
+    childView.MergeProperties(*this);
 
-        if (childView.IsResponsible() && !IsResponsible())
-        {
-            IsResponsible(true);
-        }
-
-        if (auto const& root { SvgRoot() })
-        {
-            root.Invalidate();
-        }
+    if (childView.IsResponsible() && !IsResponsible()) {
+      IsResponsible(true);
     }
 
+    if (auto const &root{SvgRoot()}) {
+      root.Invalidate();
+    }
+  }
 }
 
 void GroupView::UnmountChildComponentView(
-    const winrt::Microsoft::ReactNative::ComponentView& childComponentView,
-    uint32_t index) noexcept
-{
-    RenderableView::UnmountChildComponentView(childComponentView, index);
+    const winrt::Microsoft::ReactNative::ComponentView &childComponentView,
+    uint32_t index) noexcept {
+  RenderableView::UnmountChildComponentView(childComponentView, index);
 
-    if (auto child = childComponentView.as<IRenderable>())
-    {
-        if (!IsUnloaded())
-        {
-            child.Unload();
-        }
-
-        if (auto const& root { SvgRoot() })
-        {
-            root.Invalidate();
-        }
+  if (auto child = childComponentView.as<IRenderable>()) {
+    if (!IsUnloaded()) {
+      child.Unload();
     }
+
+    if (auto const &root{SvgRoot()}) {
+      root.Invalidate();
+    }
+  }
 }
 
-void GroupView::UpdateProperties(const winrt::Microsoft::ReactNative::IComponentProps& props, const winrt::Microsoft::ReactNative::IComponentProps& oldProps, bool forceUpdate, bool invalidate) noexcept
-{
+void GroupView::UpdateProperties(
+    const winrt::Microsoft::ReactNative::IComponentProps &props,
+    const winrt::Microsoft::ReactNative::IComponentProps &oldProps,
+    bool forceUpdate,
+    bool invalidate) noexcept {
+  auto renderableProps = props.as<SvgGroupCommonProps>();
+  auto oldRenderableProps = oldProps ? oldProps.as<SvgGroupCommonProps>() : nullptr;
 
-    auto renderableProps = props.as<SvgGroupCommonProps>();
-    auto oldRenderableProps = oldProps ? oldProps.as<SvgGroupCommonProps>() : nullptr;
+  auto const &parent{Parent().try_as<RNSVG::GroupView>()};
 
-    auto const& parent { Parent().try_as<RNSVG::GroupView>() };
+  if (!oldRenderableProps || renderableProps->font != oldRenderableProps->font) {
+    if (forceUpdate || !m_fontPropMap[RNSVG::FontProp::FontSize]) {
+      if (renderableProps->font.fontSize) {
+        m_fontSize =
+            renderableProps->font.fontSize ? renderableProps->font.fontSize : (parent ? parent.FontSize() : 12.0f);
+      }
 
-    if (!oldRenderableProps || renderableProps->font != oldRenderableProps->font)
-    {
-        if (forceUpdate || !m_fontPropMap[RNSVG::FontProp::FontSize])
-        {
-            if (renderableProps->font.fontSize)
-            {
-                m_fontSize = renderableProps->font.fontSize ? renderableProps->font.fontSize : (parent ? parent.FontSize() : 12.0f);
-            }
-
-            m_fontPropMap[RNSVG::FontProp::FontSize] = !!renderableProps->font.fontSize;
-        }
-
-        if (forceUpdate || !m_fontPropMap[RNSVG::FontProp::FontFamily])
-        {
-            if (renderableProps->font.fontSize)
-            {
-                m_fontFamily = !renderableProps->font.fontFamily.empty() ? winrt::to_hstring(renderableProps->font.fontFamily) : (parent ? parent.FontFamily() : L"Segoe UI");
-            }
-
-            m_fontPropMap[RNSVG::FontProp::FontFamily] = !renderableProps->font.fontFamily.empty();
-        }
-
-        if (forceUpdate || !m_fontPropMap[RNSVG::FontProp::FontWeight])
-        {
-            if (!renderableProps->font.fontWeight.empty())
-            {
-                m_fontWeight = !renderableProps->font.fontWeight.empty() ? winrt::to_hstring(renderableProps->font.fontWeight) : (parent ? parent.FontWeight() : L"auto");
-            }
-
-            m_fontPropMap[RNSVG::FontProp::FontWeight] = !renderableProps->font.fontWeight.empty();
-        }
+      m_fontPropMap[RNSVG::FontProp::FontSize] = !!renderableProps->font.fontSize;
     }
 
-    base_type::UpdateProperties(props, oldProps, forceUpdate, false);
+    if (forceUpdate || !m_fontPropMap[RNSVG::FontProp::FontFamily]) {
+      if (renderableProps->font.fontSize) {
+        m_fontFamily = !renderableProps->font.fontFamily.empty() ? winrt::to_hstring(renderableProps->font.fontFamily)
+                                                                 : (parent ? parent.FontFamily() : L"Segoe UI");
+      }
 
-    for (auto const& child : Children())
-    {
-        child.as<IRenderable>().UpdateProperties(props, oldProps, false, false);
+      m_fontPropMap[RNSVG::FontProp::FontFamily] = !renderableProps->font.fontFamily.empty();
     }
 
-    if (invalidate && Parent())
-    {
-        SvgRoot().Invalidate();
+    if (forceUpdate || !m_fontPropMap[RNSVG::FontProp::FontWeight]) {
+      if (!renderableProps->font.fontWeight.empty()) {
+        m_fontWeight = !renderableProps->font.fontWeight.empty() ? winrt::to_hstring(renderableProps->font.fontWeight)
+                                                                 : (parent ? parent.FontWeight() : L"auto");
+      }
+
+      m_fontPropMap[RNSVG::FontProp::FontWeight] = !renderableProps->font.fontWeight.empty();
     }
+  }
+
+  base_type::UpdateProperties(props, oldProps, forceUpdate, false);
+
+  for (auto const &child : Children()) {
+    child.as<IRenderable>().UpdateProperties(props, oldProps, false, false);
+  }
+
+  if (invalidate && Parent()) {
+    SvgRoot().Invalidate();
+  }
 }
 
 void GroupView::CreateGeometry() {
-  std::vector<ID2D1Geometry*> geometries;
+  std::vector<ID2D1Geometry *> geometries;
   for (auto const childComponent : Children()) {
-      auto const child = childComponent.as<IRenderable>();
+    auto const child = childComponent.as<IRenderable>();
     if (!child.Geometry()) {
       child.CreateGeometry();
     }
@@ -245,7 +230,6 @@ winrt::RNSVG::IRenderable GroupView::HitTest(Point const &point) {
         D2D1_RECT_F bounds;
         check_hresult(geometry->GetBounds(nullptr, &bounds));
 
-
         if (xaml::RectHelper::Contains(D2DHelpers::FromD2DRect(bounds), point)) {
           return *this;
         }
@@ -255,22 +239,16 @@ winrt::RNSVG::IRenderable GroupView::HitTest(Point const &point) {
   return renderable;
 }
 
-void GroupView::RegisterComponent(const winrt::Microsoft::ReactNative::IReactPackageBuilderFabric& builder) noexcept
-{
-    builder.AddViewComponent(
-        L"RNSVGGroup",
-        [](winrt::Microsoft::ReactNative::IReactViewComponentBuilder const& builder) noexcept
-    {
-        builder.SetCreateProps([](winrt::Microsoft::ReactNative::ViewProps props) noexcept
-        {
-            return winrt::make<winrt::RNSVG::implementation::SvgGroupCommonProps>(props);
+void GroupView::RegisterComponent(const winrt::Microsoft::ReactNative::IReactPackageBuilderFabric &builder) noexcept {
+  builder.AddViewComponent(
+      L"RNSVGGroup", [](winrt::Microsoft::ReactNative::IReactViewComponentBuilder const &builder) noexcept {
+        builder.SetCreateProps([](winrt::Microsoft::ReactNative::ViewProps props) noexcept {
+          return winrt::make<winrt::RNSVG::implementation::SvgGroupCommonProps>(props);
         });
-        builder.SetCreateComponentView(
-            [](const winrt::Microsoft::ReactNative::CreateComponentViewArgs& args) noexcept
-        {
-            return winrt::make<winrt::RNSVG::implementation::GroupView>(args);
+        builder.SetCreateComponentView([](const winrt::Microsoft::ReactNative::CreateComponentViewArgs &args) noexcept {
+          return winrt::make<winrt::RNSVG::implementation::GroupView>(args);
         });
-    });
+      });
 }
 
 } // namespace winrt::RNSVG::implementation

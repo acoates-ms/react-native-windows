@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "TextViewManager.h"
 #include "TextViewManager.g.cpp"
+#include "TextViewManager.h"
 
 using namespace winrt;
 using namespace Microsoft::ReactNative;

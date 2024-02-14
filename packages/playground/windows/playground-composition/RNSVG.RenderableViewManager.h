@@ -9,19 +9,25 @@ struct RenderableViewManager : RenderableViewManagerT<RenderableViewManager> {
   RenderableViewManager() = default;
 
   // IViewManager
-  hstring Name() { return m_name; }
+  hstring Name() {
+    return m_name;
+  }
   Windows::UI::Xaml::FrameworkElement CreateView();
 
   // IViewManagerWithReactContext
-  Microsoft::ReactNative::IReactContext ReactContext() { return m_reactContext; }
-  void ReactContext(Microsoft::ReactNative::IReactContext const &value) { m_reactContext = value; }
+  Microsoft::ReactNative::IReactContext ReactContext() {
+    return m_reactContext;
+  }
+  void ReactContext(Microsoft::ReactNative::IReactContext const &value) {
+    m_reactContext = value;
+  }
 
   // IViewManagerWithNativeProperties
   void UpdateProperties(
       Windows::UI::Xaml::FrameworkElement const &view,
       Microsoft::ReactNative::IJSValueReader const &propertyMapReader);
-  virtual
-    Windows::Foundation::Collections::IMapView<hstring, Microsoft::ReactNative::ViewManagerPropertyType> NativeProps();
+  virtual Windows::Foundation::Collections::IMapView<hstring, Microsoft::ReactNative::ViewManagerPropertyType>
+  NativeProps();
 
  protected:
   Microsoft::ReactNative::IReactContext m_reactContext{nullptr};

@@ -13,282 +13,257 @@ using namespace Microsoft::ReactNative;
 
 namespace winrt::RNSVG::implementation {
 
+SvgNodeCommonProps::SvgNodeCommonProps(const winrt::Microsoft::ReactNative::ViewProps &props) : m_props(props) {}
 
-    SvgNodeCommonProps::SvgNodeCommonProps(const winrt::Microsoft::ReactNative::ViewProps& props) : m_props(props)
-    {
+void SvgNodeCommonProps::SetProp(
+    uint32_t hash,
+    winrt::hstring propName,
+    winrt::Microsoft::ReactNative::IJSValueReader value) noexcept {
+  winrt::Microsoft::ReactNative::ReadProp(hash, propName, value, *this);
+}
+
+SvgRenderableCommonProps::SvgRenderableCommonProps(const winrt::Microsoft::ReactNative::ViewProps &props)
+    : base_type(props) {}
+
+void SvgRenderableCommonProps::SetProp(
+    uint32_t hash,
+    winrt::hstring propName,
+    winrt::Microsoft::ReactNative::IJSValueReader value) noexcept {
+  winrt::Microsoft::ReactNative::ReadProp(hash, propName, value, *this);
+}
+
+RenderableView::RenderableView(const winrt::Microsoft::ReactNative::CreateComponentViewArgs &args)
+    : base_type(args), m_reactContext(args.ReactContext()) {}
+
+void RenderableView::UpdateProps(
+    const winrt::Microsoft::ReactNative::IComponentProps &props,
+    const winrt::Microsoft::ReactNative::IComponentProps &oldProps) noexcept {
+  UpdateProperties(props, oldProps);
+}
+
+void RenderableView::UpdateProperties(
+    const winrt::Microsoft::ReactNative::IComponentProps &props,
+    const winrt::Microsoft::ReactNative::IComponentProps &oldProps,
+    bool forceUpdate,
+    bool invalidate) noexcept {
+  auto renderableProps = props.as<SvgRenderableCommonProps>();
+  auto oldRenderableProps = oldProps ? oldProps.as<SvgRenderableCommonProps>() : nullptr;
+
+  bool fillSet{
+      renderableProps->propList &&
+      std::find(renderableProps->propList->begin(), renderableProps->propList->end(), "fill") !=
+          renderableProps->propList->end()};
+  bool strokeSet{
+      renderableProps->propList &&
+      std::find(renderableProps->propList->begin(), renderableProps->propList->end(), "stroke") !=
+          renderableProps->propList->end()};
+
+  auto const &parent{Parent().try_as<RNSVG::RenderableView>()};
+
+  // name is not a prop we want to propagate to child elements
+  // so we only set it when forceUpdate = true
+
+  if (forceUpdate && (!oldRenderableProps || renderableProps->name != oldRenderableProps->name)) {
+    if (parent) {
+      SvgRoot().Templates().Remove(m_id);
+    }
+    m_id = winrt::to_hstring(renderableProps->name);
+    if (parent) {
+      SaveDefinition();
+    }
+  }
+
+  if (!oldRenderableProps || renderableProps->strokeWidth != oldRenderableProps->strokeWidth) {
+    if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeWidth]) {
+      m_strokeWidth = (renderableProps->strokeWidth != std::nullopt)
+          ? *renderableProps->strokeWidth
+          : (parent ? parent.StrokeWidth() : RNSVG::SVGLength{1.0f, RNSVG::LengthType::Pixel});
     }
 
-    void SvgNodeCommonProps::SetProp(uint32_t hash, winrt::hstring propName, winrt::Microsoft::ReactNative::IJSValueReader value) noexcept
-    {
-        winrt::Microsoft::ReactNative::ReadProp(hash, propName, value, *this);
+    // forceUpdate = true means the property is being set on an element
+    // instead of being inherited from the parent.
+    if (forceUpdate) {
+      // If the optional is null, that generally means the prop was deleted
+      m_propSetMap[RNSVG::BaseProp::StrokeWidth] = renderableProps->strokeWidth != std::nullopt;
     }
+  }
 
-    SvgRenderableCommonProps::SvgRenderableCommonProps(const winrt::Microsoft::ReactNative::ViewProps& props) : base_type(props)
-    {
+  if (!oldRenderableProps || renderableProps->strokeOpacity != oldRenderableProps->strokeOpacity) {
+    if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeOpacity]) {
+      m_strokeOpacity = (renderableProps->strokeOpacity != std::nullopt) ? *renderableProps->strokeOpacity
+                                                                         : (parent ? parent.StrokeOpacity() : 1.0f);
     }
-
-    void SvgRenderableCommonProps::SetProp(uint32_t hash, winrt::hstring propName, winrt::Microsoft::ReactNative::IJSValueReader value) noexcept
-    {
-        winrt::Microsoft::ReactNative::ReadProp(hash, propName, value, *this);
+    // forceUpdate = true means the property is being set on an element
+    // instead of being inherited from the parent.
+    if (forceUpdate) {
+      // If the optional is null, that generally means the prop was deleted
+      m_propSetMap[RNSVG::BaseProp::StrokeOpacity] = renderableProps->strokeOpacity != std::nullopt;
     }
+  }
 
-    RenderableView::RenderableView(const winrt::Microsoft::ReactNative::CreateComponentViewArgs& args) : base_type(args), m_reactContext(args.ReactContext()) { }
-
-    void RenderableView::UpdateProps(const winrt::Microsoft::ReactNative::IComponentProps& props, const winrt::Microsoft::ReactNative::IComponentProps& oldProps) noexcept
-    {
-        UpdateProperties(props, oldProps);
+  if (!oldRenderableProps || renderableProps->fillOpacity != oldRenderableProps->fillOpacity) {
+    if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::FillOpacity]) {
+      m_fillOpacity = (renderableProps->fillOpacity != std::nullopt) ? *renderableProps->fillOpacity
+                                                                     : (parent ? parent.FillOpacity() : 1.0f);
     }
-
-    void RenderableView::UpdateProperties(const winrt::Microsoft::ReactNative::IComponentProps& props, const winrt::Microsoft::ReactNative::IComponentProps& oldProps, bool forceUpdate, bool invalidate) noexcept
-    {
-        auto renderableProps = props.as<SvgRenderableCommonProps>();
-        auto oldRenderableProps = oldProps ? oldProps.as<SvgRenderableCommonProps>() : nullptr;
-
-        bool fillSet { renderableProps->propList && std::find(renderableProps->propList->begin(), renderableProps->propList->end(), "fill") != renderableProps->propList->end() };
-        bool strokeSet { renderableProps->propList && std::find(renderableProps->propList->begin(), renderableProps->propList->end(), "stroke") != renderableProps->propList->end() };
-
-        auto const& parent { Parent().try_as<RNSVG::RenderableView>() };
-
-        // name is not a prop we want to propagate to child elements
-        // so we only set it when forceUpdate = true
-
-        if (forceUpdate && (!oldRenderableProps || renderableProps->name != oldRenderableProps->name))
-        {
-            if (parent)
-            {
-                SvgRoot().Templates().Remove(m_id);
-            }
-            m_id = winrt::to_hstring(renderableProps->name);
-            if (parent)
-            {
-                SaveDefinition();
-            }
-        }
-
-        if (!oldRenderableProps || renderableProps->strokeWidth != oldRenderableProps->strokeWidth)
-        {
-            if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeWidth])
-            {
-                m_strokeWidth = (renderableProps->strokeWidth != std::nullopt) ? *renderableProps->strokeWidth : (parent ? parent.StrokeWidth() : RNSVG::SVGLength { 1.0f, RNSVG::LengthType::Pixel });
-            }
-
-            // forceUpdate = true means the property is being set on an element
-            // instead of being inherited from the parent.
-            if (forceUpdate)
-            {
-                // If the optional is null, that generally means the prop was deleted
-                m_propSetMap[RNSVG::BaseProp::StrokeWidth] = renderableProps->strokeWidth != std::nullopt;
-            }
-
-        }
-
-        if (!oldRenderableProps || renderableProps->strokeOpacity != oldRenderableProps->strokeOpacity)
-        {
-            if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeOpacity])
-            {
-                m_strokeOpacity = (renderableProps->strokeOpacity != std::nullopt) ? *renderableProps->strokeOpacity : (parent ? parent.StrokeOpacity() : 1.0f);
-            }
-            // forceUpdate = true means the property is being set on an element
-            // instead of being inherited from the parent.
-            if (forceUpdate)
-            {
-                // If the optional is null, that generally means the prop was deleted
-                m_propSetMap[RNSVG::BaseProp::StrokeOpacity] = renderableProps->strokeOpacity != std::nullopt;
-            }
-        }
-
-        if (!oldRenderableProps || renderableProps->fillOpacity != oldRenderableProps->fillOpacity)
-        {
-            if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::FillOpacity])
-            {
-                m_fillOpacity = (renderableProps->fillOpacity != std::nullopt) ? *renderableProps->fillOpacity : (parent ? parent.FillOpacity() : 1.0f);
-            }
-            // forceUpdate = true means the property is being set on an element
-            // instead of being inherited from the parent.
-            if (forceUpdate)
-            {
-                // If the optional is null, that generally means the prop was deleted
-                m_propSetMap[RNSVG::BaseProp::FillOpacity] = renderableProps->fillOpacity != std::nullopt;
-            }
-
-        }
-
-        if (!oldRenderableProps || renderableProps->stroke != oldRenderableProps->stroke)
-        {
-            if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::Stroke])
-            {
-                if (!m_strokeBrushId.empty())
-                {
-                    m_strokeBrushId.clear();
-                }
-
-                SetColor(renderableProps->stroke, ((parent && !strokeSet) ? parent.Stroke() : winrt::Microsoft::ReactNative::Color::Transparent()), "stroke");
-            }
-            // forceUpdate = true means the property is being set on an element
-            // instead of being inherited from the parent.
-            if (forceUpdate)
-            {
-                m_propSetMap[RNSVG::BaseProp::Stroke] = strokeSet;
-            }
-        }
-
-        if (!oldRenderableProps || renderableProps->fill != oldRenderableProps->fill)
-        {
-            if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::Fill])
-            {
-                winrt::Microsoft::ReactNative::Color fallbackColor { winrt::Microsoft::ReactNative::Color::Black() };
-                if (renderableProps->fill == std::nullopt && fillSet)
-                {
-                    fallbackColor = winrt::Microsoft::ReactNative::Color::Transparent();
-                }
-                else if (parent)
-                {
-                    fallbackColor = parent.Fill();
-                }
-
-                if (!m_fillBrushId.empty())
-                {
-                    m_fillBrushId.clear();
-                }
-
-                SetColor(renderableProps->fill, fallbackColor, "fill");
-            }
-            // forceUpdate = true means the property is being set on an element
-            // instead of being inherited from the parent.
-            if (forceUpdate)
-            {
-                m_propSetMap[RNSVG::BaseProp::Fill] = fillSet;
-            }
-        }
-
-        if (!oldRenderableProps || renderableProps->strokeLinecap != oldRenderableProps->strokeLinecap)
-        {
-            if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeLineCap])
-            {
-                m_strokeLineCap = renderableProps->strokeLinecap != std::nullopt ? *renderableProps->strokeLinecap : parent.StrokeLineCap();
-            }
-            // forceUpdate = true means the property is being set on an element
-            // instead of being inherited from the parent.
-            if (forceUpdate)
-            {
-                // If the optional is null, that generally means the prop was deleted
-                m_propSetMap[RNSVG::BaseProp::StrokeLineCap] = renderableProps->strokeLinecap != std::nullopt;
-            }
-        }
-
-        if (!oldRenderableProps || renderableProps->strokeLinejoin != oldRenderableProps->strokeLinejoin)
-        {
-            if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeLineJoin])
-            {
-                m_strokeLineJoin = renderableProps->strokeLinejoin != std::nullopt ? *renderableProps->strokeLinejoin : parent.StrokeLineJoin();
-            }
-            // forceUpdate = true means the property is being set on an element
-            // instead of being inherited from the parent.
-            if (forceUpdate)
-            {
-                // If the optional is null, that generally means the prop was deleted
-                m_propSetMap[RNSVG::BaseProp::StrokeLineJoin] = renderableProps->strokeLinejoin != std::nullopt;
-            }
-        }
-
-        if (!oldRenderableProps || renderableProps->fillRule != oldRenderableProps->fillRule)
-        {
-            if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::FillRule])
-            {
-                m_fillRule = renderableProps->fillRule != std::nullopt ? *renderableProps->fillRule : parent.FillRule();
-            }
-            if (forceUpdate)
-            {
-                // If the optional is null, that generally means the prop was deleted
-                m_propSetMap[RNSVG::BaseProp::FillRule] = renderableProps->fillRule != std::nullopt;
-            }
-        }
-
-        if (!oldRenderableProps || renderableProps->strokeDashoffset != oldRenderableProps->strokeDashoffset)
-        {
-            if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeDashOffset])
-            {
-                m_strokeDashOffset = renderableProps->strokeDashoffset != std::nullopt ? *renderableProps->strokeDashoffset : (parent ? parent.StrokeDashOffset() : 0.0f);
-            }
-            if (forceUpdate)
-            {
-                // If the optional is null, that generally means the prop was deleted
-                m_propSetMap[RNSVG::BaseProp::StrokeDashOffset] = renderableProps->strokeDashoffset != std::nullopt;
-            }
-        }
-        if (!oldRenderableProps || renderableProps->strokeMiterlimit != oldRenderableProps->strokeMiterlimit)
-        {
-            if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeMiterLimit])
-            {
-                m_strokeMiterLimit = renderableProps->strokeMiterlimit != std::nullopt ? *renderableProps->strokeMiterlimit : (parent ? parent.StrokeMiterLimit() : 0.0f);
-            }
-            if (forceUpdate)
-            {
-                // If the optional is null, that generally means the prop was deleted
-                m_propSetMap[RNSVG::BaseProp::StrokeMiterLimit] = renderableProps->strokeMiterlimit != std::nullopt;
-            }
-        }
-        if (!oldRenderableProps || renderableProps->strokeDasharray != oldRenderableProps->strokeDasharray)
-        {
-            if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeDashArray])
-            {
-                if (renderableProps->strokeDasharray != std::nullopt)
-                {
-                    m_strokeDashArray.Clear();
-
-                    for (auto const& item : *renderableProps->strokeDasharray)
-                    {
-                        m_strokeDashArray.Append(item);
-                    }
-                }
-                else
-                {
-                    m_strokeDashArray = parent.StrokeDashArray();
-                }
-                if (forceUpdate)
-                {
-                    // If the optional is null, that generally means the prop was deleted
-                    m_propSetMap[RNSVG::BaseProp::StrokeDashArray] = renderableProps->strokeDasharray != std::nullopt;
-                }
-            }
-        }
-
-        if (!oldRenderableProps || renderableProps->matrix != oldRenderableProps->matrix)
-        {
-            if (forceUpdate)
-            {
-                m_transformMatrix = renderableProps->matrix != std::nullopt ?
-                    Numerics::float3x2(renderableProps->matrix->at(0), renderableProps->matrix->at(1), renderableProps->matrix->at(2), renderableProps->matrix->at(3), renderableProps->matrix->at(4), renderableProps->matrix->at(5))
-                    : (parent ? parent.SvgTransform() : Numerics::make_float3x2_rotation(0));
-                if (forceUpdate)
-                {
-                    // If the optional is null, that generally means the prop was deleted
-                    m_propSetMap[RNSVG::BaseProp::Matrix] = renderableProps->matrix != std::nullopt;
-                }
-            }
-        }
-
-        if (forceUpdate && (!oldRenderableProps || renderableProps->opacity != oldRenderableProps->opacity))
-        {
-            m_opacity = renderableProps->opacity != std::nullopt ? *renderableProps->opacity : 1.0f;
-        }
-
-        if (!oldRenderableProps || renderableProps->clipPath != oldRenderableProps->clipPath)
-        {
-            m_clipPathId = to_hstring(renderableProps->clipPath);
-        }
-        if (!oldRenderableProps || renderableProps->responsible != oldRenderableProps->responsible)
-        {
-            m_isResponsible = renderableProps->responsible;
-        }
-
-    m_recreateResources = true;
-
-    if (invalidate && Parent())
-    {
-        SvgRoot().Invalidate();
+    // forceUpdate = true means the property is being set on an element
+    // instead of being inherited from the parent.
+    if (forceUpdate) {
+      // If the optional is null, that generally means the prop was deleted
+      m_propSetMap[RNSVG::BaseProp::FillOpacity] = renderableProps->fillOpacity != std::nullopt;
     }
+  }
 
+  if (!oldRenderableProps || renderableProps->stroke != oldRenderableProps->stroke) {
+    if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::Stroke]) {
+      if (!m_strokeBrushId.empty()) {
+        m_strokeBrushId.clear();
+      }
+
+      SetColor(
+          renderableProps->stroke,
+          ((parent && !strokeSet) ? parent.Stroke() : winrt::Microsoft::ReactNative::Color::Transparent()),
+          "stroke");
+    }
+    // forceUpdate = true means the property is being set on an element
+    // instead of being inherited from the parent.
+    if (forceUpdate) {
+      m_propSetMap[RNSVG::BaseProp::Stroke] = strokeSet;
+    }
+  }
+
+  if (!oldRenderableProps || renderableProps->fill != oldRenderableProps->fill) {
+    if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::Fill]) {
+      winrt::Microsoft::ReactNative::Color fallbackColor{winrt::Microsoft::ReactNative::Color::Black()};
+      if (renderableProps->fill == std::nullopt && fillSet) {
+        fallbackColor = winrt::Microsoft::ReactNative::Color::Transparent();
+      } else if (parent) {
+        fallbackColor = parent.Fill();
+      }
+
+      if (!m_fillBrushId.empty()) {
+        m_fillBrushId.clear();
+      }
+
+      SetColor(renderableProps->fill, fallbackColor, "fill");
+    }
+    // forceUpdate = true means the property is being set on an element
+    // instead of being inherited from the parent.
+    if (forceUpdate) {
+      m_propSetMap[RNSVG::BaseProp::Fill] = fillSet;
+    }
+  }
+
+  if (!oldRenderableProps || renderableProps->strokeLinecap != oldRenderableProps->strokeLinecap) {
+    if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeLineCap]) {
+      m_strokeLineCap =
+          renderableProps->strokeLinecap != std::nullopt ? *renderableProps->strokeLinecap : parent.StrokeLineCap();
+    }
+    // forceUpdate = true means the property is being set on an element
+    // instead of being inherited from the parent.
+    if (forceUpdate) {
+      // If the optional is null, that generally means the prop was deleted
+      m_propSetMap[RNSVG::BaseProp::StrokeLineCap] = renderableProps->strokeLinecap != std::nullopt;
+    }
+  }
+
+  if (!oldRenderableProps || renderableProps->strokeLinejoin != oldRenderableProps->strokeLinejoin) {
+    if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeLineJoin]) {
+      m_strokeLineJoin =
+          renderableProps->strokeLinejoin != std::nullopt ? *renderableProps->strokeLinejoin : parent.StrokeLineJoin();
+    }
+    // forceUpdate = true means the property is being set on an element
+    // instead of being inherited from the parent.
+    if (forceUpdate) {
+      // If the optional is null, that generally means the prop was deleted
+      m_propSetMap[RNSVG::BaseProp::StrokeLineJoin] = renderableProps->strokeLinejoin != std::nullopt;
+    }
+  }
+
+  if (!oldRenderableProps || renderableProps->fillRule != oldRenderableProps->fillRule) {
+    if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::FillRule]) {
+      m_fillRule = renderableProps->fillRule != std::nullopt ? *renderableProps->fillRule : parent.FillRule();
+    }
+    if (forceUpdate) {
+      // If the optional is null, that generally means the prop was deleted
+      m_propSetMap[RNSVG::BaseProp::FillRule] = renderableProps->fillRule != std::nullopt;
+    }
+  }
+
+  if (!oldRenderableProps || renderableProps->strokeDashoffset != oldRenderableProps->strokeDashoffset) {
+    if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeDashOffset]) {
+      m_strokeDashOffset = renderableProps->strokeDashoffset != std::nullopt
+          ? *renderableProps->strokeDashoffset
+          : (parent ? parent.StrokeDashOffset() : 0.0f);
+    }
+    if (forceUpdate) {
+      // If the optional is null, that generally means the prop was deleted
+      m_propSetMap[RNSVG::BaseProp::StrokeDashOffset] = renderableProps->strokeDashoffset != std::nullopt;
+    }
+  }
+  if (!oldRenderableProps || renderableProps->strokeMiterlimit != oldRenderableProps->strokeMiterlimit) {
+    if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeMiterLimit]) {
+      m_strokeMiterLimit = renderableProps->strokeMiterlimit != std::nullopt
+          ? *renderableProps->strokeMiterlimit
+          : (parent ? parent.StrokeMiterLimit() : 0.0f);
+    }
+    if (forceUpdate) {
+      // If the optional is null, that generally means the prop was deleted
+      m_propSetMap[RNSVG::BaseProp::StrokeMiterLimit] = renderableProps->strokeMiterlimit != std::nullopt;
+    }
+  }
+  if (!oldRenderableProps || renderableProps->strokeDasharray != oldRenderableProps->strokeDasharray) {
+    if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeDashArray]) {
+      if (renderableProps->strokeDasharray != std::nullopt) {
+        m_strokeDashArray.Clear();
+
+        for (auto const &item : *renderableProps->strokeDasharray) {
+          m_strokeDashArray.Append(item);
+        }
+      } else {
+        m_strokeDashArray = parent.StrokeDashArray();
+      }
+      if (forceUpdate) {
+        // If the optional is null, that generally means the prop was deleted
+        m_propSetMap[RNSVG::BaseProp::StrokeDashArray] = renderableProps->strokeDasharray != std::nullopt;
+      }
+    }
+  }
+
+  if (!oldRenderableProps || renderableProps->matrix != oldRenderableProps->matrix) {
+    if (forceUpdate) {
+      m_transformMatrix = renderableProps->matrix != std::nullopt
+          ? Numerics::float3x2(
+                renderableProps->matrix->at(0),
+                renderableProps->matrix->at(1),
+                renderableProps->matrix->at(2),
+                renderableProps->matrix->at(3),
+                renderableProps->matrix->at(4),
+                renderableProps->matrix->at(5))
+          : (parent ? parent.SvgTransform() : Numerics::make_float3x2_rotation(0));
+      if (forceUpdate) {
+        // If the optional is null, that generally means the prop was deleted
+        m_propSetMap[RNSVG::BaseProp::Matrix] = renderableProps->matrix != std::nullopt;
+      }
+    }
+  }
+
+  if (forceUpdate && (!oldRenderableProps || renderableProps->opacity != oldRenderableProps->opacity)) {
+    m_opacity = renderableProps->opacity != std::nullopt ? *renderableProps->opacity : 1.0f;
+  }
+
+  if (!oldRenderableProps || renderableProps->clipPath != oldRenderableProps->clipPath) {
+    m_clipPathId = to_hstring(renderableProps->clipPath);
+  }
+  if (!oldRenderableProps || renderableProps->responsible != oldRenderableProps->responsible) {
+    m_isResponsible = renderableProps->responsible;
+  }
+
+  m_recreateResources = true;
+
+  if (invalidate && Parent()) {
+    SvgRoot().Invalidate();
+  }
 }
 
 void RenderableView::SaveDefinition() {
@@ -492,17 +467,20 @@ RNSVG::IRenderable RenderableView::HitTest(Point const &point) {
   return nullptr;
 }
 
-void RenderableView::SetColor(std::optional<ColorStruct> &color, winrt::Microsoft::ReactNative::Color const &fallbackColor, std::string propName) {
-    if (color == std::nullopt)
-    {
-        propName == "fill" ? m_fill = fallbackColor : m_stroke = fallbackColor;
-        return;
-    }
+void RenderableView::SetColor(
+    std::optional<ColorStruct> &color,
+    winrt::Microsoft::ReactNative::Color const &fallbackColor,
+    std::string propName) {
+  if (color == std::nullopt) {
+    propName == "fill" ? m_fill = fallbackColor : m_stroke = fallbackColor;
+    return;
+  }
 
   switch (color->type) {
     // https://github.com/software-mansion/react-native-svg/blob/main/src/lib/extract/extractBrush.ts#L29
     case 1: {
-      propName == "fill" ? m_fillBrushId = winrt::to_hstring(color->brushRef) : m_strokeBrushId = winrt::to_hstring(color->brushRef);
+      propName == "fill" ? m_fillBrushId = winrt::to_hstring(color->brushRef)
+                         : m_strokeBrushId = winrt::to_hstring(color->brushRef);
       break;
     }
     // https://github.com/software-mansion/react-native-svg/blob/main/src/lib/extract/extractBrush.ts#L6-L8
