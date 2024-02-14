@@ -265,7 +265,7 @@ struct Utils {
 
   static com_ptr<ID2D1Brush> GetCanvasBrush(
       hstring const &brushId,
-      winrt::Windows::UI::Color const &color,
+      winrt::Microsoft::ReactNative::Color const &color,
       RNSVG::SvgView const &root,
       com_ptr<ID2D1Geometry> const &geometry) {
 
@@ -275,7 +275,8 @@ struct Utils {
     if (root && brushId != L"") {
       if (brushId == L"currentColor") {
         com_ptr<ID2D1SolidColorBrush> scb;
-        deviceContext->CreateSolidColorBrush(D2DHelpers::AsD2DColor(root.CurrentColor()), scb.put());
+        assert(false); // need to provide theme to AsWindowsColor
+        deviceContext->CreateSolidColorBrush(D2DHelpers::AsD2DColor(root.CurrentColor().AsWindowsColor(nullptr)), scb.put());
         brush = scb.as<ID2D1Brush>();
       } else if (auto const &brushView{root.Brushes().TryLookup(brushId)}) {
         brushView.CreateBrush();
@@ -292,7 +293,8 @@ struct Utils {
 
     if (!brush) {
       com_ptr<ID2D1SolidColorBrush> scb;
-      deviceContext->CreateSolidColorBrush(D2DHelpers::AsD2DColor(color), scb.put());
+      assert(false); // need to provide theme to AsWindowsColor
+      deviceContext->CreateSolidColorBrush(D2DHelpers::AsD2DColor(color.AsWindowsColor(nullptr)), scb.put());
       brush = scb.as<ID2D1Brush>();
     }
 

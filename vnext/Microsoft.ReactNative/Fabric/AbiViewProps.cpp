@@ -107,6 +107,16 @@ void Color::WriteValue(
   }
 }
 
+winrt::Microsoft::ReactNative::Color Color::Transparent() noexcept {
+  return winrt::make<Color>(facebook::react::clearColor());
+}
+winrt::Microsoft::ReactNative::Color Color::Black() noexcept {
+  return winrt::make<Color>(facebook::react::blackColor());
+}
+winrt::Microsoft::ReactNative::Color Color::White() noexcept {
+  return winrt::make<Color>(facebook::react::whiteColor());
+}
+
 UserViewProps::UserViewProps(std::shared_ptr<::Microsoft::ReactNative::AbiViewProps const> viewProps) noexcept
     : m_viewProps(viewProps.get()) {}
 

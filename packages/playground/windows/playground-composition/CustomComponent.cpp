@@ -187,7 +187,7 @@ static void RegisterViewComponent(winrt::Microsoft::ReactNative::IReactPackageBu
         });
         auto compBuilder =
             builder.as<winrt::Microsoft::ReactNative::Composition::IReactCompositionViewComponentBuilder>();
-        compBuilder.SetCreateComponentView(
+        compBuilder.SetCreateViewComponentView(
             [](const winrt::Microsoft::ReactNative::Composition::CreateCompositionComponentViewArgs &args) noexcept {
               return winrt::make<CustomComponent>(true, args);
             });
@@ -227,7 +227,7 @@ static void RegisterViewComponent(winrt::Microsoft::ReactNative::IReactPackageBu
         });
         auto compBuilder =
             builder.as<winrt::Microsoft::ReactNative::Composition::IReactCompositionViewComponentBuilder>();
-        compBuilder.SetCreateComponentView(
+        compBuilder.SetCreateViewComponentView(
             [](const winrt::Microsoft::ReactNative::Composition::CreateCompositionComponentViewArgs &args) noexcept {
               return winrt::make<CustomComponent>(false, args);
             });

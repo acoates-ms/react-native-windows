@@ -23,15 +23,19 @@ namespace RNSVG
   };
 
   [experimental]
+  [default_interface]
+  unsealed runtimeclass RectProps : SvgRenderableCommonProps {
+  };
+
+  [experimental]
   interface IRenderable
   {
-    Microsoft.ReactNative.ComponentView SvgParent;
     D2DGeometry Geometry;
     Boolean IsResponsible;
 
     void CreateResources();
     void Draw(D2DDeviceContext deviceContext, Windows.Foundation.Size size);
-    void UpdateProperties(Microsoft.ReactNative.IJSValueReader reader, Boolean forceUpdate, Boolean invalidate);
+    void UpdateProperties(Microsoft.ReactNative.IComponentProps props, Microsoft.ReactNative.IComponentProps oldProps, Boolean forceUpdate, Boolean invalidate);
     void MergeProperties(RenderableView other);
     void SaveDefinition();
     void Unload();
@@ -41,14 +45,14 @@ namespace RNSVG
 
   [experimental]
   [default_interface]
-  runtimeclass SvgView : Microsoft.ReactNative.Composition.ComponentView, IRenderable
+  runtimeclass SvgView : Microsoft.ReactNative.Composition.ViewComponentView, IRenderable
   {
     SvgView(Microsoft.ReactNative.Composition.CreateCompositionComponentViewArgs args);
 
     Windows.Foundation.Size ActualSize { get; };
 
     GroupView Group;
-    Windows.UI.Color CurrentColor{ get; };
+    Microsoft.ReactNative.Color CurrentColor{ get; };
     D2DDevice Device{ get; };
     D2DDeviceContext DeviceContext{ get; };
     Windows.Foundation.Collections.IMap<String, IRenderable> Templates{ get; };
@@ -67,10 +71,10 @@ namespace RNSVG
 
     String Id{ get; };
     Windows.Foundation.Numerics.Matrix3x2 SvgTransform{ get; };
-    Windows.UI.Color Fill{ get; };
+    Microsoft.ReactNative.Color Fill{ get; };
     Single FillOpacity{ get; };
     String FillBrushId{ get; };
-    Windows.UI.Color Stroke{ get; };
+    Microsoft.ReactNative.Color Stroke{ get; };
     Single StrokeOpacity{ get; };
     String StrokeBrushId{ get; };
     SVGLength StrokeWidth{ get; };
@@ -132,7 +136,6 @@ namespace RNSVG
   unsealed runtimeclass GroupView : RenderableView
   {
     GroupView(Microsoft.ReactNative.CreateComponentViewArgs args);
-    Windows.Foundation.Collections.IVector<IRenderable> Children { get; };
 
     Single FontSize;
     String FontFamily;

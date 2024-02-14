@@ -14,6 +14,8 @@ namespace Microsoft.ReactNative {
     Windows.UI.Color AsWindowsColor(Microsoft.ReactNative.Composition.Theme theme);
     Microsoft.ReactNative.Composition.IBrush AsBrush(Microsoft.ReactNative.Composition.Theme theme);
 
+    static Color Black();
+    static Color Transparent();
     static Color ReadValue(IJSValueReader reader);
     static void WriteValue(IJSValueWriter writer, Color color);
   };

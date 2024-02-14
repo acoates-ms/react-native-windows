@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include "AbiState.h"
 #include "AbiViewProps.h"
+#include "AbiShadowNode.h"
 
 #include <react/renderer/components/view/ConcreteViewShadowNode.h>
 #include <react/renderer/core/LayoutContext.h>
@@ -45,21 +46,6 @@ struct LayoutContext : LayoutContextT<LayoutContext> {
   }
 
   facebook::react::LayoutContext m_layoutContext;
-};
-
-struct ShadowNode : ShadowNodeT<ShadowNode> {
-  ShadowNode(facebook::react::ShadowNode::Shared shadowNode) noexcept;
-
-  void EnsureUnsealed() noexcept;
-  winrt::IInspectable Tag() const noexcept;
-  void Tag(winrt::IInspectable tag) noexcept;
-
-  winrt::IInspectable StateData() const noexcept;
-  void StateData(winrt::IInspectable tag) noexcept;
-
- protected:
-  facebook::react::ShadowNode::Shared m_shadowNode;
-  winrt::IInspectable m_tag;
 };
 
 struct YogaLayoutableShadowNode : YogaLayoutableShadowNodeT<YogaLayoutableShadowNode, implementation::ShadowNode> {

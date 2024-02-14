@@ -139,7 +139,7 @@ struct D2DHelpers {
 
      auto const &groupView{parent.try_as<RNSVG::GroupView>()};
      DWRITE_FONT_WEIGHT parentWeight{
-     groupView ? D2DHelpers::FontWeightFrom(groupView.FontWeight(), groupView.SvgParent()) : DWRITE_FONT_WEIGHT_NORMAL};
+     groupView ? D2DHelpers::FontWeightFrom(groupView.FontWeight(), groupView.Parent()) : DWRITE_FONT_WEIGHT_NORMAL};
 
      if (weight == L"bolder") {
        return D2DHelpers::Bolder(parentWeight);

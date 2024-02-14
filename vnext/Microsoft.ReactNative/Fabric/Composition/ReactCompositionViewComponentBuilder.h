@@ -15,6 +15,8 @@ struct ReactCompositionViewComponentBuilder : winrt::implements<
   ReactCompositionViewComponentBuilder() noexcept;
 
  public: // IReactViewComponentBuilder
+
+  void SetCreateComponentView(ComponentViewFactory impl) noexcept;
   void SetCreateProps(ViewPropsFactory impl) noexcept;
 
   // (Object handle, Microsoft.ReactNative.IComponentState state) => void
@@ -27,8 +29,7 @@ struct ReactCompositionViewComponentBuilder : winrt::implements<
   void SetLayoutHandler(LayoutHandler impl) noexcept;
 
  public: // Composition::IReactCompositionViewComponentBuilder
-  // (ICompositionContext) => ComponentView
-  void SetCreateComponentView(CompositionComponentFactory impl) noexcept;
+  void SetCreateViewComponentView(CompositionViewComponentViewFactory impl) noexcept;
 
  public:
   IComponentProps CreateProps(ViewProps props) noexcept;
@@ -50,7 +51,8 @@ struct ReactCompositionViewComponentBuilder : winrt::implements<
   winrt::Microsoft::ReactNative::MeasureContentHandler m_measureContent;
   winrt::Microsoft::ReactNative::LayoutHandler m_layoutHandler;
 
-  CompositionComponentFactory m_createView;
+  ComponentViewFactory m_createComponentView{nullptr};
+  CompositionViewComponentViewFactory m_createView{nullptr};
 };
 
 } // namespace winrt::Microsoft::ReactNative::Composition

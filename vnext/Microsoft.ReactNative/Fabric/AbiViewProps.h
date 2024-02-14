@@ -47,6 +47,9 @@ struct Color : ColorT<Color> {
   static void WriteValue(
       const winrt::Microsoft::ReactNative::IJSValueWriter &writer,
       const winrt::Microsoft::ReactNative::Color &value) noexcept;
+  static winrt::Microsoft::ReactNative::Color Transparent() noexcept;
+  static winrt::Microsoft::ReactNative::Color Black() noexcept;
+  static winrt::Microsoft::ReactNative::Color White() noexcept;
 
  private:
   facebook::react::SharedColor m_color;

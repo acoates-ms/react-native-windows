@@ -1,13 +1,84 @@
 #pragma once
 #include "RNSVG.GroupView.g.h"
 #include "RNSVG.RenderableView.h"
+#include "RNSVG.SvgGroupCommonProps.g.h"
 
 namespace winrt::RNSVG::implementation {
+
+    REACT_STRUCT(FontObject)
+        struct FontObject
+    {
+        REACT_FIELD(fontStyle)
+            std::string fontStyle;
+        REACT_FIELD(fontVariant)
+            std::string fontVariant;
+        REACT_FIELD(fontWeight)
+            std::string fontWeight;
+        REACT_FIELD(fontStretch)
+            std::string fontStretch;
+        REACT_FIELD(fontSize)
+            float fontSize;
+        REACT_FIELD(fontFamily)
+            std::string fontFamily;
+        REACT_FIELD(textAnchor)
+            std::string textAnchor;
+        REACT_FIELD(textDecoration)
+            std::string textDecoration;
+        REACT_FIELD(letterSpacing)
+            std::string letterSpacing;
+        REACT_FIELD(wordSpacing)
+            std::string wordSpacing;
+        REACT_FIELD(kerning)
+            std::string kerning;
+        REACT_FIELD(fontFeatureSettings)
+            std::string fontFeatureSettings;
+        REACT_FIELD(fontVariantLigatures)
+            std::string fontVariantLigatures;
+        REACT_FIELD(fontVariationSettings)
+            std::string fontVariationSettings;
+
+        bool operator==(const FontObject& rhs) const
+        {
+            return fontStyle == rhs.fontStyle
+                && fontVariant == rhs.fontVariant
+                && fontWeight == rhs.fontWeight
+                && fontStretch == rhs.fontStretch
+                && fontSize == rhs.fontSize
+                && fontFamily == rhs.fontFamily
+                && textAnchor == rhs.textAnchor
+                && textDecoration == rhs.textDecoration
+                && letterSpacing == rhs.letterSpacing
+                && wordSpacing == rhs.wordSpacing
+                && kerning == rhs.kerning
+                && fontFeatureSettings == rhs.fontFeatureSettings
+                && fontVariantLigatures == rhs.fontVariantLigatures
+                && fontVariationSettings == rhs.fontVariationSettings;
+        } 
+
+        bool operator!=(const FontObject& rhs) const
+        {
+            return !(*this == rhs);
+        }
+    };
+
+    REACT_STRUCT(SvgGroupCommonProps)
+        struct SvgGroupCommonProps : SvgGroupCommonPropsT< SvgGroupCommonProps, SvgRenderableCommonProps>
+    {
+        SvgGroupCommonProps(const winrt::Microsoft::ReactNative::ViewProps& props);
+
+        void SetProp(uint32_t hash, winrt::hstring propName, winrt::Microsoft::ReactNative::IJSValueReader value) noexcept;
+
+        REACT_FIELD(fontSize)
+            std::string fontSize;
+        REACT_FIELD(fontWeight)
+            std::string fontWeight;
+        REACT_FIELD(font)
+            FontObject font;
+    };
+
 struct GroupView : GroupViewT<GroupView, RNSVG::implementation::RenderableView> {
  public:
      GroupView(const winrt::Microsoft::ReactNative::CreateComponentViewArgs& args);
-
-  Windows::Foundation::Collections::IVector<RNSVG::IRenderable> Children() { return m_children; }
 
   hstring FontFamily() { return m_fontFamily; }
   void FontFamily(hstring const &value) { m_fontFamily = value; }
@@ -18,7 +89,15 @@ struct GroupView : GroupViewT<GroupView, RNSVG::implementation::RenderableView> 
   hstring FontWeight(){ return m_fontWeight; }
   void FontWeight(hstring const &value) { m_fontWeight = value; }
 
-  virtual void UpdateProperties(Microsoft::ReactNative::IJSValueReader const &reader, bool forceUpdate, bool invalidate);
+  void UpdateProperties(const winrt::Microsoft::ReactNative::IComponentProps& props, const winrt::Microsoft::ReactNative::IComponentProps& oldProps, bool forceUpdate = true, bool invalidate = true) noexcept override;
+
+  virtual void MountChildComponentView(
+      const winrt::Microsoft::ReactNative::ComponentView& childComponentView,
+      uint32_t index) noexcept;
+  virtual void UnmountChildComponentView(
+      const winrt::Microsoft::ReactNative::ComponentView& childComponentView,
+      uint32_t index) noexcept;
+
   virtual void CreateGeometry();
 
   virtual void SaveDefinition();
@@ -35,10 +114,10 @@ struct GroupView : GroupViewT<GroupView, RNSVG::implementation::RenderableView> 
 
   virtual RNSVG::IRenderable HitTest(Windows::Foundation::Point const &point);
 
+  static void RegisterComponent(const winrt::Microsoft::ReactNative::IReactPackageBuilderFabric& builder) noexcept;
+
  private:
   Microsoft::ReactNative::IReactContext m_reactContext{nullptr};
-  Windows::Foundation::Collections::IVector<RNSVG::IRenderable> m_children{
-      winrt::single_threaded_vector<RNSVG::IRenderable>()};
 
   float m_fontSize{12.0f};
   hstring m_fontFamily{L"Segoe UI"};

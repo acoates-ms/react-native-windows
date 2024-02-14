@@ -6,8 +6,6 @@
 
 /*
 #include "RNSVGModule.h"
-#include "SvgViewManager.h"
-#include "GroupViewManager.h"
 #include "PathViewManager.h"
 #include "RectViewManager.h"
 #include "CircleViewManager.h"
@@ -27,6 +25,8 @@
 */
 
 #include "RNSVG.SvgView.h"
+#include "RNSVG.GroupView.h"
+#include "RNSVG.RectView.h"
 
 #include <winrt/Microsoft.ReactNative.h>
 
@@ -37,6 +37,8 @@ namespace winrt::RNSVG::implementation
       auto fabricPackageBuilder = packageBuilder.as<winrt::Microsoft::ReactNative::IReactPackageBuilderFabric>();
 
       SvgView::RegisterComponent(fabricPackageBuilder);
+      GroupView::RegisterComponent(fabricPackageBuilder);
+      RectView::RegisterComponent(fabricPackageBuilder);
 
       /*
 

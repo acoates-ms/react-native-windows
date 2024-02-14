@@ -24,17 +24,17 @@ struct SvgViewProps : SvgViewPropsT<SvgViewProps> {
         winrt::RNSVG::SVGLength bbHeight { 0.0, winrt::RNSVG::LengthType::Unknown };
 
     REACT_FIELD(minX)
-        std::optional<float> minX;
+        float minX;
     REACT_FIELD(minY)
-        std::optional<float> minY;
+        float minY;
     REACT_FIELD(vbWidth)
-        std::optional<float> vbWidth;
+        float vbWidth;
     REACT_FIELD(vbHeight)
-        std::optional<float> vbHeight;
+        float vbHeight;
     REACT_FIELD(align)
-        std::optional<std::string> align;
+        std::string align;
     REACT_FIELD(meetOrSlice)
-        std::optional<winrt::RNSVG::MeetOrSlice> meetOrSlice;
+        winrt::RNSVG::MeetOrSlice meetOrSlice;
     REACT_FIELD(tintColor)
         winrt::Microsoft::ReactNative::Color tintColor { nullptr };
     REACT_FIELD(color)
@@ -50,9 +50,6 @@ struct SvgView : SvgViewT<SvgView> {
 
   SvgView(const winrt::Microsoft::ReactNative::Composition::CreateCompositionComponentViewArgs& args);
 
-  winrt::Microsoft::ReactNative::ComponentView SvgParent() { return m_parent; }
-  void SvgParent(winrt::Microsoft::ReactNative::ComponentView const &value);
-
   RNSVG::GroupView Group() { return m_group; }
   void Group(RNSVG::GroupView const &value) { m_group = value; }
 
@@ -65,7 +62,7 @@ struct SvgView : SvgViewT<SvgView> {
   RNSVG::D2DGeometry Geometry() { return m_group ? m_group.Geometry() : nullptr; }
   void Geometry(RNSVG::D2DGeometry const & /*value*/) {}
 
-  Windows::UI::Color CurrentColor() { return m_currentColor; }
+  winrt::Microsoft::ReactNative::Color CurrentColor() { return m_currentColor; }
 
   bool IsResponsible() { return m_isResponsible; }
   void IsResponsible(bool isResponsible) { m_isResponsible = isResponsible; }
@@ -78,7 +75,7 @@ struct SvgView : SvgViewT<SvgView> {
   }
 
   // IRenderable
-  void UpdateProperties(Microsoft::ReactNative::IJSValueReader const &reader, bool forceUpdate = true, bool invalidate = true);
+  void UpdateProperties(const winrt::Microsoft::ReactNative::IComponentProps& props, const winrt::Microsoft::ReactNative::IComponentProps& oldProps, bool forceUpdate = true, bool invalidate = true);
   void MergeProperties(RNSVG::RenderableView const &other);
   void SaveDefinition();
   void Unload();
@@ -93,6 +90,13 @@ struct SvgView : SvgViewT<SvgView> {
   void UpdateLayoutMetrics(const winrt::Microsoft::ReactNative::LayoutMetrics& metrics, const winrt::Microsoft::ReactNative::LayoutMetrics& oldMetrics);
   //Windows::Foundation::Size MeasureOverride(Windows::Foundation::Size const &availableSize);
   //Windows::Foundation::Size ArrangeOverride(Windows::Foundation::Size const &finalSize);
+  void MountChildComponentView(
+      const winrt::Microsoft::ReactNative::ComponentView& childComponentView,
+      uint32_t index) noexcept;
+  void UnmountChildComponentView(
+      const winrt::Microsoft::ReactNative::ComponentView& childComponentView,
+      uint32_t index) noexcept;
+
 
   void Invalidate();
 
@@ -102,7 +106,6 @@ struct SvgView : SvgViewT<SvgView> {
   bool m_hasRendered{false};
   bool m_isResponsible{false};
   Microsoft::ReactNative::IReactContext m_reactContext{nullptr};
-  winrt::Microsoft::ReactNative::ComponentView m_parent{nullptr};
   RNSVG::D2DDevice m_device;
   RNSVG::D2DDeviceContext m_deviceContext;
   //Windows::UI::Xaml::Controls::Image m_image;
@@ -119,7 +122,7 @@ struct SvgView : SvgViewT<SvgView> {
   std::string m_align{""};
   winrt::Microsoft::ReactNative::Composition::ISpriteVisual m_visual { nullptr };
   RNSVG::MeetOrSlice m_meetOrSlice{RNSVG::MeetOrSlice::Meet};
-  Windows::UI::Color m_currentColor{winrt::Windows::UI::Color{255,0,0,0}};
+  winrt::Microsoft::ReactNative::Color m_currentColor{nullptr};
   winrt::Microsoft::ReactNative::LayoutMetrics m_layoutMetrics;
   winrt::Microsoft::ReactNative::Composition::ICompositionContext m_compContext { nullptr };
 
