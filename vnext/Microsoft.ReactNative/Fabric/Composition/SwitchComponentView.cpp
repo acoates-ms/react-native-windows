@@ -5,8 +5,8 @@
 #pragma once
 
 #include "SwitchComponentView.h"
+#include <AutoDraw.h>
 #include <Fabric/AbiViewProps.h>
-#include "Composition/AutoDraw.h"
 #include "CompositionDynamicAutomationProvider.h"
 #include "RootComponentView.h"
 

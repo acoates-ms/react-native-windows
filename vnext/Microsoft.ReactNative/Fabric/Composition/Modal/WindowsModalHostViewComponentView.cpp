@@ -6,9 +6,9 @@
 
 #include "WindowsModalHostViewComponentView.h"
 
+#include <AutoDraw.h>
 #include <Fabric/DWriteHelpers.h>
 #include "../CompositionDynamicAutomationProvider.h"
-#include "Composition/AutoDraw.h"
 #include "Unicode.h"
 
 namespace winrt::Microsoft::ReactNative::Composition::implementation {

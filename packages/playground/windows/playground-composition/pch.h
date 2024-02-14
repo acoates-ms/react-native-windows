@@ -17,3 +17,5 @@
 // #include <winrt/ReactNativePicker.h>
 #include <winrt/Windows.Foundation.Collections.h>
 #include <winrt/Windows.Foundation.h>
+
+#include <d2d1_3.h>

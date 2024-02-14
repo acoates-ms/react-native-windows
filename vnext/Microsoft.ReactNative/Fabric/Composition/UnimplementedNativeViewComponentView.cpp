@@ -6,8 +6,8 @@
 
 #include "UnimplementedNativeViewComponentView.h"
 
+#include <AutoDraw.h>
 #include <Fabric/DWriteHelpers.h>
-#include "Composition/AutoDraw.h"
 #include "CompositionDynamicAutomationProvider.h"
 #include "Unicode.h"
 

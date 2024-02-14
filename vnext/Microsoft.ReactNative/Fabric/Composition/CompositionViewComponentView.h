@@ -224,7 +224,7 @@ struct ViewComponentView : public ViewComponentViewT<ViewComponentView, Componen
 
   // Publicaly overridable APIs
   virtual winrt::Microsoft::ReactNative::Composition::IVisual CreateVisual() noexcept;
-  virtual void UpdateLayoutMetrics(LayoutMetrics metrics) noexcept;
+  virtual void UpdateLayoutMetrics(const LayoutMetrics &metrics, const LayoutMetrics &oldMetrics) noexcept;
 
  private:
   facebook::react::SharedViewProps m_props;

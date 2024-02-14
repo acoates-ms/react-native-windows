@@ -129,6 +129,13 @@
     <ClCompile Include="CustomComponent.cpp" />
     <ClCompile Include="Playground-Composition.cpp" />
     <ClCompile Include="YogaXamlPanel.cpp" />
+    <ClCompile Include="RNSVG.RenderableView.cpp" />
+    <ClCompile Include="RNSVG.BrushView.cpp" />
+    <ClCompile Include="RNSVG.GroupView.cpp" />
+    <ClCompile Include="RNSVG.SVGLength.cpp" />
+    <ClCompile Include="RNSVG.RectView.cpp" />
+    <ClCompile Include="RNSVG.ReactPackageProvider.cpp" />
+    <ClCompile Include="RNSVG.SvgView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <!-- Island-support: Needed to run Markup Compiler on App.xaml and make the generated files -->
@@ -140,6 +147,9 @@
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="CustomComponent.idl"/>
+    <Midl Include="RNSVG.Types.idl"/>
+    <Midl Include="RNSVG.ReactPackageProvider.idl"/>
+    <Midl Include="RNSVG.Views.idl"/>
     <Midl Include="YogaXamlPanel.idl"/>
   </ItemGroup>
   <ItemGroup>

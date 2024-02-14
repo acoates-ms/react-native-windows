@@ -16,9 +16,9 @@
 
 #include <windows.ui.composition.interop.h>
 
+#include <AutoDraw.h>
 #include <Fabric/DWriteHelpers.h>
 #include <unicode.h>
-#include "Composition/AutoDraw.h"
 #include "CompositionDynamicAutomationProvider.h"
 #include "JSValueReader.h"
 #include "RootComponentView.h"

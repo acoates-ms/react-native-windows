@@ -63,11 +63,13 @@ void ComponentView::updateProps(
   if (m_customComponent) {
     // Review is it expected that I need this cast to call overridden methods?
     winrt::Microsoft::ReactNative::ComponentView outer(*this);
-    outer.UpdateProps(userProps(props));
+    outer.UpdateProps(userProps(props), oldProps ? userProps(oldProps) : nullptr);
   }
 }
 
-void ComponentView::UpdateProps(const winrt::Microsoft::ReactNative::IComponentProps &props) noexcept {}
+void ComponentView::UpdateProps(
+    const winrt::Microsoft::ReactNative::IComponentProps &props,
+    const winrt::Microsoft::ReactNative::IComponentProps &oldProps) noexcept {}
 
 const winrt::Microsoft::ReactNative::IComponentProps ComponentView::userProps(
     facebook::react::Props::Shared const &props) noexcept {
@@ -101,10 +103,15 @@ void ComponentView::updateLayoutMetrics(
         layoutMetrics.frame.origin.y,
         layoutMetrics.frame.size.width,
         layoutMetrics.frame.size.height},
-       layoutMetrics.pointScaleFactor});
+       layoutMetrics.pointScaleFactor},
+      {{oldLayoutMetrics.frame.origin.x,
+        oldLayoutMetrics.frame.origin.y,
+        oldLayoutMetrics.frame.size.width,
+        oldLayoutMetrics.frame.size.height},
+       oldLayoutMetrics.pointScaleFactor});
 }
 
-void ComponentView::UpdateLayoutMetrics(LayoutMetrics metrics) noexcept {}
+void ComponentView::UpdateLayoutMetrics(const LayoutMetrics &metrics, const LayoutMetrics &oldMetrics) noexcept {}
 
 void ComponentView::FinalizeUpdates(winrt::Microsoft::ReactNative::ComponentViewUpdateMask updateMask) noexcept {}
 

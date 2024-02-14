@@ -23,6 +23,7 @@
 #include <DesktopWindowBridge.h>
 #include "App.xaml.h"
 #include "NativeModules.h"
+#include "RNSVG.ReactPackageProvider.h"
 #include "ReactPropertyBag.h"
 
 #if USE_WINUI3
@@ -159,6 +160,9 @@ struct WindowData {
           if (!m_useLiftedComposition) {
             host.PackageProviders().Append(winrt::make<CompReactPackageProvider>());
           }
+
+          host.PackageProviders().Append(winrt::make<winrt::RNSVG::implementation::ReactPackageProvider>());
+
           winrt::Microsoft::ReactNative::ReactCoreInjection::SetTopLevelWindowId(
               host.InstanceSettings().Properties(), reinterpret_cast<uint64_t>(hwnd));
 

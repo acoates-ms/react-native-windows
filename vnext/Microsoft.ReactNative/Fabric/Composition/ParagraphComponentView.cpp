@@ -6,12 +6,12 @@
 
 #include "ParagraphComponentView.h"
 
+#include <AutoDraw.h>
 #include <Utils/ValueUtils.h>
 #include <react/renderer/components/text/ParagraphShadowNode.h>
 #include <react/renderer/components/text/ParagraphState.h>
 #include <unicode.h>
 #include <winrt/Microsoft.ReactNative.Composition.h>
-#include "Composition/AutoDraw.h"
 #include "CompositionDynamicAutomationProvider.h"
 #include "CompositionHelpers.h"
 
