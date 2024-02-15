@@ -28,7 +28,12 @@ SwitchComponentView::SwitchComponentView(
     const winrt::Microsoft::ReactNative::Composition::ICompositionContext &compContext,
     facebook::react::Tag tag,
     winrt::Microsoft::ReactNative::ReactContext const &reactContext)
-    : base_type(compContext, tag, reactContext, CompositionComponentViewFeatures::Default, false) {
+    : base_type(
+          compContext,
+          tag,
+          reactContext,
+          ComponentViewFeatures::Default & ~ComponentViewFeatures::Background,
+          false) {
   m_props = std::make_shared<facebook::react::SwitchProps const>();
 }
 

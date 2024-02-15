@@ -31,7 +31,7 @@ export default class Bootstrap extends React.Component {
     return (
       <View
         accessible={true}
-        style={{ width: 300, height: 300, margin: 10, backgroundColor: 'green' }}>
+        style={{ width: 300, height: 300, margin: 10, borderColor: 'green', borderWidth: 1 }}>
         <Svg width="200" height="60">
           <Rect
             x="5%"

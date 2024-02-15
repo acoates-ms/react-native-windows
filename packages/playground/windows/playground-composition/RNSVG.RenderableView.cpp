@@ -405,16 +405,18 @@ void RenderableView::MergeProperties(RNSVG::RenderableView const &other) {
 }
 
 RNSVG::SvgView RenderableView::SvgRoot() {
-  if (Parent()) {
-    if (auto const &svgView{Parent().try_as<RNSVG::SvgView>()}) {
-      if (svgView.Parent()) {
-        if (auto const &parent{svgView.Parent().try_as<RNSVG::RenderableView>()}) {
+  if (auto parent = Parent()) {
+    if (auto const &svgView{parent.try_as<RNSVG::SvgView>()}) {
+      if (auto const &svgViewParent = svgView.Parent()) {
+        if (auto const &parent{svgViewParent.try_as<RNSVG::RenderableView>()}) {
           return parent.SvgRoot();
+        } else {
+          return svgView;
         }
       } else {
         return svgView;
       }
-    } else if (auto const &renderable{Parent().try_as<RNSVG::RenderableView>()}) {
+    } else if (auto const &renderable{parent.try_as<RNSVG::RenderableView>()}) {
       return renderable.SvgRoot();
     }
   }

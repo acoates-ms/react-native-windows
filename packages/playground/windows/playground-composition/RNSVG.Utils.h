@@ -2,6 +2,7 @@
 
 #include "pch.h"
 
+#include <winrt/Microsoft.ReactNative.Composition.h>
 #include <winrt/Windows.Foundation.Numerics.h>
 #include <winrt/Windows.UI.Text.h>
 #include "JSValueReader.h"
@@ -285,9 +286,8 @@ struct Utils {
     if (root && brushId != L"") {
       if (brushId == L"currentColor") {
         com_ptr<ID2D1SolidColorBrush> scb;
-        assert(false); // need to provide theme to AsWindowsColor
         deviceContext->CreateSolidColorBrush(
-            D2DHelpers::AsD2DColor(root.CurrentColor().AsWindowsColor(nullptr)), scb.put());
+            D2DHelpers::AsD2DColor(root.CurrentColor().AsWindowsColor(root.Theme())), scb.put());
         brush = scb.as<ID2D1Brush>();
       } else if (auto const &brushView{root.Brushes().TryLookup(brushId)}) {
         brushView.CreateBrush();
@@ -304,8 +304,8 @@ struct Utils {
 
     if (!brush) {
       com_ptr<ID2D1SolidColorBrush> scb;
-      assert(false); // need to provide theme to AsWindowsColor
-      deviceContext->CreateSolidColorBrush(D2DHelpers::AsD2DColor(color.AsWindowsColor(nullptr)), scb.put());
+      assert(root != nullptr);
+      deviceContext->CreateSolidColorBrush(D2DHelpers::AsD2DColor(color.AsWindowsColor(root.Theme())), scb.put());
       brush = scb.as<ID2D1Brush>();
     }
 

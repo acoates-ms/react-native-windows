@@ -121,6 +121,7 @@ struct SvgView : SvgViewT<SvgView> {
   void UnmountChildComponentView(
       const winrt::Microsoft::ReactNative::ComponentView &childComponentView,
       uint32_t index) noexcept;
+  void OnThemeChanged() noexcept;
 
   void Invalidate();
 

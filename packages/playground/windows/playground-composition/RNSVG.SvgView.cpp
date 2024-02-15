@@ -74,6 +74,7 @@ SvgView::SvgView(const winrt::Microsoft::ReactNative::Composition::CreateComposi
 
 winrt::Microsoft::ReactNative::Composition::IVisual SvgView::CreateVisual() noexcept {
   m_visual = m_compContext.CreateSpriteVisual();
+  m_visual.Comment(L"SVGRoot");
   return m_visual;
 }
 
@@ -102,6 +103,11 @@ void SvgView::UnmountChildComponentView(
   base_type::UnmountChildComponentView(childComponentView, index);
 }
 
+void SvgView::OnThemeChanged() noexcept {
+  Invalidate();
+  base_type::OnThemeChanged();
+}
+
 void SvgView::UpdateProps(
     const winrt::Microsoft::ReactNative::IComponentProps &props,
     const winrt::Microsoft::ReactNative::IComponentProps &oldProps) noexcept {
@@ -128,12 +134,12 @@ else if (propertyName == "height")
 
   if (!oldSvgProps || svgProps->bbWidth != oldSvgProps->bbWidth) {
     m_bbWidth = svgProps->bbWidth;
-    assert(false);
+    // assert(false);
     // Width(m_bbWidth.Value());
   }
   if (!oldSvgProps || svgProps->bbHeight != oldSvgProps->bbHeight) {
     m_bbHeight = svgProps->bbHeight;
-    assert(false);
+    // assert(false);
     // Height(m_bbHeight.Value());
   }
   if (!oldSvgProps || svgProps->vbWidth != oldSvgProps->vbWidth) {
@@ -332,6 +338,8 @@ void SvgView::RegisterComponent(const winrt::Microsoft::ReactNative::IReactPacka
             builder.as<winrt::Microsoft::ReactNative::Composition::IReactCompositionViewComponentBuilder>();
         compBuilder.SetCreateViewComponentView(
             [](const winrt::Microsoft::ReactNative::Composition::CreateCompositionComponentViewArgs &args) noexcept {
+              args.Features(
+                  args.Features() & ~winrt::Microsoft::ReactNative::Composition::ComponentViewFeatures::Background);
               return winrt::make<winrt::RNSVG::implementation::SvgView>(args);
             });
       });

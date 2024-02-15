@@ -50,7 +50,8 @@ REACT_STRUCT(SvgNodeCommonProps)
 struct SvgNodeCommonProps : SvgNodeCommonPropsT<SvgNodeCommonProps> {
   SvgNodeCommonProps(const winrt::Microsoft::ReactNative::ViewProps &props);
 
-  void SetProp(uint32_t hash, winrt::hstring propName, winrt::Microsoft::ReactNative::IJSValueReader value) noexcept;
+  virtual void
+  SetProp(uint32_t hash, winrt::hstring propName, winrt::Microsoft::ReactNative::IJSValueReader value) noexcept;
 
   REACT_SVG_NODE_COMMON_PROPS;
 
@@ -91,7 +92,8 @@ REACT_STRUCT(SvgRenderableCommonProps)
 struct SvgRenderableCommonProps : SvgRenderableCommonPropsT<SvgRenderableCommonProps, SvgNodeCommonProps> {
   SvgRenderableCommonProps(const winrt::Microsoft::ReactNative::ViewProps &props);
 
-  void SetProp(uint32_t hash, winrt::hstring propName, winrt::Microsoft::ReactNative::IJSValueReader value) noexcept;
+  void SetProp(uint32_t hash, winrt::hstring propName, winrt::Microsoft::ReactNative::IJSValueReader value) noexcept
+      override;
 
   REACT_SVG_NODE_COMMON_PROPS;
   REACT_SVG_RENDERABLE_COMMON_PROPS;
