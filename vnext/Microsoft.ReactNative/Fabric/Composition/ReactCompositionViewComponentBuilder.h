@@ -38,6 +38,7 @@ struct ReactCompositionViewComponentBuilder : winrt::implements<
       winrt::Microsoft::ReactNative::IComponentProps props) noexcept;
   MeasureContentHandler MeasureContentHandler() const noexcept;
   LayoutHandler LayoutHandler() const noexcept;
+  bool IsViewComponent() const noexcept;
 
   winrt::Microsoft::ReactNative::ComponentView
   CreateView(const IReactContext &reactContext, facebook::react::Tag tag, const ICompositionContext &context) noexcept;

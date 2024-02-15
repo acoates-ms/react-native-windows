@@ -183,7 +183,7 @@ struct RenderableView : RenderableViewT<RenderableView> {
   }
   RNSVG::D2DGeometry ClipPathGeometry();
 
-  void UpdateProps(
+  virtual void UpdateProps(
       const winrt::Microsoft::ReactNative::IComponentProps &props,
       const winrt::Microsoft::ReactNative::IComponentProps &oldProps) noexcept;
 

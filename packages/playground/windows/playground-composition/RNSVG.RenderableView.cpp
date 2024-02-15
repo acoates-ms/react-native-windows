@@ -156,8 +156,9 @@ void RenderableView::UpdateProperties(
 
   if (!oldRenderableProps || renderableProps->strokeLinecap != oldRenderableProps->strokeLinecap) {
     if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeLineCap]) {
-      m_strokeLineCap =
-          renderableProps->strokeLinecap != std::nullopt ? *renderableProps->strokeLinecap : parent.StrokeLineCap();
+      m_strokeLineCap = renderableProps->strokeLinecap != std::nullopt
+          ? *renderableProps->strokeLinecap
+          : (parent ? parent.StrokeLineCap() : RNSVG::LineCap::Butt);
     }
     // forceUpdate = true means the property is being set on an element
     // instead of being inherited from the parent.
@@ -169,8 +170,9 @@ void RenderableView::UpdateProperties(
 
   if (!oldRenderableProps || renderableProps->strokeLinejoin != oldRenderableProps->strokeLinejoin) {
     if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::StrokeLineJoin]) {
-      m_strokeLineJoin =
-          renderableProps->strokeLinejoin != std::nullopt ? *renderableProps->strokeLinejoin : parent.StrokeLineJoin();
+      m_strokeLineJoin = renderableProps->strokeLinejoin != std::nullopt
+          ? *renderableProps->strokeLinejoin
+          : (parent ? parent.StrokeLineJoin() : RNSVG::LineJoin::Miter);
     }
     // forceUpdate = true means the property is being set on an element
     // instead of being inherited from the parent.
@@ -182,7 +184,8 @@ void RenderableView::UpdateProperties(
 
   if (!oldRenderableProps || renderableProps->fillRule != oldRenderableProps->fillRule) {
     if (forceUpdate || !m_propSetMap[RNSVG::BaseProp::FillRule]) {
-      m_fillRule = renderableProps->fillRule != std::nullopt ? *renderableProps->fillRule : parent.FillRule();
+      m_fillRule = renderableProps->fillRule != std::nullopt ? *renderableProps->fillRule
+                                                             : (parent ? parent.FillRule() : RNSVG::FillRule::NonZero);
     }
     if (forceUpdate) {
       // If the optional is null, that generally means the prop was deleted
@@ -221,7 +224,7 @@ void RenderableView::UpdateProperties(
           m_strokeDashArray.Append(item);
         }
       } else {
-        m_strokeDashArray = parent.StrokeDashArray();
+        m_strokeDashArray = (parent ? parent.StrokeDashArray() : winrt::single_threaded_vector<RNSVG::SVGLength>());
       }
       if (forceUpdate) {
         // If the optional is null, that generally means the prop was deleted

@@ -64,49 +64,8 @@ facebook::react::Tag ComponentView::Tag() const noexcept {
   return m_tag;
 }
 
-RootComponentView *ComponentView::rootComponentView() noexcept {
-  if (m_rootView)
-    return m_rootView;
-
-  if (m_parent)
-    return winrt::get_self<winrt::Microsoft::ReactNative::implementation::ComponentView>(m_parent)->rootComponentView();
-
-  return nullptr;
-}
-
 facebook::react::Props::Shared ComponentView::props() noexcept {
   return viewProps();
-}
-
-void ComponentView::parent(const winrt::Microsoft::ReactNative::ComponentView &parent) noexcept {
-  if (!parent) {
-    auto root = rootComponentView();
-    winrt::Microsoft::ReactNative::ComponentView view{nullptr};
-    winrt::check_hresult(
-        QueryInterface(winrt::guid_of<winrt::Microsoft::ReactNative::ComponentView>(), winrt::put_abi(view)));
-    if (root && root->GetFocusedComponent() == view) {
-      root->SetFocusedComponent(nullptr); // TODO need move focus logic - where should focus go?
-    }
-  }
-
-  if (m_parent != parent) {
-    m_rootView = nullptr;
-    m_parent = parent;
-    if (parent) {
-      theme(winrt::get_self<winrt::Microsoft::ReactNative::implementation::ComponentView>(parent)->theme());
-    }
-  }
-}
-
-void ComponentView::theme(winrt::Microsoft::ReactNative::Composition::implementation::Theme *value) noexcept {
-  if (m_theme != value) {
-    for (auto it = m_children.begin(); it != m_children.end(); ++it) {
-      winrt::get_self<winrt::Microsoft::ReactNative::implementation::ComponentView>(*it)->theme(value);
-    }
-
-    m_theme = value;
-    onThemeChanged();
-  }
 }
 
 void ComponentView::onThemeChanged() noexcept {
@@ -120,12 +79,6 @@ void ComponentView::onThemeChanged() noexcept {
   }
 
   base_type::onThemeChanged();
-}
-
-winrt::Microsoft::ReactNative::Composition::implementation::Theme *ComponentView::theme() const noexcept {
-  return m_theme ? m_theme
-                 : winrt::get_self<winrt::Microsoft::ReactNative::Composition::implementation::Theme>(
-                       winrt::Microsoft::ReactNative::Composition::implementation::Theme::EmptyTheme());
 }
 
 void ComponentView::Theme(const winrt::Microsoft::ReactNative::Composition::Theme &value) noexcept {
@@ -1515,7 +1468,12 @@ void ViewComponentView::MountChildComponentView(
 
   indexOffsetForBorder(index);
   ensureVisual();
-  m_visual.InsertAt(childComponentView.as<ComponentView>()->OuterVisual(), index);
+
+  // TODO if we get mixed children of composition and non-composition ComponentViews the indexes will get mixed up
+  // We could offset the index based on non-composition children in m_children
+  if (auto compositionChild = childComponentView.try_as<ComponentView>()) {
+    m_visual.InsertAt(compositionChild->OuterVisual(), index);
+  }
 }
 
 void ViewComponentView::UnmountChildComponentView(
@@ -1524,7 +1482,9 @@ void ViewComponentView::UnmountChildComponentView(
   base_type::UnmountChildComponentView(childComponentView, index);
 
   indexOffsetForBorder(index);
-  m_visual.Remove(childComponentView.as<ComponentView>()->OuterVisual());
+  if (auto compositionChild = childComponentView.try_as<ComponentView>()) {
+    m_visual.Remove(compositionChild->OuterVisual());
+  }
 }
 
 void ViewComponentView::updateProps(
@@ -1559,6 +1519,7 @@ void ViewComponentView::updateProps(
 
 const winrt::Microsoft::ReactNative::IComponentProps ViewComponentView::userProps(
     facebook::react::Props::Shared const &props) noexcept {
+  assert(m_customComponent);
   const auto &abiViewProps = *std::static_pointer_cast<const ::Microsoft::ReactNative::AbiViewProps>(props);
   return abiViewProps.UserProps();
 }

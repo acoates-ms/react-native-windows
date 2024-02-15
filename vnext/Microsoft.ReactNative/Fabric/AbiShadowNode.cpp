@@ -12,6 +12,22 @@
 
 namespace winrt::Microsoft::ReactNative::implementation {
 
+AbiProps::AbiProps(
+    const facebook::react::PropsParserContext &context,
+    const AbiProps &sourceProps,
+    const facebook::react::RawProps &rawProps)
+    : facebook::react::Props(context, sourceProps, rawProps) {}
+
+AbiProps::~AbiProps() {}
+
+void AbiProps::SetUserProps(winrt::Microsoft::ReactNative::IComponentProps componentProps) noexcept {
+  m_componentProps = componentProps;
+}
+
+winrt::Microsoft::ReactNative::IComponentProps AbiProps::UserProps() const noexcept {
+  return m_componentProps;
+}
+
 ShadowNode::ShadowNode(facebook::react::ShadowNode::Shared shadowNode) noexcept : m_shadowNode(shadowNode) {}
 
 void ShadowNode::EnsureUnsealed() noexcept {

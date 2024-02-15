@@ -5,14 +5,14 @@
 
 #include <react/renderer/components/view/ConcreteViewShadowNode.h>
 #include <react/renderer/core/ComponentDescriptor.h>
+#include "AbiShadowNode.h"
 #include "AbiViewProps.h"
-#include "AbiViewShadowNode.h"
 #include "winrt/Microsoft.ReactNative.h"
 
 namespace Microsoft::ReactNative {
 
 class AbiComponentDescriptor : public facebook::react::ComponentDescriptor {
-  using ShadowNodeT = AbiViewShadowNode;
+  using ShadowNodeT = AbiShadowNode;
   using SharedShadowNodeT = std::shared_ptr<const ShadowNodeT>;
 
  public:

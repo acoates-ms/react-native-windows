@@ -7,7 +7,6 @@
 
 #include <Fabric/WindowsComponentDescriptorRegistry.h>
 #include <ReactContext.h>
-#include <react/renderer/components/view/ViewPropsInterpolation.h>
 #include "DynamicReader.h"
 
 namespace Microsoft::ReactNative {
@@ -46,7 +45,7 @@ std::shared_ptr<facebook::react::ShadowNode> AbiComponentDescriptor::createShado
     facebook::react::ShadowNodeFamily::Shared const &family) const {
   auto shadowNode = std::make_shared<ShadowNodeT>(fragment, family, getTraits());
 
-  shadowNode->Proxy(winrt::make<winrt::Microsoft::ReactNative::implementation::YogaLayoutableShadowNode>(shadowNode));
+  shadowNode->Proxy(winrt::make<winrt::Microsoft::ReactNative::implementation::ShadowNode>(shadowNode));
   winrt::get_self<winrt::Microsoft::ReactNative::Composition::ReactCompositionViewComponentBuilder>(m_builder)
       ->CreateShadowNode(shadowNode->Proxy());
 
@@ -59,7 +58,7 @@ facebook::react::ShadowNode::Unshared AbiComponentDescriptor::cloneShadowNode(
     const facebook::react::ShadowNodeFragment &fragment) const {
   auto shadowNode = std::make_shared<ShadowNodeT>(sourceShadowNode, fragment);
 
-  shadowNode->Proxy(winrt::make<winrt::Microsoft::ReactNative::implementation::YogaLayoutableShadowNode>(shadowNode));
+  shadowNode->Proxy(winrt::make<winrt::Microsoft::ReactNative::implementation::ShadowNode>(shadowNode));
   winrt::get_self<winrt::Microsoft::ReactNative::Composition::ReactCompositionViewComponentBuilder>(m_builder)
       ->CloneShadowNode(shadowNode->Proxy(), static_cast<const ShadowNodeT &>(sourceShadowNode).Proxy());
 
@@ -98,13 +97,15 @@ facebook::react::Props::Shared AbiComponentDescriptor::cloneProps(
 
   // Call old-style constructor
   // auto shadowNodeProps = std::make_shared<ShadowNodeT::Props>(context, rawProps, props);
-  auto shadowNodeProps = std::make_shared<AbiViewProps>(
-      context, props ? static_cast<AbiViewProps const &>(*props) : *ShadowNodeT::defaultSharedProps(), rawProps);
-  auto viewProps = winrt::make<winrt::Microsoft::ReactNative::implementation::UserViewProps>(shadowNodeProps);
+  auto shadowNodeProps = std::make_shared<winrt::Microsoft::ReactNative::implementation::AbiProps>(
+      context,
+      props ? static_cast<winrt::Microsoft::ReactNative::implementation::AbiProps const &>(*props)
+            : *ShadowNodeT::defaultSharedProps(),
+      rawProps);
   auto userProps =
       winrt::get_self<winrt::Microsoft::ReactNative::Composition::ReactCompositionViewComponentBuilder>(m_builder)
-          ->CreateProps(viewProps);
-  shadowNodeProps->SetUserProps(userProps, viewProps);
+          ->CreateProps(nullptr);
+  shadowNodeProps->SetUserProps(userProps);
 
   rawProps.iterateOverValues(
       [&](facebook::react::RawPropsPropNameHash hash, const char *propName, facebook::react::RawValue const &fn) {
@@ -124,7 +125,9 @@ AbiComponentDescriptor::ConcreteStateData AbiComponentDescriptor::initialStateDa
     const facebook::react::ComponentDescriptor &componentDescriptor) noexcept {
   return {winrt::get_self<winrt::Microsoft::ReactNative::Composition::ReactCompositionViewComponentBuilder>(
               static_cast<const AbiComponentDescriptor &>(componentDescriptor).m_builder)
-              ->InitialStateData(std::static_pointer_cast<AbiViewProps const>(props)->UserProps())};
+              ->InitialStateData(
+                  std::static_pointer_cast<winrt::Microsoft::ReactNative::implementation::AbiProps const>(props)
+                      ->UserProps())};
 }
 
 facebook::react::State::Shared AbiComponentDescriptor::createInitialState(
@@ -177,15 +180,8 @@ facebook::react::ShadowNodeFamily::Shared AbiComponentDescriptor::createFamily(
 void AbiComponentDescriptor::adopt(facebook::react::ShadowNode &shadowNode) const {
   react_native_assert(shadowNode.getComponentHandle() == getComponentHandle());
 
-  auto &abiViewShadowNode = static_cast<AbiViewShadowNode &>(shadowNode);
-
-  abiViewShadowNode.Builder(m_builder);
-
-  if (winrt::get_self<winrt::Microsoft::ReactNative::Composition::ReactCompositionViewComponentBuilder>(m_builder)
-          ->MeasureContentHandler()) {
-    abiViewShadowNode.dirtyLayout();
-    abiViewShadowNode.enableMeasurement();
-  }
+  auto &abiShadowNode = static_cast<AbiShadowNode &>(shadowNode);
+  abiShadowNode.Builder(m_builder);
 }
 
 } // namespace Microsoft::ReactNative

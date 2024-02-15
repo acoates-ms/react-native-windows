@@ -130,8 +130,8 @@ struct SvgView : SvgViewT<SvgView> {
   bool m_hasRendered{false};
   bool m_isResponsible{false};
   Microsoft::ReactNative::IReactContext m_reactContext{nullptr};
-  RNSVG::D2DDevice m_device;
-  RNSVG::D2DDeviceContext m_deviceContext;
+  RNSVG::D2DDevice m_device{nullptr};
+  RNSVG::D2DDeviceContext m_deviceContext{nullptr};
   // Windows::UI::Xaml::Controls::Image m_image;
   RNSVG::GroupView m_group{nullptr};
   hstring m_id{L""};
@@ -139,15 +139,15 @@ struct SvgView : SvgViewT<SvgView> {
   float m_minY{0.0f};
   float m_vbWidth{0.0f};
   float m_vbHeight{0.0f};
-  RNSVG::SVGLength m_bbWidth{};
-  RNSVG::SVGLength m_bbHeight{};
-  RNSVG::SVGLength m_width{};
-  RNSVG::SVGLength m_height{};
+  RNSVG::SVGLength m_bbWidth{0, RNSVG::LengthType::Unknown};
+  RNSVG::SVGLength m_bbHeight{0, RNSVG::LengthType::Unknown};
+  RNSVG::SVGLength m_width{0, RNSVG::LengthType::Unknown};
+  RNSVG::SVGLength m_height{0, RNSVG::LengthType::Unknown};
   std::string m_align{""};
   winrt::Microsoft::ReactNative::Composition::ISpriteVisual m_visual{nullptr};
   RNSVG::MeetOrSlice m_meetOrSlice{RNSVG::MeetOrSlice::Meet};
   winrt::Microsoft::ReactNative::Color m_currentColor{nullptr};
-  winrt::Microsoft::ReactNative::LayoutMetrics m_layoutMetrics;
+  winrt::Microsoft::ReactNative::LayoutMetrics m_layoutMetrics{{0, 0, 0, 0}, 1.0};
   winrt::Microsoft::ReactNative::Composition::ICompositionContext m_compContext{nullptr};
 
   Windows::Foundation::Collections::IMap<hstring, RNSVG::IRenderable> m_templates{

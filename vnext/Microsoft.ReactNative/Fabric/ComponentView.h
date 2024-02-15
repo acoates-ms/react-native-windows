@@ -152,6 +152,8 @@ struct ComponentView : public ComponentViewT<ComponentView> {
  protected:
   const bool m_customComponent; // Is a user custom component, and so needs to call external override functions
   const facebook::react::Tag m_tag;
+  winrt::Microsoft::ReactNative::Composition::implementation::RootComponentView *m_rootView{nullptr};
+  mutable winrt::Microsoft::ReactNative::Composition::implementation::Theme *m_theme{nullptr};
   const winrt::Microsoft::ReactNative::ReactContext m_reactContext;
   winrt::Microsoft::ReactNative::ComponentView m_parent{nullptr};
   winrt::Windows::Foundation::Collections::IVector<winrt::Microsoft::ReactNative::ComponentView> m_children{

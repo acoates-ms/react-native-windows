@@ -66,14 +66,10 @@ struct ComponentView
   const facebook::react::SharedViewEventEmitter &GetEventEmitter() const noexcept;
   void HandleCommand(winrt::hstring commandName, const winrt::Microsoft::ReactNative::IJSValueReader &args) noexcept
       override;
-  RootComponentView *rootComponentView() noexcept override;
-  void parent(const winrt::Microsoft::ReactNative::ComponentView &parent) noexcept override;
   facebook::react::Props::Shared props() noexcept override;
   virtual facebook::react::SharedViewProps viewProps() noexcept {
     return nullptr;
   };
-  void theme(winrt::Microsoft::ReactNative::Composition::implementation::Theme *theme) noexcept override;
-  winrt::Microsoft::ReactNative::Composition::implementation::Theme *theme() const noexcept override;
   void Theme(const winrt::Microsoft::ReactNative::Composition::Theme &theme) noexcept;
   winrt::Microsoft::ReactNative::Composition::Theme Theme() const noexcept;
   void onThemeChanged() noexcept override;
@@ -141,7 +137,6 @@ struct ComponentView
   winrt::Microsoft::ReactNative::Composition::ICompositionContext m_compContext;
   comp::CompositionPropertySet m_centerPropSet{nullptr};
   facebook::react::SharedViewEventEmitter m_eventEmitter;
-  RootComponentView *m_rootView{nullptr};
   facebook::react::LayoutMetrics m_layoutMetrics;
   bool m_needsBorderUpdate{false};
   bool m_hasTransformMatrixFacade{false};
@@ -168,7 +163,6 @@ struct ComponentView
   void UpdateCenterPropertySet() noexcept;
 
   CompositionComponentViewFeatures m_flags;
-  mutable winrt::Microsoft::ReactNative::Composition::implementation::Theme *m_theme{nullptr};
   void showFocusVisual(bool show) noexcept;
   winrt::Microsoft::ReactNative::Composition::IFocusVisual m_focusVisual{nullptr};
   winrt::Microsoft::ReactNative::Composition::IVisual m_outerVisual{nullptr};

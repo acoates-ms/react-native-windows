@@ -107,4 +107,8 @@ winrt::Microsoft::ReactNative::ComponentView ReactCompositionViewComponentBuilde
   }
 }
 
+bool ReactCompositionViewComponentBuilder::IsViewComponent() const noexcept {
+  return m_createView != nullptr;
+}
+
 } // namespace winrt::Microsoft::ReactNative::Composition

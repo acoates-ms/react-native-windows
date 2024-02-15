@@ -230,6 +230,10 @@ void SvgView::Draw(RNSVG::D2DDeviceContext const &context, Size const &size) {
 void SvgView::UpdateLayoutMetrics(const LayoutMetrics &metrics, const LayoutMetrics &oldMetrics) {
   m_layoutMetrics = metrics;
   base_type::UpdateLayoutMetrics(metrics, oldMetrics);
+
+  if (metrics != oldMetrics) {
+    Invalidate();
+  }
 }
 
 winrt::Windows::Foundation::Size SvgView::ActualSize() noexcept {
@@ -292,6 +296,10 @@ void SvgView::Invalidate() {
 
   Size size = ActualSize();
 
+  if (size.Height == 0 || size.Width == 0) {
+    return;
+  }
+
   auto drawingSurface = m_compContext.CreateDrawingSurfaceBrush(
       size,
       winrt::Windows::Graphics::DirectX::DirectXPixelFormat::B8G8R8A8UIntNormalized,
@@ -311,8 +319,7 @@ void SvgView::Invalidate() {
     }
   }
 
-  assert(false);
-  // m_image.Source(surfaceImageSource);
+  m_visual.Brush(drawingSurface);
 }
 
 void SvgView::RegisterComponent(const winrt::Microsoft::ReactNative::IReactPackageBuilderFabric &builder) noexcept {
