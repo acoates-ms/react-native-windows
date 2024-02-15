@@ -33,44 +33,7 @@ void SvgViewProps::SetProp(
 }
 
 SvgView::SvgView(const winrt::Microsoft::ReactNative::Composition::CreateCompositionComponentViewArgs &args)
-    : base_type(args), m_reactContext(args.ReactContext()), m_compContext(args.CompositionContext()) {
-  uint32_t creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-
-  D3D_FEATURE_LEVEL featureLevels[] = {
-      D3D_FEATURE_LEVEL_11_1,
-      D3D_FEATURE_LEVEL_11_0,
-      D3D_FEATURE_LEVEL_10_1,
-      D3D_FEATURE_LEVEL_10_0,
-      D3D_FEATURE_LEVEL_9_3,
-      D3D_FEATURE_LEVEL_9_2,
-      D3D_FEATURE_LEVEL_9_1};
-
-  // Create the Direct3D device.
-  com_ptr<ID3D11Device> d3dDevice;
-  D3D_FEATURE_LEVEL supportedFeatureLevel;
-  check_hresult(D3D11CreateDevice(
-      nullptr, // default adapter
-      D3D_DRIVER_TYPE_HARDWARE,
-      0,
-      creationFlags,
-      featureLevels,
-      ARRAYSIZE(featureLevels),
-      D3D11_SDK_VERSION,
-      d3dDevice.put(),
-      &supportedFeatureLevel,
-      nullptr));
-
-  com_ptr<IDXGIDevice> dxgiDevice{d3dDevice.as<IDXGIDevice>()};
-
-  // Create the Direct2D device and a corresponding context.
-  com_ptr<ID2D1Device> device;
-  check_hresult(D2D1CreateDevice(dxgiDevice.get(), nullptr, device.put()));
-  m_device = make<RNSVG::implementation::D2DDevice>(device);
-
-  com_ptr<ID2D1DeviceContext> deviceContext;
-  check_hresult(device->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, deviceContext.put()));
-  m_deviceContext = make<RNSVG::implementation::D2DDeviceContext>(deviceContext);
-}
+    : base_type(args), m_reactContext(args.ReactContext()), m_compContext(args.CompositionContext()) {}
 
 winrt::Microsoft::ReactNative::Composition::IVisual SvgView::CreateVisual() noexcept {
   m_visual = m_compContext.CreateSpriteVisual();
@@ -246,9 +209,9 @@ winrt::Windows::Foundation::Size SvgView::ActualSize() noexcept {
   return winrt::Windows::Foundation::Size{m_layoutMetrics.Frame.Width, m_layoutMetrics.Frame.Height};
 }
 
-void SvgView::CreateGeometry() {
+void SvgView::CreateGeometry(RNSVG::D2DDeviceContext const &context) {
   if (m_group) {
-    m_group.CreateGeometry();
+    m_group.CreateGeometry(context);
   }
 }
 
@@ -306,6 +269,9 @@ void SvgView::Invalidate() {
     return;
   }
 
+  if (Theme().IsEmpty())
+    return;
+
   auto drawingSurface = m_compContext.CreateDrawingSurfaceBrush(
       size,
       winrt::Windows::Graphics::DirectX::DirectXPixelFormat::B8G8R8A8UIntNormalized,
@@ -321,7 +287,9 @@ void SvgView::Invalidate() {
 
       deviceContext->Clear(D2D1::ColorF(D2D1::ColorF::Black, 0.0f));
 
-      Draw(DeviceContext(), size);
+      com_ptr<ID2D1DeviceContext> spDeviceContext;
+      spDeviceContext.copy_from(deviceContext);
+      Draw(winrt::make<RNSVG::implementation::D2DDeviceContext>(spDeviceContext), size);
     }
   }
 

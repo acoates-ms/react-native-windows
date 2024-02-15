@@ -39,7 +39,7 @@ struct RectView : RectViewT<RectView, RNSVG::implementation::RenderableView> {
       const winrt::Microsoft::ReactNative::IComponentProps &oldProps,
       bool forceUpdate = true,
       bool invalidate = true) noexcept override;
-  void CreateGeometry();
+  void CreateGeometry(RNSVG::D2DDeviceContext const &context);
 
   static void RegisterComponent(const winrt::Microsoft::ReactNative::IReactPackageBuilderFabric &builder) noexcept;
 

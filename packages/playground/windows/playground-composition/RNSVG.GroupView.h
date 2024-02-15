@@ -101,7 +101,7 @@ struct GroupView : GroupViewT<GroupView, RNSVG::implementation::RenderableView> 
       const winrt::Microsoft::ReactNative::ComponentView &childComponentView,
       uint32_t index) noexcept;
 
-  virtual void CreateGeometry();
+  virtual void CreateGeometry(RNSVG::D2DDeviceContext const &context);
 
   virtual void SaveDefinition();
 

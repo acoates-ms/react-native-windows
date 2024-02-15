@@ -277,7 +277,7 @@ void RenderableView::SaveDefinition() {
 
 void RenderableView::Draw(RNSVG::D2DDeviceContext const &context, Size const &size) {
   if (m_recreateResources) {
-    CreateGeometry();
+    CreateGeometry(context);
   }
 
   if (!Geometry()) {
@@ -303,8 +303,8 @@ void RenderableView::Draw(RNSVG::D2DDeviceContext const &context, Size const &si
   geometry = geometryGroup;
 
   com_ptr<ID2D1Geometry> clipPathGeometry;
-  if (ClipPathGeometry()) {
-    clipPathGeometry = get_self<D2DGeometry>(ClipPathGeometry())->Get();
+  if (ClipPathGeometry(context)) {
+    clipPathGeometry = get_self<D2DGeometry>(ClipPathGeometry(context))->Get();
   }
 
   D2DHelpers::PushOpacityLayer(deviceContext.get(), clipPathGeometry.get(), m_opacity);
@@ -312,7 +312,7 @@ void RenderableView::Draw(RNSVG::D2DDeviceContext const &context, Size const &si
   if (FillOpacity()) {
     D2DHelpers::PushOpacityLayer(deviceContext.get(), clipPathGeometry.get(), FillOpacity());
 
-    auto fill{Utils::GetCanvasBrush(FillBrushId(), Fill(), SvgRoot(), geometry)};
+    auto fill{Utils::GetCanvasBrush(FillBrushId(), Fill(), SvgRoot(), geometry, context)};
     deviceContext->FillGeometry(geometry.get(), fill.get());
 
     deviceContext->PopLayer();
@@ -347,7 +347,7 @@ void RenderableView::Draw(RNSVG::D2DDeviceContext const &context, Size const &si
     check_hresult(
         factory->CreateStrokeStyle(strokeStyleProperties, dashArray, m_strokeDashArray.Size(), strokeStyle.put()));
 
-    auto const stroke{Utils::GetCanvasBrush(StrokeBrushId(), Stroke(), SvgRoot(), geometry)};
+    auto const stroke{Utils::GetCanvasBrush(StrokeBrushId(), Stroke(), SvgRoot(), geometry, context)};
     deviceContext->DrawGeometry(geometry.get(), stroke.get(), strokeWidth, strokeStyle.get());
     deviceContext->PopLayer();
   }
@@ -424,11 +424,11 @@ RNSVG::SvgView RenderableView::SvgRoot() {
   return nullptr;
 }
 
-RNSVG::D2DGeometry RenderableView::ClipPathGeometry() {
+RNSVG::D2DGeometry RenderableView::ClipPathGeometry(RNSVG::D2DDeviceContext const &context) {
   if (!m_clipPathId.empty()) {
     if (auto const &clipPath{SvgRoot().Templates().TryLookup(m_clipPathId)}) {
       if (!clipPath.Geometry()) {
-        clipPath.CreateGeometry();
+        clipPath.CreateGeometry(context);
       }
       return clipPath.Geometry();
     }

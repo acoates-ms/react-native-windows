@@ -38,7 +38,7 @@ void RectView::UpdateProperties(
   base_type::UpdateProperties(props, oldProps, forceUpdate, invalidate);
 }
 
-void RectView::CreateGeometry() {
+void RectView::CreateGeometry(RNSVG::D2DDeviceContext const &context) {
   auto const &root{SvgRoot()};
 
   float x{Utils::GetAbsoluteLength(m_props->x, root.ActualSize().Width)};
@@ -51,7 +51,7 @@ void RectView::CreateGeometry() {
   float rx{Utils::GetAbsoluteLength(rxLength, root.ActualSize().Width)};
   float ry{Utils::GetAbsoluteLength(ryLength, root.ActualSize().Height)};
 
-  com_ptr<ID2D1DeviceContext> deviceContext{get_self<D2DDeviceContext>(root.DeviceContext())->Get()};
+  com_ptr<ID2D1DeviceContext> deviceContext{get_self<D2DDeviceContext>(context)->Get()};
 
   com_ptr<ID2D1Factory> factory;
   deviceContext->GetFactory(factory.put());

@@ -58,14 +58,6 @@ struct SvgView : SvgViewT<SvgView> {
 
   winrt::Windows::Foundation::Size ActualSize() noexcept;
 
-  RNSVG::D2DDevice Device() {
-    return m_device;
-  }
-
-  RNSVG::D2DDeviceContext DeviceContext() {
-    return m_deviceContext;
-  }
-
   RNSVG::D2DGeometry Geometry() {
     return m_group ? m_group.Geometry() : nullptr;
   }
@@ -100,7 +92,7 @@ struct SvgView : SvgViewT<SvgView> {
   void Unload();
   void Draw(RNSVG::D2DDeviceContext const &deviceContext, Windows::Foundation::Size const &size);
   void CreateResources();
-  void CreateGeometry();
+  void CreateGeometry(RNSVG::D2DDeviceContext const &deviceContext);
   RNSVG::IRenderable HitTest(Windows::Foundation::Point const & /*point*/) {
     return nullptr;
   }
@@ -131,8 +123,6 @@ struct SvgView : SvgViewT<SvgView> {
   bool m_hasRendered{false};
   bool m_isResponsible{false};
   Microsoft::ReactNative::IReactContext m_reactContext{nullptr};
-  RNSVG::D2DDevice m_device{nullptr};
-  RNSVG::D2DDeviceContext m_deviceContext{nullptr};
   // Windows::UI::Xaml::Controls::Image m_image;
   RNSVG::GroupView m_group{nullptr};
   hstring m_id{L""};

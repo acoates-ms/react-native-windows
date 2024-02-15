@@ -278,10 +278,10 @@ struct Utils {
       hstring const &brushId,
       winrt::Microsoft::ReactNative::Color const &color,
       RNSVG::SvgView const &root,
-      com_ptr<ID2D1Geometry> const &geometry) {
+      com_ptr<ID2D1Geometry> const &geometry,
+      RNSVG::D2DDeviceContext const &context) {
     com_ptr<ID2D1Brush> brush;
-    com_ptr<ID2D1DeviceContext> deviceContext{
-        get_self<RNSVG::implementation::D2DDeviceContext>(root.DeviceContext())->Get()};
+    com_ptr<ID2D1DeviceContext> deviceContext{get_self<RNSVG::implementation::D2DDeviceContext>(context)->Get()};
 
     if (root && brushId != L"") {
       if (brushId == L"currentColor") {

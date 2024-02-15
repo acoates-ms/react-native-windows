@@ -111,12 +111,12 @@ void GroupView::UpdateProperties(
   }
 }
 
-void GroupView::CreateGeometry() {
+void GroupView::CreateGeometry(RNSVG::D2DDeviceContext const &context) {
   std::vector<ID2D1Geometry *> geometries;
   for (auto const childComponent : Children()) {
     auto const child = childComponent.as<IRenderable>();
     if (!child.Geometry()) {
-      child.CreateGeometry();
+      child.CreateGeometry(context);
     }
 
     if (child.Geometry()) {
@@ -129,7 +129,7 @@ void GroupView::CreateGeometry() {
   }
 
   if (!geometries.empty()) {
-    com_ptr<ID2D1DeviceContext> deviceContext{get_self<D2DDeviceContext>(SvgRoot().DeviceContext())->Get()};
+    com_ptr<ID2D1DeviceContext> deviceContext{get_self<D2DDeviceContext>(context)->Get()};
 
     com_ptr<ID2D1Factory> factory;
     deviceContext->GetFactory(factory.put());
@@ -169,8 +169,8 @@ void GroupView::Draw(RNSVG::D2DDeviceContext const &context, Size const &size) {
 
   com_ptr<ID2D1Geometry> clipPathGeometry;
 
-  if (ClipPathGeometry()) {
-    clipPathGeometry = get_self<D2DGeometry>(ClipPathGeometry())->Get();
+  if (ClipPathGeometry(context)) {
+    clipPathGeometry = get_self<D2DGeometry>(ClipPathGeometry(context))->Get();
   }
 
   D2DHelpers::PushOpacityLayer(deviceContext.get(), clipPathGeometry.get(), m_opacity);
@@ -221,7 +221,9 @@ winrt::RNSVG::IRenderable GroupView::HitTest(Point const &point) {
       return *this;
     } else if (!renderable) {
       if (!Geometry()) {
-        CreateGeometry();
+        assert(false); // Do we need a real context here... I think the geometry should already be created by the time
+                       // we get here?
+        CreateGeometry(nullptr);
       }
 
       if (Geometry()) {

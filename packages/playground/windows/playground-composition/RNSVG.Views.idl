@@ -39,7 +39,7 @@ namespace RNSVG
     void MergeProperties(RenderableView other);
     void SaveDefinition();
     void Unload();
-    void CreateGeometry();
+    void CreateGeometry(D2DDeviceContext deviceContext);
     IRenderable HitTest(Windows.Foundation.Point point);
   };
 
@@ -53,8 +53,6 @@ namespace RNSVG
 
     GroupView Group;
     Microsoft.ReactNative.Color CurrentColor{ get; };
-    D2DDevice Device{ get; };
-    D2DDeviceContext DeviceContext{ get; };
     Windows.Foundation.Collections.IMap<String, IRenderable> Templates{ get; };
     Windows.Foundation.Collections.IMap<String, BrushView> Brushes{ get; };
 
@@ -84,7 +82,7 @@ namespace RNSVG
     LineCap StrokeLineCap{ get; };
     LineJoin StrokeLineJoin{ get; };
     FillRule FillRule{ get; };
-    D2DGeometry ClipPathGeometry{ get; };
+    D2DGeometry ClipPathGeometry(D2DDeviceContext deviceContext);
   };
 
   [experimental]

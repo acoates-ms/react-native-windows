@@ -183,7 +183,7 @@ struct RenderableView : RenderableViewT<RenderableView> {
   RNSVG::FillRule FillRule() {
     return m_fillRule;
   }
-  RNSVG::D2DGeometry ClipPathGeometry();
+  RNSVG::D2DGeometry ClipPathGeometry(RNSVG::D2DDeviceContext const &context);
 
   virtual void UpdateProps(
       const winrt::Microsoft::ReactNative::IComponentProps &props,
@@ -194,7 +194,7 @@ struct RenderableView : RenderableViewT<RenderableView> {
       const winrt::Microsoft::ReactNative::IComponentProps &oldProps,
       bool forceUpdate = true,
       bool invalidate = true) noexcept;
-  virtual void CreateGeometry() {}
+  virtual void CreateGeometry(RNSVG::D2DDeviceContext const &context) {}
   virtual void MergeProperties(RNSVG::RenderableView const &other);
   virtual void SaveDefinition();
   virtual void Unload();
