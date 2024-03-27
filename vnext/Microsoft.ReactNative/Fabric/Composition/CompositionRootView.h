@@ -81,7 +81,9 @@ struct CompositionRootView : CompositionRootViewT<CompositionRootView>, ::Micros
   IInspectable GetUiaProvider() noexcept;
 
   // When driving the rootview without an island
-  void SetWindow(uint64_t hwnd) noexcept;
+  INonContentIslandRootViewHost NonContentIslandHost() const noexcept;
+  void NonContentIslandHost(const INonContentIslandRootViewHost& host) noexcept;
+
   int64_t SendMessage(uint32_t msg, uint64_t wParam, int64_t lParam) noexcept;
 
   bool CapturePointer(
@@ -111,7 +113,7 @@ struct CompositionRootView : CompositionRootViewT<CompositionRootView>, ::Micros
   winrt::Microsoft::UI::Content::ContentIsland m_island{nullptr};
 #endif
 
-  HWND m_hwnd{0};
+  INonContentIslandRootViewHost m_nonContentIslandHost{nullptr};
   bool m_isInitialized{false};
   bool m_isJSViewAttached{false};
   bool m_hasRenderedVisual{false};
@@ -140,6 +142,7 @@ struct CompositionRootView : CompositionRootViewT<CompositionRootView>, ::Micros
   void ShowInstanceLoading() noexcept;
   void UpdateRootVisualSize() noexcept;
   void UpdateLoadingVisualSize() noexcept;
+  HWND GetNonContentIslandHwnd() noexcept;
   Composition::IDrawingSurfaceBrush CreateLoadingVisualBrush() noexcept;
 };
 

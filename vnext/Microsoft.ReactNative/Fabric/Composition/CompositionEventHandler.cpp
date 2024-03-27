@@ -366,47 +366,47 @@ winrt::Windows::System::VirtualKeyModifiers GetKeyModifiers(uint64_t wParam) {
   return keyModifiers;
 }
 
-int64_t CompositionEventHandler::SendMessage(HWND hwnd, uint32_t msg, uint64_t wParam, int64_t lParam) noexcept {
+int64_t CompositionEventHandler::SendMessage(const winrt::Microsoft::ReactNative::INonContentIslandRootViewHost& host, uint32_t msg, uint64_t wParam, int64_t lParam) noexcept {
   switch (msg) {
     case WM_LBUTTONDOWN: {
       auto pp = winrt::make<winrt::Microsoft::ReactNative::Composition::Input::implementation::PointerPoint>(
-          hwnd, msg, wParam, lParam, m_compRootView.ScaleFactor());
+          host, msg, wParam, lParam, m_compRootView.ScaleFactor());
       onPointerPressed(pp, GetKeyModifiers(wParam));
       return 0;
     }
     case WM_POINTERDOWN: {
       auto pp = winrt::make<winrt::Microsoft::ReactNative::Composition::Input::implementation::PointerPoint>(
-          hwnd, msg, wParam, lParam, m_compRootView.ScaleFactor());
+          host, msg, wParam, lParam, m_compRootView.ScaleFactor());
       onPointerPressed(pp, GetKeyModifiers(wParam));
       return 0;
     }
     case WM_LBUTTONUP: {
       auto pp = winrt::make<winrt::Microsoft::ReactNative::Composition::Input::implementation::PointerPoint>(
-          hwnd, msg, wParam, lParam, m_compRootView.ScaleFactor());
+          host, msg, wParam, lParam, m_compRootView.ScaleFactor());
       onPointerReleased(pp, GetKeyModifiers(wParam));
       return 0;
     }
     case WM_POINTERUP: {
       auto pp = winrt::make<winrt::Microsoft::ReactNative::Composition::Input::implementation::PointerPoint>(
-          hwnd, msg, wParam, lParam, m_compRootView.ScaleFactor());
+          host, msg, wParam, lParam, m_compRootView.ScaleFactor());
       onPointerReleased(pp, GetKeyModifiers(wParam));
       return 0;
     }
     case WM_MOUSEMOVE: {
       auto pp = winrt::make<winrt::Microsoft::ReactNative::Composition::Input::implementation::PointerPoint>(
-          hwnd, msg, wParam, lParam, m_compRootView.ScaleFactor());
+          host, msg, wParam, lParam, m_compRootView.ScaleFactor());
       onPointerMoved(pp, GetKeyModifiers(wParam));
       return 0;
     }
     case WM_CAPTURECHANGED: {
       auto pp = winrt::make<winrt::Microsoft::ReactNative::Composition::Input::implementation::PointerPoint>(
-          hwnd, msg, wParam, lParam, m_compRootView.ScaleFactor());
+          host, msg, wParam, lParam, m_compRootView.ScaleFactor());
       onPointerCaptureLost(pp, winrt::Windows::System::VirtualKeyModifiers::None);
       return 0;
     }
     case WM_MOUSEWHEEL: {
       auto pp = winrt::make<winrt::Microsoft::ReactNative::Composition::Input::implementation::PointerPoint>(
-          hwnd, msg, wParam, lParam, m_compRootView.ScaleFactor());
+          host, msg, wParam, lParam, m_compRootView.ScaleFactor());
       onPointerWheelChanged(pp, GetKeyModifiers(wParam));
       break;
     }

@@ -274,12 +274,12 @@ winrt::IInspectable CompositionRootView::GetUiaProvider() noexcept {
   if (m_uiaProvider == nullptr) {
     m_uiaProvider =
         winrt::make<winrt::Microsoft::ReactNative::implementation::CompositionRootAutomationProvider>(*this);
-    if (m_hwnd) {
+    if (auto hwnd = GetNonContentIslandHwnd()) {
       auto pRootProvider =
           static_cast<winrt::Microsoft::ReactNative::implementation::CompositionRootAutomationProvider *>(
               m_uiaProvider.as<IRawElementProviderSimple>().get());
       if (pRootProvider != nullptr) {
-        pRootProvider->SetHwnd(m_hwnd);
+        pRootProvider->SetHwnd(hwnd);
       }
     }
   }
@@ -306,8 +306,18 @@ void CompositionRootView::SetTag(int64_t tag) noexcept {
   m_rootTag = tag;
 }
 
-void CompositionRootView::SetWindow(uint64_t hwnd) noexcept {
-  m_hwnd = reinterpret_cast<HWND>(hwnd);
+  INonContentIslandRootViewHost CompositionRootView::NonContentIslandHost() const noexcept {
+    return m_nonContentIslandHost;
+  }
+  void CompositionRootView::NonContentIslandHost(const INonContentIslandRootViewHost& host) noexcept {
+    m_nonContentIslandHost = host;
+  }
+
+HWND CompositionRootView::GetNonContentIslandHwnd() noexcept {
+  if (m_nonContentIslandHost) {
+    return reinterpret_cast<HWND>(m_nonContentIslandHost.GetHostingHwnd());
+  }
+  return 0;
 }
 
 int64_t CompositionRootView::SendMessage(uint32_t msg, uint64_t wParam, int64_t lParam) noexcept {
@@ -315,10 +325,10 @@ int64_t CompositionRootView::SendMessage(uint32_t msg, uint64_t wParam, int64_t 
     return 0;
 
   // SetWindow must be called when not using ContentIsland hosting
-  assert(m_hwnd);
+  assert(GetNonContentIslandHwnd());
 
   if (m_CompositionEventHandler) {
-    auto result = m_CompositionEventHandler->SendMessage(m_hwnd, msg, wParam, lParam);
+    auto result = m_CompositionEventHandler->SendMessage(m_nonContentIslandHost, msg, wParam, lParam);
     if (result)
       return result;
   }
@@ -329,8 +339,8 @@ int64_t CompositionRootView::SendMessage(uint32_t msg, uint64_t wParam, int64_t 
 bool CompositionRootView::CapturePointer(
     const winrt::Microsoft::ReactNative::Composition::Input::Pointer &pointer,
     facebook::react::Tag tag) noexcept {
-  if (m_hwnd) {
-    SetCapture(m_hwnd);
+  if (auto hwnd = GetNonContentIslandHwnd()) {
+    SetCapture(hwnd);
   }
   return m_CompositionEventHandler->CapturePointer(pointer, tag);
 }
@@ -339,8 +349,8 @@ void CompositionRootView::ReleasePointerCapture(
     const winrt::Microsoft::ReactNative::Composition::Input::Pointer &pointer,
     facebook::react::Tag tag) noexcept {
   if (m_CompositionEventHandler->ReleasePointerCapture(pointer, tag)) {
-    if (m_hwnd) {
-      if (m_hwnd == GetCapture()) {
+    if (auto hwnd = GetNonContentIslandHwnd()) {
+      if (hwnd == GetCapture()) {
         ReleaseCapture();
       }
     }

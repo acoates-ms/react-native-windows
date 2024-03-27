@@ -26,6 +26,36 @@ WINUSERAPI UINT WINAPI GetDpiForWindow(_In_ HWND hwnd);
 
 namespace winrt::Microsoft::ReactNative::implementation {
 
+struct NonContentIslandRootViewHost
+    : winrt::implements<NonContentIslandRootViewHost, winrt::Microsoft::ReactNative::INonContentIslandRootViewHost> {
+  NonContentIslandRootViewHost(HWND hwnd) : m_hwnd(hwnd) {}
+
+  winrt::Windows::Foundation::Point ConvertClientToScreen(winrt::Windows::Foundation::Point inPoint) {
+    POINT pt{static_cast<LONG>(inPoint.X), static_cast<LONG>(inPoint.Y)};
+    ::ClientToScreen(m_hwnd, &pt);
+    return {static_cast<float>(pt.x), static_cast<float>(pt.y)};
+  }
+
+  winrt::Windows::Foundation::Point ConvertScreenToClient(winrt::Windows::Foundation::Point inPoint) {
+    POINT pt{static_cast<LONG>(inPoint.X), static_cast<LONG>(inPoint.Y)};
+    ::ScreenToClient(m_hwnd, &pt);
+    return {static_cast<float>(pt.x), static_cast<float>(pt.y)};
+  }
+
+  winrt::Windows::Foundation::Rect GetContentRect() {
+    assert(false);
+    return {0, 0, 0, 0};
+  }
+
+  uint64_t GetHostingHwnd() {
+    return reinterpret_cast<uint64_t>(m_hwnd);
+  }
+
+ private:
+  const HWND m_hwnd;
+};
+
+
 CompositionHwndHost::CompositionHwndHost() noexcept {}
 
 void CompositionHwndHost::Initialize(uint64_t hwnd) noexcept {
@@ -38,7 +68,6 @@ void CompositionHwndHost::Initialize(uint64_t hwnd) noexcept {
   if (auto liftedCompositor = winrt::Microsoft::ReactNative::Composition::implementation::
           MicrosoftCompositionContextHelper::InnerCompositor(compositionContext)) {
     m_compRootView = winrt::Microsoft::ReactNative::CompositionRootView(liftedCompositor);
-    m_compRootView.SetWindow(reinterpret_cast<uint64_t>(m_hwnd));
 
     auto bridge = winrt::Microsoft::UI::Content::DesktopChildSiteBridge::Create(
         liftedCompositor, winrt::Microsoft::UI::GetWindowIdFromWindow(m_hwnd));
@@ -55,7 +84,7 @@ void CompositionHwndHost::Initialize(uint64_t hwnd) noexcept {
     bridge.ResizePolicy(winrt::Microsoft::UI::Content::ContentSizePolicy::ResizeContentToParentWindow);
   } else {
     m_compRootView = winrt::Microsoft::ReactNative::CompositionRootView();
-    m_compRootView.SetWindow(reinterpret_cast<uint64_t>(m_hwnd));
+    m_compRootView.NonContentIslandHost(winrt::make<NonContentIslandRootViewHost>(m_hwnd));
 
 #endif
     auto compositor =

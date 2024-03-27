@@ -34,7 +34,7 @@ class CompositionEventHandler {
       const winrt::Microsoft::ReactNative::CompositionRootView &CompositionRootView);
   virtual ~CompositionEventHandler();
 
-  int64_t SendMessage(HWND hwnd, uint32_t msg, uint64_t wParam, int64_t lParam) noexcept;
+  int64_t SendMessage(const winrt::Microsoft::ReactNative::INonContentIslandRootViewHost& host, uint32_t msg, uint64_t wParam, int64_t lParam) noexcept;
   void RemoveTouchHandlers();
   winrt::Windows::UI::Core::CoreVirtualKeyStates GetKeyState(winrt::Windows::System::VirtualKey key) noexcept;
 

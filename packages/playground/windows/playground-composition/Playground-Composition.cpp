@@ -49,6 +49,35 @@ struct CompReactPackageProvider
   }
 };
 
+struct NonContentIslandRootViewHost
+    : winrt::implements<NonContentIslandRootViewHost, winrt::Microsoft::ReactNative::INonContentIslandRootViewHost> {
+  NonContentIslandRootViewHost(HWND hwnd, winrt::Windows::Foundation::Point offset) : m_hwnd(hwnd), m_offset(offset) {}
+
+  winrt::Windows::Foundation::Point ConvertClientToScreen(winrt::Windows::Foundation::Point inPoint) {
+    POINT pt{static_cast<LONG>(inPoint.X), static_cast<LONG>(inPoint.Y)};
+    ::ClientToScreen(m_hwnd, &pt);
+    return {static_cast<float>(pt.x), static_cast<float>(pt.y)};
+  }
+
+  winrt::Windows::Foundation::Point ConvertScreenToClient(winrt::Windows::Foundation::Point inPoint) {
+    POINT pt{static_cast<LONG>(inPoint.X), static_cast<LONG>(inPoint.Y)};
+    ::ScreenToClient(m_hwnd, &pt);
+    return {static_cast<float>(pt.x), static_cast<float>(pt.y)};
+  }
+
+  winrt::Windows::Foundation::Rect GetContentRect() {
+    return {m_offset.X, m_offset.Y, 0, 0};
+  }
+
+  uint64_t GetHostingHwnd() {
+    return reinterpret_cast<uint64_t>(m_hwnd);
+  }
+
+ private:
+  const HWND m_hwnd;
+  const winrt::Windows::Foundation::Point m_offset;
+};
+
 winrt::Windows::System::DispatcherQueueController g_dispatcherQueueController{nullptr};
 winrt::Windows::UI::Composition::Compositor g_compositor{nullptr};
 
@@ -228,14 +257,18 @@ struct WindowData {
               m_target = target;
 
               auto root = g_compositor.CreateContainerVisual();
+
+              //winrt::Windows::Foundation::Point rootOffset{0, 0};
+              winrt::Windows::Foundation::Point rootOffset{100, 200}; // Used to test hosting CompositionRootViews at a non-zero offset within an HWND
+
               root.RelativeSizeAdjustment({1.0f, 1.0f});
-              root.Offset({0, 0, 0});
+              root.Offset({rootOffset.X, rootOffset.Y, 0});
               m_target.Root(root);
-              m_compRootView.SetWindow(reinterpret_cast<uint64_t>(hwnd));
+              m_compRootView.NonContentIslandHost(winrt::make<NonContentIslandRootViewHost>(hwnd, rootOffset));
               m_compRootView.RootVisual(
                   winrt::Microsoft::ReactNative::Composition::SystemCompositionContextHelper::CreateVisual(root));
               m_compRootView.ScaleFactor(ScaleFactor(hwnd));
-              m_compRootView.Size({m_width / ScaleFactor(hwnd), m_height / ScaleFactor(hwnd)});
+              m_compRootView.Size({(m_width  - rootOffset.X)/ ScaleFactor(hwnd), (m_height - rootOffset.Y) / ScaleFactor(hwnd)});
             }
           }
 

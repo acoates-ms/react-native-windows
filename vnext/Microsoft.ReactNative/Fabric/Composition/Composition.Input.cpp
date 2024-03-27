@@ -372,23 +372,23 @@ float PointerPointProperties::YTilt() noexcept {
 
 #ifdef USE_WINUI3
 PointerPoint::PointerPoint(const winrt::Microsoft::UI::Input::PointerPoint &pp, float scaleFactor)
-    : m_sysPointerPoint(pp), m_scaleFactor(scaleFactor), m_offset({0, 0}) {}
+    : m_sysPointerPoint(pp), m_scaleFactor(scaleFactor), m_offset({0, 0}), m_host(nullptr) {}
 
 PointerPoint::PointerPoint(
     const winrt::Microsoft::UI::Input::PointerPoint &pp,
     float scaleFactor,
     const winrt::Windows::Foundation::Point &offset)
-    : m_sysPointerPoint(pp), m_scaleFactor(scaleFactor), m_offset(offset) {}
+    : m_sysPointerPoint(pp), m_scaleFactor(scaleFactor), m_offset(offset), m_host(nullptr) {}
 #endif
 
 PointerPoint::PointerPoint(
-    HWND hwnd,
+    const INonContentIslandRootViewHost& host,
     uint32_t msg,
     uint64_t wParam,
     int64_t lParam,
     float scaleFactor,
     const winrt::Windows::Foundation::Point &offset)
-    : m_offset(offset), m_hwnd(hwnd), m_msg(msg), m_wParam(wParam), m_lParam(lParam), m_scaleFactor(scaleFactor) {
+    : m_offset(offset), m_host(host), m_msg(msg), m_wParam(wParam), m_lParam(lParam), m_scaleFactor(scaleFactor) {
   if (IsPointerMessage(msg)) {
     const unsigned int pointerId = GET_POINTERID_WPARAM(wParam);
     bool result = ::GetPointerInfo(pointerId, &m_pi);
@@ -396,8 +396,8 @@ PointerPoint::PointerPoint(
   }
 }
 
-PointerPoint::PointerPoint(HWND hwnd, uint32_t msg, uint64_t wParam, int64_t lParam, float scaleFactor)
-    : PointerPoint(hwnd, msg, wParam, lParam, scaleFactor, {0, 0}) {}
+PointerPoint::PointerPoint(const INonContentIslandRootViewHost& host, uint32_t msg, uint64_t wParam, int64_t lParam, float scaleFactor)
+    : PointerPoint(host, msg, wParam, lParam, scaleFactor, {0, 0}) {}
 
 uint32_t PointerPoint::FrameId() const noexcept {
 #ifdef USE_WINUI3
@@ -460,16 +460,21 @@ winrt::Windows::Foundation::Point PointerPoint::Position() const noexcept {
   }
 #endif
 
-  assert(m_hwnd);
+  assert(m_host);
   POINT clientPoint{
       m_pi.pointerId ? m_pi.ptPixelLocation.x : GET_X_LPARAM(m_lParam),
       m_pi.pointerId ? m_pi.ptPixelLocation.y : GET_Y_LPARAM(m_lParam)};
   if (m_pi.pointerId || m_msg == WM_MOUSEWHEEL || m_msg == WM_MOUSEHWHEEL) {
-    ScreenToClient(m_hwnd, &clientPoint);
+    auto pt = m_host.ConvertScreenToClient({static_cast<float>(clientPoint.x), static_cast<float>(clientPoint.y)});
+    clientPoint.x = static_cast<LONG>(pt.X);
+    clientPoint.y = static_cast<LONG>(pt.Y);
   }
+
+  auto rect = m_host.GetContentRect();
+
   return winrt::Windows::Foundation::Point{
-      static_cast<float>(clientPoint.x / m_scaleFactor) - (m_offset.X / m_scaleFactor),
-      static_cast<float>(clientPoint.y / m_scaleFactor) - (m_offset.Y / m_scaleFactor)};
+      static_cast<float>((clientPoint.x - rect.X) / m_scaleFactor) - (m_offset.X / m_scaleFactor),
+      static_cast<float>((clientPoint.y - rect.Y) / m_scaleFactor) - (m_offset.Y / m_scaleFactor)};
 }
 
 winrt::Microsoft::ReactNative::Composition::Input::PointerPointProperties PointerPoint::Properties() const noexcept {
@@ -610,7 +615,7 @@ winrt::Microsoft::ReactNative::Composition::Input::PointerPoint PointerPoint::Ge
     return winrt::make<PointerPoint>(m_sysPointerPoint, m_scaleFactor, offset);
   }
 #endif
-  return winrt::make<PointerPoint>(m_hwnd, m_msg, m_wParam, m_lParam, m_scaleFactor, offset);
+  return winrt::make<PointerPoint>(m_host, m_msg, m_wParam, m_lParam, m_scaleFactor, offset);
 }
 
 bool PointerPoint::IsPointerMessage(uint32_t message) const noexcept {

@@ -162,9 +162,9 @@ struct PointerPoint : PointerPointT<PointerPoint> {
       float scaleFactor,
       const winrt::Windows::Foundation::Point &offset);
 #endif
-  PointerPoint(HWND hwnd, uint32_t msg, uint64_t wParam, int64_t lParam, float scaleFactor);
+  PointerPoint(const INonContentIslandRootViewHost& host, uint32_t msg, uint64_t wParam, int64_t lParam, float scaleFactor);
   PointerPoint(
-      HWND hwnd,
+      const INonContentIslandRootViewHost& host,
       uint32_t msg,
       uint64_t wParam,
       int64_t lParam,
@@ -189,7 +189,7 @@ struct PointerPoint : PointerPointT<PointerPoint> {
   winrt::Microsoft::UI::Input::PointerPoint m_sysPointerPoint{nullptr};
 #endif
   // Non Windows::Input
-  HWND m_hwnd;
+  const INonContentIslandRootViewHost& m_host;
   // WM_POINTER*
   POINTER_INFO m_pi = {0};
   // WM_*MOUSE

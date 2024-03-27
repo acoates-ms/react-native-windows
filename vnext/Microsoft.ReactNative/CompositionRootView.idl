@@ -32,6 +32,17 @@ namespace Microsoft.ReactNative
     FocusNavigationReason Reason {get;set;};
   };
 
+  [webhosthidden]
+  [experimental]
+  DOC_STRING("This interface should be provided by the host to host a @CompositionRootView without using a ContentIsland.")
+  interface INonContentIslandRootViewHost
+  {
+    Windows.Foundation.Point ConvertClientToScreen(Windows.Foundation.Point inPoint);
+    Windows.Foundation.Point ConvertScreenToClient(Windows.Foundation.Point inPoint);
+    Windows.Foundation.Rect  GetContentRect();
+    UInt64 GetHostingHwnd();
+  };
+
   [default_interface]
   [webhosthidden]
   [experimental]
@@ -73,8 +84,8 @@ namespace Microsoft.ReactNative
     Windows.Foundation.Size Measure(Windows.Foundation.Size availableSize);
     Windows.Foundation.Size Arrange(Windows.Foundation.Size availableSize);
 
-    DOC_STRING("Hosting Window that input is coming from. Only required when not using ContentIslands")
-    void SetWindow(UInt64 hwnd);
+    DOC_STRING("Hosting interface required when not using ContentIslands")
+    INonContentIslandRootViewHost NonContentIslandHost;
 
     DOC_STRING("Forward input to the RootView. Only required when not using ContentIslands")
     Int64 SendMessage(UInt32 Msg, UInt64 WParam, Int64 LParam);
