@@ -547,6 +547,7 @@ JsiValueRef JsiRuntime::EvaluatePreparedJavaScript(ReactNative::JsiPreparedJavaS
   throw;
 }
 
+/*
 void JsiRuntime::QueueMicrotask(JsiObjectRef func) try
 {
   auto funcPtr = RuntimeAccessor::AsPointerValue(func);
@@ -557,6 +558,7 @@ catch (JSI_SET_ERROR)
 {
   throw;
 }
+*/
 
 bool JsiRuntime::DrainMicrotasks(int32_t maxMicrotasksHint) try {
   return m_runtimeAccessor->drainMicrotasks(maxMicrotasksHint);

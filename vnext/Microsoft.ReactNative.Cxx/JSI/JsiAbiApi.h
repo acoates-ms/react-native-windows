@@ -84,7 +84,7 @@ struct JsiAbiRuntime : facebook::jsi::Runtime {
       std::string sourceURL) override;
   facebook::jsi::Value evaluatePreparedJavaScript(
       const std::shared_ptr<const facebook::jsi::PreparedJavaScript> &js) override;
-  void queueMicrotask(const facebook::jsi::Function& callback) override;
+  //void queueMicrotask(const facebook::jsi::Function& callback) override;
   bool drainMicrotasks(int maxMicrotasksHint = -1) override;
   facebook::jsi::Object global() override;
   std::string description() override;
