@@ -65,6 +65,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <!-- Include Warnings.props after Microsoft.Cpp.props to change default WarningLevel -->
   <Import Project="$(ReactNativeWindowsDir)PropertySheets\Warnings.props" />
+  <Import Project="$(ReactNativeWindowsDir)\PropertySheets\ReactCommunity.cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared" />
@@ -101,7 +102,6 @@
       <AdditionalIncludeDirectories>
         $(FmtDir)\include;
         $(ReactNativeWindowsDir)Microsoft.ReactNative;
-        $(ReactNativeWindowsDir)Microsoft.ReactNative\Fabric\platform;
         $(ReactNativeWindowsDir)Microsoft.ReactNative\Pch;
         $(ReactNativeWindowsDir)Microsoft.ReactNative\ReactHost;
         $(ReactNativeWindowsDir)Microsoft.ReactNative\Views;
@@ -165,7 +165,6 @@
       <AdditionalOptions>%(AdditionalOptions) /noattributename</AdditionalOptions>
     </Midl>
   </ItemDefinitionGroup>
-  <Import Project="$(ReactNativeWindowsDir)\PropertySheets\ReactCommunity.cpp.props" />
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>

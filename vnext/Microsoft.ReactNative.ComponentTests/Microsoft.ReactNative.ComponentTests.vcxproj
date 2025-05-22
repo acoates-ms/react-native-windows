@@ -86,7 +86,6 @@
         $(VCInstallDir)UnitTest\include;
         $(ReactNativeWindowsDir);
         $(ReactNativeWindowsDir)Common;
-        $(ReactNativeWindowsDir)stubs;
         $(ReactNativeWindowsDir)Shared\tracing;
         $(ReactNativeWindowsDir)Microsoft.ReactNative;
         $(ReactNativeWindowsDir)Microsoft.ReactNative.Cxx;

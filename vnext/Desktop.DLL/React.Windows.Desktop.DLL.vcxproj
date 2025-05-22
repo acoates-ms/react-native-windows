@@ -60,7 +60,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IncludePath>$(ReactNativeWindowsDir)Shared;$(ReactNativeWindowsDir)stubs;$(MSBuildProjectDirectory);$(IncludePath)</IncludePath>
+    <IncludePath>
+      $(ReactNativeWindowsDir)Shared;
+      $(MSBuildProjectDirectory);
+      $(IncludePath)
+    </IncludePath>
     <!--
     Prevents Microsoft.Windows.CppWinRT.props from adding WindowsApp.lib reference, see
     WindowsApp_downleve.lib reference below.

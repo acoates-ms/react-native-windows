@@ -99,7 +99,15 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <IncludePath>$(ReactNativeWindowsDir);$(ReactNativeWindowsDir)Common;$(ReactNativeWindowsDir)stubs;$(MSBuildProjectDirectory);$(ReactNativeWindowsDir)Shared;$(ReactNativeWindowsDir)\Shared\tracing;$(ReactNativeWindowsDir)include\Shared;$(IncludePath)</IncludePath>
+    <IncludePath>
+      $(ReactNativeWindowsDir);
+      $(ReactNativeWindowsDir)Common;
+      $(MSBuildProjectDirectory);
+      $(ReactNativeWindowsDir)Shared;
+      $(ReactNativeWindowsDir)\Shared\tracing;
+      $(ReactNativeWindowsDir)include\Shared;
+      $(IncludePath)
+    </IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -127,7 +135,6 @@
       </PreprocessorDefinitions>
       <AdditionalIncludeDirectories>
         "$(ReactNativeWindowsDir)Microsoft.ReactNative";
-        "$(ReactNativeWindowsDir)Microsoft.ReactNative\Fabric\platform";
         "$(ReactNativeWindowsDir)Microsoft.ReactNative\ReactHost";
         "$(ReactNativeWindowsDir)Microsoft.ReactNative\Views";
         "$(ReactNativeWindowsDir)codegen";

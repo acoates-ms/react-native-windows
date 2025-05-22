@@ -146,6 +146,7 @@
       <AdditionalIncludeDirectories>
         $(FollyDir);
         $(FmtDir)include;
+        "$(ReactNativeWindowsDir)Microsoft.ReactNative\Fabric\platform";
         $(ReactNativeDir)\ReactCommon;
         $(ReactNativeDir)\ReactCommon\callinvoker;
         $(ReactNativeDir)\ReactCommon\jsi;
@@ -156,6 +157,7 @@
         $(ReactNativeDir)\ReactCommon\reactperflogger;
         $(ReactNativeDir)\ReactCommon\runtimeexecutor;
         $(ReactNativeDir)\ReactCxxPlatform;
+        $(ReactNativeWindowsDir)stubs;
         %(AdditionalIncludeDirectories);
       </AdditionalIncludeDirectories>
     </ClCompile>
