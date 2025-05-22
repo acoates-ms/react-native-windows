@@ -97,7 +97,10 @@
       <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Midl>
-      <AdditionalIncludeDirectories>$(ReactNativeWindowsDir)Microsoft.ReactNative;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>
+        $(ReactNativeWindowsDir)Microsoft.ReactNative;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
     </Midl>
     <Link>
       <SubSystem>Console</SubSystem>
