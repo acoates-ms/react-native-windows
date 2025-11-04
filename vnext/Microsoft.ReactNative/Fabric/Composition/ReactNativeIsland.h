@@ -10,9 +10,12 @@
 #include <react/renderer/core/LayoutConstraints.h>
 #include <winrt/Microsoft.ReactNative.Composition.Experimental.h>
 #include <winrt/Microsoft.ReactNative.h>
+#include <winrt/Microsoft.UI.Content.h>
 #include <winrt/Windows.UI.ViewManagement.h>
+#include <ReactHost/DebuggerNotifications.h>
 #include "CompositionEventHandler.h"
 #include "PortalComponentView.h"
+#include "DebuggerUIIsland.h"
 #include "ReactHost/React.h"
 
 namespace winrt::Microsoft::ReactNative::implementation {
@@ -181,6 +184,9 @@ struct ReactNativeIsland
   std::shared_ptr<::Microsoft::ReactNative::CompositionEventHandler> m_CompositionEventHandler;
   winrt::Microsoft::ReactNative::Composition::Experimental::IVisual m_rootVisual{nullptr};
   winrt::Microsoft::ReactNative::Composition::Experimental::ISpriteVisual m_loadingVisual{nullptr};
+  winrt::Microsoft::UI::Content::ChildSiteLink m_debuggerChildSiteLink{nullptr};
+  std::shared_ptr<DebuggerUIIsland> m_debuggerUIIsland;
+  winrt::Microsoft::ReactNative::Composition::Experimental::ISpriteVisual m_debuggerVisual{nullptr};
   winrt::Microsoft::ReactNative::Composition::Experimental::IActivityVisual m_loadingActivityVisual{nullptr};
   winrt::Microsoft::ReactNative::Composition::ICustomResourceLoader m_resources{nullptr};
   winrt::Microsoft::ReactNative::Composition::Theme m_theme{nullptr};
@@ -196,8 +202,11 @@ struct ReactNativeIsland
   void ShowInstanceLoaded() noexcept;
   void ShowInstanceError() noexcept;
   void ShowInstanceLoading() noexcept;
+  void ShowDebuggerUI(std::string message, const std::function<void()> &onResume) noexcept;
+  void HideDebuggerUI() noexcept;
   void UpdateRootVisualSize() noexcept;
   void UpdateLoadingVisualSize() noexcept;
+  void UpdateDebuggerVisualSize() noexcept;
   Composition::Experimental::IDrawingSurfaceBrush CreateLoadingVisualBrush() noexcept;
   void ApplyConstraints(
       const winrt::Microsoft::ReactNative::LayoutConstraints &layoutConstraintsIn,
