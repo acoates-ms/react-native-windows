@@ -18,6 +18,40 @@
 
 namespace facebook::react {
 
+class WindowsTextLayoutCacheKey final {
+ public:
+  AttributedString attributedString{};
+  ParagraphAttributes paragraphAttributes{};
+  Size size{};
+  //LayoutConstraints layoutConstraints{};
+};
+
+using WindowsTextLayoutCache = SimpleThreadSafeCache<WindowsTextLayoutCacheKey, winrt::com_ptr<IDWriteTextLayout>, kSimpleThreadSafeCacheSizeCap>;
+
+inline bool operator==(const WindowsTextLayoutCacheKey &lhs, const WindowsTextLayoutCacheKey &rhs)
+{
+  return areAttributedStringsEquivalentLayoutWise(lhs.attributedString, rhs.attributedString) &&
+      lhs.paragraphAttributes == rhs.paragraphAttributes && lhs.size == rhs.size;
+}
+
+}
+
+namespace std {
+
+template <>
+struct hash<facebook::react::WindowsTextLayoutCacheKey> {
+  size_t operator()(const facebook::react::WindowsTextLayoutCacheKey &key) const
+  {
+    return facebook::react::hash_combine(
+        attributedStringHashLayoutWise(key.attributedString), key.paragraphAttributes, key.size);
+  }
+};
+
+}
+
+namespace facebook::react {
+
+
 class WindowsTextLayoutManager : public TextLayoutManager {
  public:
   WindowsTextLayoutManager(const std::shared_ptr<const ContextContainer> &contextContainer);
@@ -64,6 +98,15 @@ class WindowsTextLayoutManager : public TextLayoutManager {
       const ParagraphAttributes &paragraphAttributes,
       Size size,
       winrt::com_ptr<IDWriteTextLayout> &spTextLayout) noexcept;
+
+    static winrt::com_ptr<IDWriteTextLayout> CreateTextLayout(
+      const AttributedStringBox &attributedStringBox,
+      const ParagraphAttributes &paragraphAttributes,
+      Size size,
+    TextMeasurement::Attachments &attachments) noexcept;
+
+
+    static WindowsTextLayoutCache m_textLayoutCache;
 };
 
 } // namespace facebook::react

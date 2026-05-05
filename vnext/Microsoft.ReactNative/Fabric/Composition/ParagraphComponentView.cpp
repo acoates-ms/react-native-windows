@@ -339,6 +339,7 @@ void ParagraphComponentView::updateVisualBrush() noexcept {
         }
       }
 
+      // TODO - This modifies the TextLayout from the cache which could result in misaligned text if the same text is used with different alignments.
       if (alignment != m_textLayout->GetTextAlignment())
         winrt::check_hresult(m_textLayout->SetTextAlignment(alignment));
     }

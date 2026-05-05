@@ -66,24 +66,27 @@ class AttachmentInlineObject : public winrt::implements<AttachmentInlineObject, 
   float m_height;
 };
 
+WindowsTextLayoutCache WindowsTextLayoutManager::m_textLayoutCache(facebook::react::kSimpleThreadSafeCacheSizeCap);
+
 TextLayoutManager::TextLayoutManager(const std::shared_ptr<const ContextContainer> &contextContainer)
     : contextContainer_(contextContainer), textMeasureCache_(kSimpleThreadSafeCacheSizeCap) {}
 
 WindowsTextLayoutManager::WindowsTextLayoutManager(const std::shared_ptr<const ContextContainer> &contextContainer)
     : TextLayoutManager(contextContainer) {}
 
-void WindowsTextLayoutManager::GetTextLayout(
+winrt::com_ptr<IDWriteTextLayout>  WindowsTextLayoutManager::CreateTextLayout(
     const AttributedStringBox &attributedStringBox,
     const ParagraphAttributes &paragraphAttributes,
     Size size,
-    winrt::com_ptr<IDWriteTextLayout> &spTextLayout,
     TextMeasurement::Attachments &attachments) noexcept {
+
+  winrt::com_ptr<IDWriteTextLayout> spTextLayout;
   const auto &attributedString = attributedStringBox.getValue();
   auto fragments = attributedString.getFragments();
 
   // Check if fragments is empty to avoid out-of-bounds access
   if (fragments.empty()) {
-    return;
+    return spTextLayout;
   }
 
   auto outerFragment = fragments[0];
@@ -112,6 +115,7 @@ void WindowsTextLayoutManager::GetTextLayout(
         : outerFragment.textAttributes.fontSizeMultiplier;
   }
 
+  // TODO cache TextFormat per fontfamily
   winrt::check_hresult(Microsoft::ReactNative::DWriteFactory()->CreateTextFormat(
       outerFragment.textAttributes.fontFamily.empty()
           ? L"Segoe UI"
@@ -217,7 +221,7 @@ void WindowsTextLayoutManager::GetTextLayout(
   // Use DWriteFactory to create the ellipsis trimming sign
   if (trimming.granularity != DWRITE_TRIMMING_GRANULARITY_NONE) {
     auto dwriteFactory = Microsoft::ReactNative::DWriteFactory();
-    HRESULT hr = dwriteFactory->CreateEllipsisTrimmingSign(spTextLayout.get(), ellipsisSign.put());
+    HRESULT hr = dwriteFactory->CreateEllipsisTrimmingSign(spTextFormat.get(), ellipsisSign.put());
     if (SUCCEEDED(hr)) {
       spTextLayout->SetTrimming(&trimming, ellipsisSign.get());
     }
@@ -302,6 +306,51 @@ void WindowsTextLayoutManager::GetTextLayout(
       position += length;
     }
   }
+
+
+  return spTextLayout;
+    
+    }
+
+void WindowsTextLayoutManager::GetTextLayout(
+    const AttributedStringBox &attributedStringBox,
+    const ParagraphAttributes &paragraphAttributes,
+    Size size,
+    winrt::com_ptr<IDWriteTextLayout> &spTextLayoutOut,
+    TextMeasurement::Attachments &attachments) noexcept {
+
+  static bool useCache = true;
+
+
+  if (!useCache)
+  {
+    spTextLayoutOut = CreateTextLayout(attributedStringBox,
+      paragraphAttributes,
+      size,
+      attachments);
+    return;
+  }
+
+  const auto& attributedString = attributedStringBox.getValue();
+
+      // Do not cache any text with attachments
+  for (const auto &fragment : attributedString.getFragments()) {
+    if (fragment.isAttachment()) {
+      spTextLayoutOut = CreateTextLayout(attributedStringBox,
+    paragraphAttributes,
+    size,
+    attachments);
+        return;
+      }
+    }
+
+  spTextLayoutOut = m_textLayoutCache.get({attributedString, paragraphAttributes, size}, [&]() {
+  return CreateTextLayout(
+    attributedStringBox,
+    paragraphAttributes,
+    size,
+    attachments);
+  });
 }
 
 void WindowsTextLayoutManager::GetTextLayout(
